@@ -15,9 +15,11 @@ public:
 private:
     ComputeProgram::SharedPtr mpProg;
     ComputeState::SharedPtr mpState;
-    bool mbPixelate = false;
     ComputeVars::SharedPtr mpProgVars;
-    Texture::SharedPtr mpImage;
 
-    Texture::SharedPtr mpTmpTexture;
+    bool mbPixelate = false;
+
+    Texture::SharedPtr gBlueNoiseTexture;
+
+    Texture::SharedPtr gOutput;
 };

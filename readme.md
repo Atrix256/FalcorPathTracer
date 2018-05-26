@@ -13,7 +13,7 @@ I coppied the "ComputeShader" project's files into my own project...
 * ComputeShader.cpp / .h
 * Data/compute.hlsl
 
-Compiled and rand and it worked woo.  Now time to start writing code.
+Compiled, ran and it worked woo.  Now time to start writing code.
 
 ## Pathtracing
 
@@ -28,15 +28,32 @@ But also:
 
 
 
+## Links
+
+* blue noise textures: http://momentsingraphics.de/?p=127
+* Aras' path tracing: http://aras-p.info/blog/2018/03/28/Daily-Pathtracer-Part-0-Intro/
+  * (READ HIS STUFF TOO)
+* mine: https://blog.demofox.org/2016/09/21/path-tracing-getting-started-with-diffuse-and-emissive/
+
 ## TODOs
 
 * try using blue noise in cosine weighted hemispheres?
+ * could also have other noise types
+ * blue noise only good for low sample counts
 * add temporal AA?
 * have imgui options for these.
 
+* presets if it makes sense...
+ * path tracer
+ * TAA path tracer
+
 Next: specular!  Make a short blog post about this and a tag / release to link to from the blog post?
 
+* vsync toggle? how do you change it? it's in the device desc
 
+* rename mpTmpTexture etc
+
+* show this source to patrick
 
 ? rename "ComputeShader" class / file to path tracer
 ? camera controls, and clear the sample count when the camera changes?

@@ -12,15 +12,15 @@ void ComputeShader::onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pC
     mpState->setProgram(mpProg);
     mpProgVars = ComputeVars::create(mpProg->getReflector());
 
-    mpImage = createTextureFromFile("Data/BlueNoise.bmp", false, false);
-    mpProgVars->setTexture("gBlueNoiseTexture", mpImage);
+    gBlueNoiseTexture = createTextureFromFile("Data/BlueNoise.bmp", false, false);
+    mpProgVars->setTexture("gBlueNoiseTexture", gBlueNoiseTexture);
 }
 
 void ComputeShader::onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
 {
 	const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
 
-    pContext->clearUAV(mpTmpTexture->getUAV().get(), clearColor);
+    pContext->clearUAV(gOutput->getUAV().get(), clearColor);
 
     if (mbPixelate)
     {
@@ -34,7 +34,7 @@ void ComputeShader::onFrameRender(SampleCallbacks* pSample, RenderContext::Share
     ConstantBuffer::SharedPtr pShaderConstants = mpProgVars["ShaderConstants"];
     pShaderConstants["fillColor"] = glm::vec3(0.0f, 0.0f, 1.0f);
 
-    mpProgVars->setTexture("gOutput", mpTmpTexture);
+    mpProgVars->setTexture("gOutput", gOutput);
 
     pContext->setComputeState(mpState);
     pContext->setComputeVars(mpProgVars);
@@ -43,12 +43,12 @@ void ComputeShader::onFrameRender(SampleCallbacks* pSample, RenderContext::Share
     uint32_t h = pSample->getWindow()->getClientAreaHeight();
 
     pContext->dispatch(w, h, 1);
-    pContext->copyResource(pTargetFbo->getColorTexture(0).get(), mpTmpTexture.get());
+    pContext->copyResource(pTargetFbo->getColorTexture(0).get(), gOutput.get());
 }
 
 void ComputeShader::onResizeSwapChain(SampleCallbacks* pSample, uint32_t width, uint32_t height)
 {
-    mpTmpTexture = Texture::create2D(width, height, ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
+    gOutput = Texture::create2D(width, height, ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
 }
 
 #ifdef _WIN32
@@ -61,7 +61,11 @@ int main(int argc, char** argv)
     SampleConfig config;
     config.windowDesc.title = "Path Tracer";
     config.windowDesc.resizableWindow = true;
+    config.windowDesc.width = 800;
+    config.windowDesc.height = 600;
+
     config.deviceDesc.depthFormat = ResourceFormat::Unknown;
+
 #ifdef _WIN32
     Sample::run(config, pRenderer);
 #else
