@@ -44,6 +44,10 @@ void ComputeShader::onFrameRender(SampleCallbacks* pSample, RenderContext::Share
     {
         mpProg->removeDefine("_PIXELATE");
     }
+
+    ConstantBuffer::SharedPtr pShaderConstants = mpProgVars["ShaderConstants"];
+    pShaderConstants["fillColor"] = glm::vec3(1.0f, 1.0f, 1.0f);
+
     mpProgVars->setTexture("gOutput", mpTmpTexture);
 
     pContext->setComputeState(mpState);

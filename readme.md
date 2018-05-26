@@ -39,3 +39,5 @@ Next: specular!  Make a short blog post about this and a tag / release to link t
 
 
 ? rename "ComputeShader" class / file to path tracer
+? camera controls, and clear the sample count when the camera changes?
+* need to figure out how to send constants over.
