@@ -28,48 +28,37 @@ void ComputeShader::loadImageFromFile(SampleCallbacks* pSample, std::string file
     mpImage = createTextureFromFile(filename, false, true);
     mpProgVars->setTexture("gInput", mpImage);
     mpTmpTexture = createTmpTex(mpImage->getWidth(), mpImage->getHeight());
-
-    pSample->resizeSwapChain(mpImage->getWidth(), mpImage->getHeight());
 }
 
 void ComputeShader::onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
 {
 	const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
 
-    if(mpImage)
+    pContext->clearUAV(mpTmpTexture->getUAV().get(), clearColor);
+
+    if (mbPixelate)
     {
-        pContext->clearUAV(mpTmpTexture->getUAV().get(), clearColor);
-
-        if (mbPixelate)
-        {
-            mpProg->addDefine("_PIXELATE");
-        }
-        else
-        {
-            mpProg->removeDefine("_PIXELATE");
-        }
-        mpProgVars->setTexture("gOutput", mpTmpTexture);
-
-        pContext->setComputeState(mpState);
-        pContext->setComputeVars(mpProgVars);
-
-        uint32_t w = (mpImage->getWidth() / 16) + 1;
-        uint32_t h = (mpImage->getHeight() / 16) + 1;
-        pContext->dispatch(w, h, 1);
-        pContext->copyResource(pTargetFbo->getColorTexture(0).get(), mpTmpTexture.get());
+        mpProg->addDefine("_PIXELATE");
     }
     else
     {
-        pContext->clearRtv(pTargetFbo->getRenderTargetView(0).get(), clearColor);
+        mpProg->removeDefine("_PIXELATE");
     }
+    mpProgVars->setTexture("gOutput", mpTmpTexture);
+
+    pContext->setComputeState(mpState);
+    pContext->setComputeVars(mpProgVars);
+
+    uint32_t w = pSample->getWindow()->getClientAreaWidth();
+    uint32_t h = pSample->getWindow()->getClientAreaHeight();
+
+    pContext->dispatch(w, h, 1);
+    pContext->copyResource(pTargetFbo->getColorTexture(0).get(), mpTmpTexture.get());
 }
 
 void ComputeShader::onResizeSwapChain(SampleCallbacks* pSample, uint32_t width, uint32_t height)
 {
-    if (mpTmpTexture)
-    {
-        mpTmpTexture = createTmpTex(width, height);
-    }
+    mpTmpTexture = createTmpTex(width, height);
 }
 
 #ifdef _WIN32
