@@ -17,6 +17,37 @@ private:
 
     Texture::SharedPtr gOutput;
 
+    glm::mat4x4 m_projMtx;
+    glm::mat4x4 m_invViewProjMtx;
+
+private:
+
+    void UpdateViewMatrix()
+    {
+        glm::vec3 pos, at, up;
+        pos = glm::vec3(0.0f, 0.0f, 0.0f);
+        at = glm::vec3(0.0f, 0.0f, 1.0f);
+        up = glm::vec3(0.0f, 1.0f, 0.0f);
+        glm::mat4x4 viewMtx = glm::lookAt(pos, at, up);
+
+        glm::mat4x4 viewProjMtx = m_projMtx * viewMtx;
+        m_invViewProjMtx = glm::inverse(viewProjMtx);
+
+        // TODO: remove when things are working well. debug code
+        /*
+        glm::vec4 A(-1.0f, 0.0f, 0.0f, 1.0f);
+        glm::vec4 B(-1.0f, 0.0f, 1.0f, 1.0f);
+
+        glm::vec4 APrime = m_invViewProjMtx * A;
+        glm::vec4 BPrime = m_invViewProjMtx * B;
+
+        glm::vec4 AFinal = APrime / APrime.w;
+        glm::vec4 BFinal = BPrime / BPrime.w;
+
+        int ijkl = 0;
+        */
+    }
+
 public:
 
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui)
@@ -52,6 +83,7 @@ public:
 
         ConstantBuffer::SharedPtr pShaderConstants = mpProgVars["ShaderConstants"];
         pShaderConstants["fillColor"] = glm::vec3(0.0f, 0.0f, 1.0f);
+        pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;
 
         mpProgVars->setTexture("gOutput", gOutput);
 
@@ -69,16 +101,11 @@ public:
     {
         gOutput = Texture::create2D(width, height, ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
 
-        glm::mat4x4 projMtx = glm::perspective(45.0f, float(width) / float(height), 0.1f, 100.0f);
+        m_projMtx = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
 
-        glm::vec3 pos, at, up;
-        pos = glm::vec3(0.0f, 0.0f, -1.0f);
-        at = glm::vec3(0.0f, 0.0f, 0.0f);
-        up = glm::vec3(0.0f, 1.0f, 0.0f);
-        glm::mat4x4 viewMtx = glm::lookAt(pos, at, up);
+        //m_projMtx = glm::orthoLH(-float(width / 2), float(width / 2), -float(height / 2), float(height / 2), 0.1f, 100.0f);
 
-        glm::mat4x4 viewProjMtx = projMtx * viewMtx;
-        glm::mat4x4 invViewProjMtx = glm::inverse(viewProjMtx);
+        UpdateViewMatrix();
     }
 };
 

@@ -53,7 +53,15 @@ Next: specular!  Make a short blog post about this and a tag / release to link t
 
 * rename mpTmpTexture etc
 
+* use m_ for members
+
 * show this source to patrick so he can see how falcor works
 
 ? camera controls, and clear the sample count when the camera changes?
 * need to figure out how to send constants over.
+
+* fix the debug spam
+
+* to get ray origin and direction...
+ * transform (u,v,0) to get ray origin in world space
+ * transform (u,v,1) to get a second point in world space to shoot a vector towards
