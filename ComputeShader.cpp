@@ -5,11 +5,6 @@ void ComputeShader::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     pGui->addCheckBox("Pixelate", mbPixelate);
 }
 
-Texture::SharedPtr createTmpTex(uint32_t width, uint32_t height)
-{
-    return Texture::create2D(width, height, ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
-}
-
 void ComputeShader::onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pContext)
 {
     mpProg = ComputeProgram::createFromFile("compute.hlsl", "main");
@@ -17,17 +12,8 @@ void ComputeShader::onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pC
     mpState->setProgram(mpProg);
     mpProgVars = ComputeVars::create(mpProg->getReflector());
 
-    Fbo::SharedPtr pFbo = pSample->getCurrentFbo();
-    mpTmpTexture = createTmpTex(pFbo->getWidth(), pFbo->getHeight());
-
-    loadImageFromFile(pSample, "Data/BlueNoise.bmp");
-}
-
-void ComputeShader::loadImageFromFile(SampleCallbacks* pSample, std::string filename)
-{
-    mpImage = createTextureFromFile(filename, false, true);
+    mpImage = createTextureFromFile("Data/BlueNoise.bmp", false, false);
     mpProgVars->setTexture("gInput", mpImage);
-    mpTmpTexture = createTmpTex(mpImage->getWidth(), mpImage->getHeight());
 }
 
 void ComputeShader::onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
@@ -62,7 +48,7 @@ void ComputeShader::onFrameRender(SampleCallbacks* pSample, RenderContext::Share
 
 void ComputeShader::onResizeSwapChain(SampleCallbacks* pSample, uint32_t width, uint32_t height)
 {
-    mpTmpTexture = createTmpTex(width, height);
+    mpTmpTexture = Texture::create2D(width, height, ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
 }
 
 #ifdef _WIN32

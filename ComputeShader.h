@@ -20,5 +20,4 @@ private:
     Texture::SharedPtr mpImage;
 
     Texture::SharedPtr mpTmpTexture;
-    void loadImageFromFile(SampleCallbacks* pSample, std::string file);
 };
