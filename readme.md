@@ -53,8 +53,7 @@ Next: specular!  Make a short blog post about this and a tag / release to link t
 
 * rename mpTmpTexture etc
 
-* show this source to patrick
+* show this source to patrick so he can see how falcor works
 
-? rename "ComputeShader" class / file to path tracer
 ? camera controls, and clear the sample count when the camera changes?
 * need to figure out how to send constants over.

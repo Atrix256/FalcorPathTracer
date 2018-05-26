@@ -3,6 +3,7 @@ RWTexture2D<float4> gOutput;
 
 cbuffer ShaderConstants
 {
+    float4x4 viewProjectionInverseMtx;
     float3 fillColor;
 };
 

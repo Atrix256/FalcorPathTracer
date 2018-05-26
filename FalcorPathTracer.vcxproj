@@ -124,10 +124,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ComputeShader.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="ComputeShader.h" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Data\compute.hlsl">
