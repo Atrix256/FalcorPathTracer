@@ -12,6 +12,7 @@ private:
     ComputeVars::SharedPtr mpProgVars;
 
     bool mbPixelate = false;
+    bool m_orthographicProjection = false;
 
     Texture::SharedPtr gBlueNoiseTexture;
 
@@ -21,6 +22,19 @@ private:
     glm::mat4x4 m_invViewProjMtx;
 
 private:
+
+    void UpdateProjectionMatrix(SampleCallbacks* pSample)
+    {
+        uint32_t width = pSample->getWindow()->getClientAreaWidth();
+        uint32_t height = pSample->getWindow()->getClientAreaHeight();
+
+        if (m_orthographicProjection)
+            m_projMtx = glm::orthoLH(-float(width / 2), float(width / 2), -float(height / 2), float(height / 2), 0.1f, 100.0f);
+        else
+            m_projMtx = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
+
+        UpdateViewMatrix();
+    }
 
     void UpdateViewMatrix()
     {
@@ -53,6 +67,11 @@ public:
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     {
         pGui->addCheckBox("Pixelate", mbPixelate);
+
+        if (pGui->addCheckBox("Orthographic Projection", m_orthographicProjection))
+        {
+            UpdateProjectionMatrix(pSample);
+        }
     }
 
     void onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pContext)
@@ -84,6 +103,8 @@ public:
         ConstantBuffer::SharedPtr pShaderConstants = mpProgVars["ShaderConstants"];
         pShaderConstants["fillColor"] = glm::vec3(0.0f, 0.0f, 1.0f);
         pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;
+        pShaderConstants["sphere1"] = glm::vec4(0.0f, 0.0f, 90.0f, 1.0f);
+        pShaderConstants["sphere2"] = glm::vec4(2.0f, 0.0f, 90.0f, 1.0f);
 
         mpProgVars->setTexture("gOutput", gOutput);
 
@@ -101,11 +122,7 @@ public:
     {
         gOutput = Texture::create2D(width, height, ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
 
-        m_projMtx = glm::perspective(glm::radians(45.0f), float(width) / float(height), 0.1f, 100.0f);
-
-        //m_projMtx = glm::orthoLH(-float(width / 2), float(width / 2), -float(height / 2), float(height / 2), 0.1f, 100.0f);
-
-        UpdateViewMatrix();
+        UpdateProjectionMatrix(pSample);
     }
 };
 

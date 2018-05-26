@@ -65,3 +65,9 @@ Next: specular!  Make a short blog post about this and a tag / release to link t
 * to get ray origin and direction...
  * transform (u,v,0) to get ray origin in world space
  * transform (u,v,1) to get a second point in world space to shoot a vector towards
+
+* maybe have an array of geo types and a param that specifies how many are actually used in the scene
+
+* make a checkbox to toggle orthographic vs perspective mode?
+
+* orthographic projection doesn't seem to work (very surface test, ran out of time)

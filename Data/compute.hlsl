@@ -1,3 +1,5 @@
+#include "geo.h"
+
 Texture2D gBlueNoiseTexture;
 RWTexture2D<float4> gOutput;
 
@@ -5,12 +7,9 @@ cbuffer ShaderConstants
 {
     float4x4 invViewProjMtx;
     float3 fillColor;
-};
 
-struct Ray
-{
-    float3 origin;
-    float3 direction;
+    float4 sphere1;
+    float4 sphere2;
 };
 
 Ray GetRayForPixel(float2 uv)
@@ -53,6 +52,7 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
     ret *= float3(10.0f, 10.0f, 0.1f);
 #else
 
+    /*
     uint2 blueNoiseDims;
     gBlueNoiseTexture.GetDimensions(blueNoiseDims.x, blueNoiseDims.y);
 
@@ -61,6 +61,17 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
     texturePixel.y = texturePixel.y % blueNoiseDims.y;
 
     ret = gBlueNoiseTexture[texturePixel].rgb;
+    */
+
+    CollisionInfo collisionInfo;
+    collisionInfo.collisionTime = -1.0f;
+    collisionInfo.normal = float3(0.0f, 0.0f, 0.0f);
+
+    RayIntersectsSphere(ray, sphere1, collisionInfo);
+    RayIntersectsSphere(ray, sphere2, collisionInfo);
+
+    ret = collisionInfo.collisionTime >= 0.0f ? float3(0.0f, 1.0f, 0.0f) : float3(1.0f, 0.0f, 0.0f);
+
 #endif
 
     gOutput[pixel] = float4(ret.bgr, 1.0f);
