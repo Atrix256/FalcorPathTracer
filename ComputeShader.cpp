@@ -2,10 +2,6 @@
 
 void ComputeShader::onGuiRender(SampleCallbacks* pSample, Gui* pGui)
 {
-    if (pGui->addButton("Load Image"))
-    {
-        loadImage(pSample);
-    }
     pGui->addCheckBox("Pixelate", mbPixelate);
 }
 
@@ -23,15 +19,8 @@ void ComputeShader::onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pC
 
     Fbo::SharedPtr pFbo = pSample->getCurrentFbo();
     mpTmpTexture = createTmpTex(pFbo->getWidth(), pFbo->getHeight());
-}
 
-void ComputeShader::loadImage(SampleCallbacks* pSample)
-{
-    std::string filename;
-    if(openFileDialog("Supported Formats\0*.jpg;*.bmp;*.dds;*.png;*.tiff;*.tif;*.tga\0\0", filename))
-    {
-        loadImageFromFile(pSample, filename);
-    }
+    loadImageFromFile(pSample, "Data/BlueNoise.bmp");
 }
 
 void ComputeShader::loadImageFromFile(SampleCallbacks* pSample, std::string filename)
@@ -83,21 +72,6 @@ void ComputeShader::onResizeSwapChain(SampleCallbacks* pSample, uint32_t width, 
     }
 }
 
- void ComputeShader::onInitializeTesting(SampleCallbacks* pSample)
- {
-     auto argList = pSample->getArgList();
-     std::vector<ArgList::Arg> filenames = argList.getValues("loadimage");
-     if (!filenames.empty())
-     {
-         loadImageFromFile(pSample, filenames[0].asString());
-     }
- 
-     if (argList.argExists("pixelate"))
-     {
-         mbPixelate = true;
-     }
- }
-
 #ifdef _WIN32
 int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 #else
@@ -106,7 +80,7 @@ int main(int argc, char** argv)
 {
     ComputeShader::UniquePtr pRenderer = std::make_unique<ComputeShader>();
     SampleConfig config;
-    config.windowDesc.title = "Compute Shader";
+    config.windowDesc.title = "Path Tracer";
     config.windowDesc.resizableWindow = true;
     config.deviceDesc.depthFormat = ResourceFormat::Unknown;
 #ifdef _WIN32

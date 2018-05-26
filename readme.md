@@ -35,3 +35,7 @@ But also:
 * have imgui options for these.
 
 Next: specular!  Make a short blog post about this and a tag / release to link to from the blog post?
+
+
+
+? rename "ComputeShader" class / file to path tracer

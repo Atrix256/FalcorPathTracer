@@ -22,7 +22,4 @@ private:
     Texture::SharedPtr mpTmpTexture;
     void loadImage(SampleCallbacks* pSample);
     void loadImageFromFile(SampleCallbacks* pSample, std::string file);
-
-    //testing
-    void onInitializeTesting(SampleCallbacks* pSample) override;
 };
