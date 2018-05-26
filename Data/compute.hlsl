@@ -1,4 +1,4 @@
-Texture2D gInput;
+Texture2D gBlueNoiseTexture;
 RWTexture2D<float4> gOutput;
 
 cbuffer ShaderConstants
@@ -16,18 +16,21 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
 
     float2 pixelPercent = float2(pixel) / float2(resolution);
 
+    float3 ret = float3(0.0f, 0.0f, 0.0f);
+
 #ifdef _PIXELATE
-    gOutput[pixel] = float4(0.0f, pixelPercent.y, pixelPercent.x, 1.0f);
-    //gOutput[pixel] = float4(fillColor, 1.0f);
+    ret = fillColor + float3(pixelPercent, 0.0f);
 #else
 
-    uint3 resDim;
-    gInput.GetDimensions(resDim.x, resDim.y);
+    uint2 blueNoiseDims;
+    gBlueNoiseTexture.GetDimensions(blueNoiseDims.x, blueNoiseDims.y);
 
     uint2 texturePixel = pixel;
-    texturePixel.x = texturePixel.x % resDim.x;
-    texturePixel.y = texturePixel.y % resDim.y;
+    texturePixel.x = texturePixel.x % blueNoiseDims.x;
+    texturePixel.y = texturePixel.y % blueNoiseDims.y;
 
-    gOutput[pixel] = gInput[texturePixel];
+    ret = gBlueNoiseTexture[texturePixel].rgb;
 #endif
+
+    gOutput[pixel] = float4(ret.bgr, 1.0f);
 }

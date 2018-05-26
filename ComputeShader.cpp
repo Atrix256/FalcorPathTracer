@@ -13,7 +13,7 @@ void ComputeShader::onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pC
     mpProgVars = ComputeVars::create(mpProg->getReflector());
 
     mpImage = createTextureFromFile("Data/BlueNoise.bmp", false, false);
-    mpProgVars->setTexture("gInput", mpImage);
+    mpProgVars->setTexture("gBlueNoiseTexture", mpImage);
 }
 
 void ComputeShader::onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
@@ -32,7 +32,7 @@ void ComputeShader::onFrameRender(SampleCallbacks* pSample, RenderContext::Share
     }
 
     ConstantBuffer::SharedPtr pShaderConstants = mpProgVars["ShaderConstants"];
-    pShaderConstants["fillColor"] = glm::vec3(1.0f, 1.0f, 1.0f);
+    pShaderConstants["fillColor"] = glm::vec3(0.0f, 0.0f, 1.0f);
 
     mpProgVars->setTexture("gOutput", mpTmpTexture);
 
