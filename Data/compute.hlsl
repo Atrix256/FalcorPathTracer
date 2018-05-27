@@ -1,5 +1,7 @@
 #include "geo.h"
 
+#define MAX_RAY_BOUNCES 2
+
 Texture2D gBlueNoiseTexture;
 RWTexture2D<float4> gOutput;
 
@@ -27,6 +29,27 @@ Ray GetRayForPixel(float2 uv)
     ret.direction = normalize(destination.xyz - origin.xyz);
 
     return ret;
+}
+
+CollisionInfo RayIntersectsScene(Ray ray)
+{
+    CollisionInfo collisionInfo;
+    collisionInfo.collisionTime = -1.0f;
+    collisionInfo.normal = float3(0.0f, 0.0f, 0.0f);
+    collisionInfo.albedo = float3(0.0f, 0.0f, 0.0f);
+    collisionInfo.emissive = float3(0.0f, 0.0f, 0.0f);
+
+    // test the spheres
+    {
+        uint count = 0;
+        uint stride;
+        gSpheres.GetDimensions(count, stride);
+
+        for (uint i = 0; i < count; i++)
+            RayIntersectsSphere(ray, gSpheres[i], collisionInfo);
+    }
+
+    return collisionInfo;
 }
 
 [numthreads(1, 1, 1)]
@@ -59,25 +82,30 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
     ret = gBlueNoiseTexture[texturePixel].rgb;
     */
 
-    CollisionInfo collisionInfo;
-    collisionInfo.collisionTime = -1.0f;
-    collisionInfo.normal = float3(0.0f, 0.0f, 0.0f);
-    collisionInfo.albedo = float3(0.0f, 0.0f, 0.0f);
-    collisionInfo.emissive = float3(0.0f, 0.0f, 0.0f);
 
-    // ray trace the spheres
+
+    CollisionInfo collisionInfo = RayIntersectsScene(ray);
+
+    uint i = 0;
+    while (collisionInfo.collisionTime > 0.0f && i < MAX_RAY_BOUNCES)
     {
-        uint count = 0;
-        uint stride;
-        gSpheres.GetDimensions(count, stride);
+        // TODO: real lighting
+        ret += collisionInfo.albedo * 0.25f;
 
-        for (uint i = 0; i < count; i++)
-            RayIntersectsSphere(ray, gSpheres[i], collisionInfo);
+        Ray newRay;
+        newRay.origin = ray.origin + ray.direction * collisionInfo.collisionTime;
+        newRay.direction = reflect(ray.direction, collisionInfo.normal);
+
+        // TODO: a minimum collision time to prevent self intersection
+        newRay.origin += newRay.direction * 0.01f;
+
+        ray = newRay;
+
+        collisionInfo = RayIntersectsScene(ray);
+
+        ++i;
     }
 
-    ret = collisionInfo.albedo;
-
-    //ret = collisionInfo.collisionTime >= 0.0f ? float3(0.0f, 1.0f, 0.0f) : float3(1.0f, 0.0f, 0.0f);
 
 #endif
 

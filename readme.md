@@ -32,6 +32,7 @@ But also:
 * make this blog post about using falcor
 * also about sub pixel jitter for AA and cosine weighted hemisphere sampling
 * ... and about TAA / blue noise?
+* possibly also about whitted raytracing?
 
 ## Links
 
