@@ -21,8 +21,11 @@ private:
     bool m_keyState[256];
 
     glm::vec3 m_cameraPos = { 0.0f, 0.0f, 0.0f };
-    glm::vec3 m_cameraAt = { 0.0f, 0.0f, 1.0f };
-    glm::vec3 m_cameraUp = { 0.0f, 1.0f, 0.0f };
+
+    glm::vec2 m_mouseDragPos;
+    bool m_mouseDown = false;
+    float m_yaw = 90.0f;
+    float m_pitch = 0.0f;
 
     bool m_pixelate = false;
     float m_fov = 45.0f;
@@ -41,7 +44,12 @@ private:
 
     void UpdateViewMatrix()
     {
-        m_viewMtx = glm::lookAt(m_cameraPos, m_cameraAt, m_cameraUp);
+        glm::vec3 forward;
+        forward.x = cos(glm::radians(m_pitch)) * cos(glm::radians(m_yaw));
+        forward.y = sin(glm::radians(m_pitch));
+        forward.z = cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw));
+
+        m_viewMtx = glm::lookAt(m_cameraPos, m_cameraPos + forward, glm::vec3(0.0f, 1.0f, 0.0f));
 
         glm::mat4x4 viewProjMtx = m_projMtx * m_viewMtx;
         m_invViewProjMtx = glm::inverse(viewProjMtx);
@@ -91,7 +99,6 @@ public:
 
         offset *= pSample->getLastFrameTime();
         m_cameraPos += offset;
-        m_cameraAt += offset;
         UpdateViewMatrix();
     }
 
@@ -139,6 +146,39 @@ public:
 
     bool onMouseEvent(SampleCallbacks* pSample, const MouseEvent& mouseEvent)
     {
+        if (mouseEvent.type == MouseEvent::Type::LeftButtonDown)
+        {
+            m_mouseDragPos = mouseEvent.pos;
+            m_mouseDown = true;
+            return true;
+        }
+        else if (mouseEvent.type == MouseEvent::Type::LeftButtonUp)
+        {
+            m_mouseDown = false;
+            return true;
+        }
+        else if (mouseEvent.type == MouseEvent::Type::Move)
+        {
+            if (m_mouseDown)
+            {
+                glm::vec2 mouseDelta = mouseEvent.pos - m_mouseDragPos;
+                m_mouseDragPos = mouseEvent.pos;
+
+                mouseDelta *= pSample->getLastFrameTime() * 100000.0f;
+                m_yaw += mouseDelta.x;
+                m_pitch += mouseDelta.y;
+
+                if (m_pitch > 89.0f)
+                    m_pitch = 89.0f;
+                else if (m_pitch < -89.0f)
+                    m_pitch = -89.0f;
+
+                UpdateViewMatrix();
+
+                return true;
+            }
+        }
+
         return false;
     }
 
