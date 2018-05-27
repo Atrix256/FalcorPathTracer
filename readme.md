@@ -43,6 +43,7 @@ But also:
 
 ## TODOs
 
+* make jitter options: none, white noise, vdc
 
 * try using blue noise in cosine weighted hemispheres?
  * could also have other noise types

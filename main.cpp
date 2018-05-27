@@ -1,5 +1,6 @@
 #include "Falcor.h"
 #include "SampleTest.h"
+#include <random>
 
 using namespace Falcor;
 
@@ -17,6 +18,15 @@ Sphere g_spheres[] =
     {{ 3.0f, 0.0f, 10.0f }, 1.0f, { 0.1f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
     {{ 1.5f, 0.0f, 13.0f }, 1.0f, { 0.1f, 0.1f, 1.0f }, {0.0f, 0.0f, 0.0f}},
 };
+
+static float RandomFloat()
+{
+    // from 0 to 1
+    static std::random_device rd;
+    static std::mt19937 mt(rd());
+    static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    return dist(mt);
+}
 
 class Application : public Renderer
 {
@@ -41,10 +51,13 @@ private:
     bool m_mouseDown = false;
     float m_yaw = 90.0f;
     float m_pitch = 0.0f;
+    size_t m_frameCount = 0;
 
+    // values controled by the UI
     bool m_pixelate = false;
     float m_fov = 45.0f;
-    size_t m_frameCount = 0;
+    bool m_jitter = true;
+    bool m_integrate = true;
 
 private:
 
@@ -81,6 +94,15 @@ public:
 
         if (pGui->addFloatVar("FOV", m_fov, 1.0f, 180.0f, 1.0f))
             UpdateProjectionMatrix(pSample);
+
+        if (pGui->addButton("Restart Integration"))
+            m_frameCount = 0;
+
+        if (pGui->addCheckBox("Jitter Camera", m_jitter))
+            m_frameCount = 0;
+
+        if (pGui->addCheckBox("Integrate", m_integrate))
+            m_frameCount = 0;
     }
 
     void onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pContext)
@@ -131,9 +153,8 @@ public:
     {
         UpdateCamera(pSample);
 
-        // TODO: don't need to clear the UAV!
-        //const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
-        //pContext->clearUAV(m_output->getUAV().get(), clearColor);
+        uint32_t width = pSample->getWindow()->getClientAreaWidth();
+        uint32_t height = pSample->getWindow()->getClientAreaHeight();
 
         if (m_pixelate)
         {
@@ -144,8 +165,27 @@ public:
             m_computeProgram->removeDefine("_PIXELATE");
         }
 
+        // jitter the camera if we should
+        glm::mat4x4 invViewProjMtx = m_invViewProjMtx;
+        if (m_jitter)
+        {
+            float jitterX = RandomFloat() / float(width);
+            float jitterY = RandomFloat() / float(height);
+
+            glm::mat4x4 viewProjMtx = m_projMtx * m_viewMtx;
+
+            glm::mat4x4 jitterMtx = glm::mat4();
+            jitterMtx[3] = glm::vec4(jitterX, jitterY, 0.0f, 1.0f);
+
+            glm::mat4x4 tempMtx = jitterMtx * viewProjMtx;
+            invViewProjMtx = glm::inverse(tempMtx);
+        }
+
+        if (!m_integrate)
+            m_frameCount = 0;
+
         ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
-        pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;
+        pShaderConstants["invViewProjMtx"] = invViewProjMtx;
         pShaderConstants["lerpAmount"] = 1.0f / float(m_frameCount + 1);
 
         for (uint i = 0; i < countof(g_spheres); ++i)
@@ -161,10 +201,7 @@ public:
         pContext->setComputeState(m_computeState);
         pContext->setComputeVars(m_computeVars);
 
-        uint32_t w = pSample->getWindow()->getClientAreaWidth();
-        uint32_t h = pSample->getWindow()->getClientAreaHeight();
-
-        pContext->dispatch(w, h, 1);
+        pContext->dispatch(width, height, 1);
         pContext->copyResource(pTargetFbo->getColorTexture(0).get(), m_output.get());
 
         m_frameCount++;
