@@ -9,7 +9,12 @@ cbuffer ShaderConstants
     float3 fillColor;
 
     float4 sphere1;
+    float4 sphere1Albedo;
+    float4 sphere1Emissive;
+
     float4 sphere2;
+    float4 sphere2Albedo;
+    float4 sphere2Emissive;
 };
 
 Ray GetRayForPixel(float2 uv)
@@ -66,11 +71,15 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
     CollisionInfo collisionInfo;
     collisionInfo.collisionTime = -1.0f;
     collisionInfo.normal = float3(0.0f, 0.0f, 0.0f);
+    collisionInfo.albedo = float3(0.0f, 0.0f, 0.0f);
+    collisionInfo.emissive = float3(0.0f, 0.0f, 0.0f);
 
-    RayIntersectsSphere(ray, sphere1, collisionInfo);
-    RayIntersectsSphere(ray, sphere2, collisionInfo);
+    RayIntersectsSphere(ray, sphere1, collisionInfo, sphere1Albedo.rgb, sphere1Emissive.rgb);
+    RayIntersectsSphere(ray, sphere2, collisionInfo, sphere2Albedo.rgb, sphere2Emissive.rgb);
 
-    ret = collisionInfo.collisionTime >= 0.0f ? float3(0.0f, 1.0f, 0.0f) : float3(1.0f, 0.0f, 0.0f);
+    ret = collisionInfo.albedo;
+
+    //ret = collisionInfo.collisionTime >= 0.0f ? float3(0.0f, 1.0f, 0.0f) : float3(1.0f, 0.0f, 0.0f);
 
 #endif
 

@@ -80,6 +80,8 @@ public:
 
     void UpdateCamera(SampleCallbacks* pSample)
     {
+        static const float c_moveSpeed = 10.0f;
+
         glm::vec3 offset(0.0f, 0.0f, 0.0f);
 
         glm::vec4 forward = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f) * m_viewMtx;
@@ -97,7 +99,7 @@ public:
         if (m_keyState['D'])
             offset += glm::vec3(left.x, left.y, left.z);
 
-        offset *= pSample->getLastFrameTime();
+        offset *= pSample->getLastFrameTime() * c_moveSpeed;
         m_cameraPos += offset;
         UpdateViewMatrix();
     }
@@ -122,8 +124,14 @@ public:
         ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
         pShaderConstants["fillColor"] = glm::vec3(0.0f, 0.0f, 1.0f);
         pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;
+
         pShaderConstants["sphere1"] = glm::vec4(0.0f, 0.0f, 10.0f, 1.0f);
+        pShaderConstants["sphere1Albedo"] = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+        pShaderConstants["sphere1Emissive"] = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+
         pShaderConstants["sphere2"] = glm::vec4(2.0f, 0.0f, 10.0f, 1.0f);
+        pShaderConstants["sphere2Albedo"] = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+        pShaderConstants["sphere2Emissive"] = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
         m_computeVars->setTexture("gOutput", m_output);
 

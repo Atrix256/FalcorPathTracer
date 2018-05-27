@@ -8,9 +8,11 @@ struct CollisionInfo
 {
     float collisionTime;  // init to -1
     float3 normal;
+    float3 albedo;
+    float3 emissive;
 };
 
-inline bool RayIntersectsSphere (in Ray ray, in float4 positionRadius, inout CollisionInfo collisionInfo)
+inline bool RayIntersectsSphere (in Ray ray, in float4 positionRadius, inout CollisionInfo collisionInfo, in float3 albedo, in float3 emissive)
 {
     //get the vector from the center of this circle to where the ray begins.
     float3 m = ray.origin - positionRadius.xyz;
@@ -39,7 +41,7 @@ inline bool RayIntersectsSphere (in Ray ray, in float4 positionRadius, inout Col
         collisionTime = -b + sqrt(discr);
 
     //enforce max distance
-    if (collisionInfo.collisionTime >= 0.0 && collisionTime > collisionTime)
+    if (collisionInfo.collisionTime >= 0.0 && collisionTime > collisionInfo.collisionTime)
         return false;
 
     float3 normal = normalize((ray.origin + ray.direction * collisionTime) - positionRadius.xyz);
@@ -51,5 +53,7 @@ inline bool RayIntersectsSphere (in Ray ray, in float4 positionRadius, inout Col
 
     collisionInfo.collisionTime = collisionTime;
     collisionInfo.normal = normal;
+    collisionInfo.albedo = albedo;
+    collisionInfo.emissive = emissive;
     return true;
 }

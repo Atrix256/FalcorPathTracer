@@ -27,6 +27,11 @@ But also:
 
 
 
+## Notes
+
+* make this blog post about using falcor
+* also about sub pixel jitter for AA and cosine weighted hemisphere sampling
+* ... and about TAA / blue noise?
 
 ## Links
 
@@ -36,6 +41,7 @@ But also:
 * mine: https://blog.demofox.org/2016/09/21/path-tracing-getting-started-with-diffuse-and-emissive/
 
 ## TODOs
+
 
 * try using blue noise in cosine weighted hemispheres?
  * could also have other noise types
@@ -58,5 +64,8 @@ Next: specular!  Make a short blog post about this and a tag / release to link t
  * does it happen to the compute shader example? yes it does!
 
 * maybe have an array of geo types and a param that specifies how many are actually used in the scene
+ * or maybe have a structured buffer for each geo type
+
+* rename compute.hlsl to pathtrace.hlsl or something
 
 * show this source to patrick so he can see how falcor works
