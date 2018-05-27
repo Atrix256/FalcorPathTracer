@@ -49,14 +49,14 @@ But also:
 
 Next: specular!  Make a short blog post about this and a tag / release to link to from the blog post?
 
-* vsync toggle? how do you change it? it's in the device desc
+* vsync toggle? how do you change it? it's in the device desc. maybe let it be off.
 
 ? camera controls, and clear the sample count when the camera changes?
 * need to figure out how to send constants over.
 
-* fix the debug spam. does it happen to the compute shader example?
+* fix the debug spam.
+ * does it happen to the compute shader example? yes it does!
 
 * maybe have an array of geo types and a param that specifies how many are actually used in the scene
-
 
 * show this source to patrick so he can see how falcor works

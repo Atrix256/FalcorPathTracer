@@ -15,7 +15,14 @@ private:
     Texture::SharedPtr m_output;
 
     glm::mat4x4 m_projMtx;
+    glm::mat4x4 m_viewMtx;
     glm::mat4x4 m_invViewProjMtx;
+
+    bool m_keyState[256];
+
+    glm::vec3 m_cameraPos = { 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_cameraAt = { 0.0f, 0.0f, 1.0f };
+    glm::vec3 m_cameraUp = { 0.0f, 1.0f, 0.0f };
 
     bool m_pixelate = false;
     float m_fov = 45.0f;
@@ -34,28 +41,10 @@ private:
 
     void UpdateViewMatrix()
     {
-        glm::vec3 pos, at, up;
-        pos = glm::vec3(0.0f, 0.0f, 0.0f);
-        at = glm::vec3(0.0f, 0.0f, 1.0f);
-        up = glm::vec3(0.0f, 1.0f, 0.0f);
-        glm::mat4x4 viewMtx = glm::lookAt(pos, at, up);
+        m_viewMtx = glm::lookAt(m_cameraPos, m_cameraAt, m_cameraUp);
 
-        glm::mat4x4 viewProjMtx = m_projMtx * viewMtx;
+        glm::mat4x4 viewProjMtx = m_projMtx * m_viewMtx;
         m_invViewProjMtx = glm::inverse(viewProjMtx);
-
-        // TODO: remove when things are working well. debug code
-        /*
-        glm::vec4 A(-1.0f, 0.0f, 0.0f, 1.0f);
-        glm::vec4 B(-1.0f, 0.0f, 1.0f, 1.0f);
-
-        glm::vec4 APrime = m_invViewProjMtx * A;
-        glm::vec4 BPrime = m_invViewProjMtx * B;
-
-        glm::vec4 AFinal = APrime / APrime.w;
-        glm::vec4 BFinal = BPrime / BPrime.w;
-
-        int ijkl = 0;
-        */
     }
 
 public:
@@ -77,12 +66,41 @@ public:
 
         m_blueNoiseTexture = createTextureFromFile("Data/BlueNoise.bmp", false, false);
         m_computeVars->setTexture("gBlueNoiseTexture", m_blueNoiseTexture);
+
+        std::fill(&m_keyState[0], &m_keyState[255], false);
+    }
+
+    void UpdateCamera(SampleCallbacks* pSample)
+    {
+        glm::vec3 offset(0.0f, 0.0f, 0.0f);
+
+        glm::vec4 forward = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f) * m_viewMtx;
+        glm::vec4 left = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f) * m_viewMtx;
+
+        if (m_keyState['W'])
+            offset += glm::vec3(forward.x, forward.y, forward.z);
+        
+        if (m_keyState['S'])
+            offset -= glm::vec3(forward.x, forward.y, forward.z);
+
+        if (m_keyState['A'])
+            offset -= glm::vec3(left.x, left.y, left.z);
+
+        if (m_keyState['D'])
+            offset += glm::vec3(left.x, left.y, left.z);
+
+        offset *= pSample->getLastFrameTime();
+        m_cameraPos += offset;
+        m_cameraAt += offset;
+        UpdateViewMatrix();
     }
 
     void onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
     {
-        const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
+        UpdateCamera(pSample);
 
+        // TODO: don't need to clear the UAV!
+        const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
         pContext->clearUAV(m_output->getUAV().get(), clearColor);
 
         if (m_pixelate)
@@ -96,7 +114,7 @@ public:
 
         ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
         pShaderConstants["fillColor"] = glm::vec3(0.0f, 0.0f, 1.0f);
-        pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;\
+        pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;
         pShaderConstants["sphere1"] = glm::vec4(0.0f, 0.0f, 10.0f, 1.0f);
         pShaderConstants["sphere2"] = glm::vec4(2.0f, 0.0f, 10.0f, 1.0f);
 
@@ -117,6 +135,23 @@ public:
         m_output = Texture::create2D(width, height, ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
 
         UpdateProjectionMatrix(pSample);
+    }
+
+    bool onMouseEvent(SampleCallbacks* pSample, const MouseEvent& mouseEvent)
+    {
+        return false;
+    }
+
+    bool onKeyEvent(SampleCallbacks* pSample, const KeyboardEvent& keyEvent)
+    {
+        if ((uint32_t)keyEvent.key >= 256)
+            return false;
+
+        if (keyEvent.type != KeyboardEvent::Type::KeyPressed && keyEvent.type != KeyboardEvent::Type::KeyReleased)
+            return false;
+
+        m_keyState[(uint32_t)keyEvent.key] = (keyEvent.type == KeyboardEvent::Type::KeyPressed);
+        return true;
     }
 };
 
