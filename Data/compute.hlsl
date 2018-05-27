@@ -8,6 +8,7 @@ RWTexture2D<float4> gOutput;
 cbuffer ShaderConstants
 {
     float4x4 invViewProjMtx;
+    float lerpAmount;
 };
 
 StructuredBuffer<Sphere> gSpheres;
@@ -92,6 +93,7 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
         // TODO: real lighting
         ret += collisionInfo.albedo * 0.25f;
 
+        // TODO: diffuse reflection, not specular!
         Ray newRay;
         newRay.origin = ray.origin + ray.direction * collisionInfo.collisionTime;
         newRay.direction = reflect(ray.direction, collisionInfo.normal);
@@ -109,5 +111,9 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
 
 #endif
 
-    gOutput[pixel] = float4(ret.bgr, 1.0f);
+    // incremental average to integrate when you get one sample at a time
+    // https://blog.demofox.org/2016/08/23/incremental-averaging/
+    ret = lerp(gOutput[pixel].rgb, ret.bgr, lerpAmount);
+
+    gOutput[pixel] = float4(ret, 1.0f);
 }

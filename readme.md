@@ -69,4 +69,6 @@ Next: specular!  Make a short blog post about this and a tag / release to link t
 
 * rename compute.hlsl to pathtrace.hlsl or something
 
+* look for TODOs
+
 * show this source to patrick so he can see how falcor works

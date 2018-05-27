@@ -44,6 +44,7 @@ private:
 
     bool m_pixelate = false;
     float m_fov = 45.0f;
+    size_t m_frameCount = 0;
 
 private:
 
@@ -68,6 +69,8 @@ private:
 
         glm::mat4x4 viewProjMtx = m_projMtx * m_viewMtx;
         m_invViewProjMtx = glm::inverse(viewProjMtx);
+
+        m_frameCount = 0;
     }
 
 public:
@@ -116,9 +119,12 @@ public:
         if (m_keyState['D'])
             offset += glm::vec3(left.x, left.y, left.z);
 
-        offset *= pSample->getLastFrameTime() * c_moveSpeed;
-        m_cameraPos += offset;
-        UpdateViewMatrix();
+        if (offset.x != 0 || offset.y != 0)
+        {
+            offset *= pSample->getLastFrameTime() * c_moveSpeed;
+            m_cameraPos += offset;
+            UpdateViewMatrix();
+        }
     }
 
     void onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
@@ -126,8 +132,8 @@ public:
         UpdateCamera(pSample);
 
         // TODO: don't need to clear the UAV!
-        const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
-        pContext->clearUAV(m_output->getUAV().get(), clearColor);
+        //const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
+        //pContext->clearUAV(m_output->getUAV().get(), clearColor);
 
         if (m_pixelate)
         {
@@ -140,6 +146,7 @@ public:
 
         ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
         pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;
+        pShaderConstants["lerpAmount"] = 1.0f / float(m_frameCount + 1);
 
         for (uint i = 0; i < countof(g_spheres); ++i)
         {
@@ -159,6 +166,8 @@ public:
 
         pContext->dispatch(w, h, 1);
         pContext->copyResource(pTargetFbo->getColorTexture(0).get(), m_output.get());
+
+        m_frameCount++;
     }
 
     void onResizeSwapChain(SampleCallbacks* pSample, uint32_t width, uint32_t height)
@@ -186,20 +195,24 @@ public:
             if (m_mouseDown)
             {
                 glm::vec2 mouseDelta = mouseEvent.pos - m_mouseDragPos;
-                m_mouseDragPos = mouseEvent.pos;
 
-                mouseDelta *= pSample->getLastFrameTime() * 100000.0f;
-                m_yaw += mouseDelta.x;
-                m_pitch += mouseDelta.y;
+                if (mouseDelta.x != 0.0f || mouseDelta.y != 0.0f)
+                {
+                    m_mouseDragPos = mouseEvent.pos;
 
-                if (m_pitch > 89.0f)
-                    m_pitch = 89.0f;
-                else if (m_pitch < -89.0f)
-                    m_pitch = -89.0f;
+                    mouseDelta *= pSample->getLastFrameTime() * 100000.0f;
+                    m_yaw += mouseDelta.x;
+                    m_pitch += mouseDelta.y;
 
-                UpdateViewMatrix();
+                    if (m_pitch > 89.0f)
+                        m_pitch = 89.0f;
+                    else if (m_pitch < -89.0f)
+                        m_pitch = -89.0f;
 
-                return true;
+                    UpdateViewMatrix();
+
+                    return true;
+                }
             }
         }
 
