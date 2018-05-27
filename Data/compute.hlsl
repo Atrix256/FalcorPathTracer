@@ -6,16 +6,9 @@ RWTexture2D<float4> gOutput;
 cbuffer ShaderConstants
 {
     float4x4 invViewProjMtx;
-    float3 fillColor;
-
-    float4 sphere1;
-    float4 sphere1Albedo;
-    float4 sphere1Emissive;
-
-    float4 sphere2;
-    float4 sphere2Albedo;
-    float4 sphere2Emissive;
 };
+
+StructuredBuffer<Sphere> gSpheres;
 
 Ray GetRayForPixel(float2 uv)
 {
@@ -51,8 +44,6 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
     float3 ret = float3(0.0f, 0.0f, 0.0f);
 
 #ifdef _PIXELATE
-    ret = fillColor + float3(uv, 0.0f);
-
     ret = abs(ray.direction);// *0.5f + 0.5f;
     ret *= float3(10.0f, 10.0f, 0.1f);
 #else
@@ -74,8 +65,15 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
     collisionInfo.albedo = float3(0.0f, 0.0f, 0.0f);
     collisionInfo.emissive = float3(0.0f, 0.0f, 0.0f);
 
-    RayIntersectsSphere(ray, sphere1, collisionInfo, sphere1Albedo.rgb, sphere1Emissive.rgb);
-    RayIntersectsSphere(ray, sphere2, collisionInfo, sphere2Albedo.rgb, sphere2Emissive.rgb);
+    // ray trace the spheres
+    {
+        uint count = 0;
+        uint stride;
+        gSpheres.GetDimensions(count, stride);
+
+        for (uint i = 0; i < count; i++)
+            RayIntersectsSphere(ray, gSpheres[i], collisionInfo);
+    }
 
     ret = collisionInfo.albedo;
 

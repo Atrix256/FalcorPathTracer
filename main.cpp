@@ -3,6 +3,20 @@
 
 using namespace Falcor;
 
+struct Sphere
+{
+    float3 position;
+    float radius;
+    float3 albedo;
+    float3 emissive;
+};
+
+Sphere g_spheres[] =
+{
+    {{ 0.0f, 0.0f, 10.0f }, 1.0f, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f, 0.0f}},
+    {{ 2.0f, 0.0f, 10.0f }, 1.0f, { 0.0f, 1.0f, 0.0f }, {0.0f, 0.0f, 0.0f}},
+};
+
 class Application : public Renderer
 {
 private:
@@ -75,6 +89,8 @@ public:
         m_blueNoiseTexture = createTextureFromFile("Data/BlueNoise.bmp", false, false);
         m_computeVars->setTexture("gBlueNoiseTexture", m_blueNoiseTexture);
 
+        m_computeVars->setStructuredBuffer("gSpheres", StructuredBuffer::create(m_computeProgram, "gSpheres", countof(g_spheres)));
+
         std::fill(&m_keyState[0], &m_keyState[255], false);
     }
 
@@ -122,16 +138,15 @@ public:
         }
 
         ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
-        pShaderConstants["fillColor"] = glm::vec3(0.0f, 0.0f, 1.0f);
         pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;
 
-        pShaderConstants["sphere1"] = glm::vec4(0.0f, 0.0f, 10.0f, 1.0f);
-        pShaderConstants["sphere1Albedo"] = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
-        pShaderConstants["sphere1Emissive"] = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
-        pShaderConstants["sphere2"] = glm::vec4(2.0f, 0.0f, 10.0f, 1.0f);
-        pShaderConstants["sphere2Albedo"] = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
-        pShaderConstants["sphere2Emissive"] = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+        for (uint i = 0; i < countof(g_spheres); ++i)
+        {
+            m_computeVars->getStructuredBuffer("gSpheres")[i]["position"] = g_spheres[i].position;
+            m_computeVars->getStructuredBuffer("gSpheres")[i]["radius"]   = g_spheres[i].radius;
+            m_computeVars->getStructuredBuffer("gSpheres")[i]["albedo"]   = g_spheres[i].albedo;
+            m_computeVars->getStructuredBuffer("gSpheres")[i]["emissive"] = g_spheres[i].emissive;
+        }
 
         m_computeVars->setTexture("gOutput", m_output);
 

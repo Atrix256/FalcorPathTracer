@@ -12,15 +12,23 @@ struct CollisionInfo
     float3 emissive;
 };
 
-inline bool RayIntersectsSphere (in Ray ray, in float4 positionRadius, inout CollisionInfo collisionInfo, in float3 albedo, in float3 emissive)
+struct Sphere
+{
+    float3 position;
+    float radius;
+    float3 albedo;
+    float3 emissive;
+};
+
+inline bool RayIntersectsSphere (in Ray ray, in Sphere sphere, inout CollisionInfo collisionInfo)
 {
     //get the vector from the center of this circle to where the ray begins.
-    float3 m = ray.origin - positionRadius.xyz;
+    float3 m = ray.origin - sphere.position;
 
     //get the dot product of the above vector and the ray's vector
     float b = dot(m, ray.direction);
 
-    float c = dot(m, m) - positionRadius.w * positionRadius.w;
+    float c = dot(m, m) - sphere.radius * sphere.radius;
 
     //exit if r's origin outside s (c > 0) and r pointing away from s (b > 0)
     if (c > 0.0 && b > 0.0)
@@ -44,7 +52,7 @@ inline bool RayIntersectsSphere (in Ray ray, in float4 positionRadius, inout Col
     if (collisionInfo.collisionTime >= 0.0 && collisionTime > collisionInfo.collisionTime)
         return false;
 
-    float3 normal = normalize((ray.origin + ray.direction * collisionTime) - positionRadius.xyz);
+    float3 normal = normalize((ray.origin + ray.direction * collisionTime) - sphere.position);
 
     // make sure normal is facing opposite of ray direction.
     // this is for if we are hitting the object from the inside / back side.
@@ -53,7 +61,7 @@ inline bool RayIntersectsSphere (in Ray ray, in float4 positionRadius, inout Col
 
     collisionInfo.collisionTime = collisionTime;
     collisionInfo.normal = normal;
-    collisionInfo.albedo = albedo;
-    collisionInfo.emissive = emissive;
+    collisionInfo.albedo = sphere.albedo;
+    collisionInfo.emissive = sphere.emissive;
     return true;
 }
