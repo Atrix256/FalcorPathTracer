@@ -51,23 +51,12 @@ Next: specular!  Make a short blog post about this and a tag / release to link t
 
 * vsync toggle? how do you change it? it's in the device desc
 
-* rename mpTmpTexture etc
-
-* use m_ for members
-
-* show this source to patrick so he can see how falcor works
-
 ? camera controls, and clear the sample count when the camera changes?
 * need to figure out how to send constants over.
 
-* fix the debug spam
-
-* to get ray origin and direction...
- * transform (u,v,0) to get ray origin in world space
- * transform (u,v,1) to get a second point in world space to shoot a vector towards
+* fix the debug spam. does it happen to the compute shader example?
 
 * maybe have an array of geo types and a param that specifies how many are actually used in the scene
 
-* make a checkbox to toggle orthographic vs perspective mode?
 
-* orthographic projection doesn't seem to work (very surface test, ran out of time)
+* show this source to patrick so he can see how falcor works

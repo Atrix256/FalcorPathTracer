@@ -7,20 +7,18 @@ class Application : public Renderer
 {
 private:
 
-    ComputeProgram::SharedPtr mpProg;
-    ComputeState::SharedPtr mpState;
-    ComputeVars::SharedPtr mpProgVars;
+    ComputeProgram::SharedPtr m_computeProgram;
+    ComputeState::SharedPtr m_computeState;
+    ComputeVars::SharedPtr m_computeVars;
 
-    bool mbPixelate = false;
-
-    float m_fov = 45.0f;
-
-    Texture::SharedPtr gBlueNoiseTexture;
-
-    Texture::SharedPtr gOutput;
+    Texture::SharedPtr m_blueNoiseTexture;
+    Texture::SharedPtr m_output;
 
     glm::mat4x4 m_projMtx;
     glm::mat4x4 m_invViewProjMtx;
+
+    bool m_pixelate = false;
+    float m_fov = 45.0f;
 
 private:
 
@@ -64,7 +62,7 @@ public:
 
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     {
-        pGui->addCheckBox("Pixelate", mbPixelate);
+        pGui->addCheckBox("Pixelate", m_pixelate);
 
         if (pGui->addFloatVar("FOV", m_fov, 1.0f, 180.0f, 1.0f))
             UpdateProjectionMatrix(pSample);
@@ -72,52 +70,51 @@ public:
 
     void onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pContext)
     {
-        mpProg = ComputeProgram::createFromFile("compute.hlsl", "main");
-        mpState = ComputeState::create();
-        mpState->setProgram(mpProg);
-        mpProgVars = ComputeVars::create(mpProg->getReflector());
+        m_computeProgram = ComputeProgram::createFromFile("compute.hlsl", "main");
+        m_computeState = ComputeState::create();
+        m_computeState->setProgram(m_computeProgram);
+        m_computeVars = ComputeVars::create(m_computeProgram->getReflector());
 
-        gBlueNoiseTexture = createTextureFromFile("Data/BlueNoise.bmp", false, false);
-        mpProgVars->setTexture("gBlueNoiseTexture", gBlueNoiseTexture);
+        m_blueNoiseTexture = createTextureFromFile("Data/BlueNoise.bmp", false, false);
+        m_computeVars->setTexture("gBlueNoiseTexture", m_blueNoiseTexture);
     }
 
     void onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
     {
         const glm::vec4 clearColor(0.38f, 0.52f, 0.10f, 1);
 
-        pContext->clearUAV(gOutput->getUAV().get(), clearColor);
+        pContext->clearUAV(m_output->getUAV().get(), clearColor);
 
-        if (mbPixelate)
+        if (m_pixelate)
         {
-            mpProg->addDefine("_PIXELATE");
+            m_computeProgram->addDefine("_PIXELATE");
         }
         else
         {
-            mpProg->removeDefine("_PIXELATE");
+            m_computeProgram->removeDefine("_PIXELATE");
         }
 
-        ConstantBuffer::SharedPtr pShaderConstants = mpProgVars["ShaderConstants"];
+        ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
         pShaderConstants["fillColor"] = glm::vec3(0.0f, 0.0f, 1.0f);
         pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;\
         pShaderConstants["sphere1"] = glm::vec4(0.0f, 0.0f, 10.0f, 1.0f);
         pShaderConstants["sphere2"] = glm::vec4(2.0f, 0.0f, 10.0f, 1.0f);
-        pShaderConstants["fov"] = glm::radians(45.0f);
 
-        mpProgVars->setTexture("gOutput", gOutput);
+        m_computeVars->setTexture("gOutput", m_output);
 
-        pContext->setComputeState(mpState);
-        pContext->setComputeVars(mpProgVars);
+        pContext->setComputeState(m_computeState);
+        pContext->setComputeVars(m_computeVars);
 
         uint32_t w = pSample->getWindow()->getClientAreaWidth();
         uint32_t h = pSample->getWindow()->getClientAreaHeight();
 
         pContext->dispatch(w, h, 1);
-        pContext->copyResource(pTargetFbo->getColorTexture(0).get(), gOutput.get());
+        pContext->copyResource(pTargetFbo->getColorTexture(0).get(), m_output.get());
     }
 
     void onResizeSwapChain(SampleCallbacks* pSample, uint32_t width, uint32_t height)
     {
-        gOutput = Texture::create2D(width, height, ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
+        m_output = Texture::create2D(width, height, ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
 
         UpdateProjectionMatrix(pSample);
     }
