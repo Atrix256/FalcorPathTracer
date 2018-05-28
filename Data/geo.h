@@ -1,3 +1,5 @@
+static const float c_rayHitMinimumT = 0.01f;
+
 struct Ray
 {
     float3 origin;
@@ -48,8 +50,8 @@ inline bool RayIntersectsSphere (in Ray ray, in Sphere sphere, inout CollisionIn
     if (collisionTime < 0.0)
         collisionTime = -b + sqrt(discr);
 
-    //enforce max distance
-    if (collisionInfo.collisionTime >= 0.0 && collisionTime > collisionInfo.collisionTime)
+    //enforce min and max distance
+    if (collisionTime < c_rayHitMinimumT || collisionInfo.collisionTime >= 0.0 && collisionTime > collisionInfo.collisionTime)
         return false;
 
     float3 normal = normalize((ray.origin + ray.direction * collisionTime) - sphere.position);

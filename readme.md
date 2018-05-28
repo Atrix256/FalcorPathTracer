@@ -43,9 +43,19 @@ But also:
 
 ## TODOs
 
+* an option for non cosine weighted hemispherical samples (pure white noise)
+ * maybe also blue noise hemispherical samples?
+
+? have a "miss color" that is a shader constant
+ * could expose it in the ui
+ * if the ray misses at first, use this color
+ * when a ray misses eventually or iteration count is over, use this color
+
+* clean up code. eg put hash21 into a header?
+
 * make jitter options: none, white noise, vdc
 
-* try using blue noise in cosine weighted hemispheres?
+* try using blue noise in cosine weighted hemispheres? or bn as an RNG seed somehow.
  * could also have other noise types
  * blue noise only good for low sample counts
 * add temporal AA?
@@ -55,21 +65,25 @@ But also:
  * path tracer
  * TAA path tracer
 
+* implement russian roulette? or wait for specular maybe
+
 Next: specular!  Make a short blog post about this and a tag / release to link to from the blog post?
 
 * vsync toggle? how do you change it? it's in the device desc. maybe let it be off.
 
-? camera controls, and clear the sample count when the camera changes?
-* need to figure out how to send constants over.
-
 * fix the debug spam.
  * does it happen to the compute shader example? yes it does!
 
-* maybe have an array of geo types and a param that specifies how many are actually used in the scene
- * or maybe have a structured buffer for each geo type
+* more geo types and a specific scene
 
 * rename compute.hlsl to pathtrace.hlsl or something
 
 * look for TODOs
 
 * show this source to patrick so he can see how falcor works
+
+* is X,Y,Z the orientation you expect?
+
+* is your white noise good enough?
+ * I feel like it might not be. It looks pretty noisy
+ * seems to have some subtle patterns in the output and takes too long to converge

@@ -14,9 +14,13 @@ struct Sphere
 
 Sphere g_spheres[] =
 {
-    {{ 0.0f, 0.0f, 10.0f }, 1.0f, { 1.0f, 0.1f, 0.1f }, {0.0f, 0.0f, 0.0f}},
-    {{ 3.0f, 0.0f, 10.0f }, 1.0f, { 0.1f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
-    {{ 1.5f, 0.0f, 13.0f }, 1.0f, { 0.1f, 0.1f, 1.0f }, {0.0f, 0.0f, 0.0f}},
+    {{ 0.0f, 0.0f, 10.0f }, 1.4f, { 1.0f, 0.1f, 0.1f }, {0.0f, 0.0f, 0.0f}},
+    {{ 3.0f, 0.0f, 10.0f }, 1.4f, { 0.1f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
+    {{ 1.5f, 0.0f, 13.0f }, 1.4f, { 0.1f, 0.1f, 1.0f }, {0.0f, 0.0f, 0.0f}},
+
+    {{ 1.5f, -5.0f, 10.0f }, 1.4f, { 0.0f, 0.0f, 0.0f }, {5.0f, 5.0f, 5.0f}},
+
+    {{ 0.0f, 0.0f, 0.0f }, 100.0f, { 0.0f, 0.0f, 0.0f }, {0.1f, 0.1f, 0.1f}},
 };
 
 static float RandomFloat()
@@ -37,7 +41,8 @@ private:
     ComputeVars::SharedPtr m_computeVars;
 
     Texture::SharedPtr m_blueNoiseTexture;
-    Texture::SharedPtr m_output;
+    Texture::SharedPtr m_outputF32;
+    Texture::SharedPtr m_outputU8;
 
     glm::mat4x4 m_projMtx;
     glm::mat4x4 m_viewMtx;
@@ -103,6 +108,10 @@ public:
 
         if (pGui->addCheckBox("Integrate", m_integrate))
             m_frameCount = 0;
+
+        char buffer[256];
+        sprintf(buffer, "%zu samples per pixel", m_frameCount);
+        pGui->addText(buffer);
     }
 
     void onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pContext)
@@ -187,6 +196,7 @@ public:
         ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
         pShaderConstants["invViewProjMtx"] = invViewProjMtx;
         pShaderConstants["lerpAmount"] = 1.0f / float(m_frameCount + 1);
+        pShaderConstants["frameRand"] = glm::vec4(RandomFloat(), RandomFloat(), RandomFloat(), RandomFloat());
 
         for (uint i = 0; i < countof(g_spheres); ++i)
         {
@@ -196,20 +206,22 @@ public:
             m_computeVars->getStructuredBuffer("gSpheres")[i]["emissive"] = g_spheres[i].emissive;
         }
 
-        m_computeVars->setTexture("gOutput", m_output);
+        m_computeVars->setTexture("gOutputF32", m_outputF32);
+        m_computeVars->setTexture("gOutputU8", m_outputU8);
 
         pContext->setComputeState(m_computeState);
         pContext->setComputeVars(m_computeVars);
 
         pContext->dispatch(width, height, 1);
-        pContext->copyResource(pTargetFbo->getColorTexture(0).get(), m_output.get());
+        pContext->copyResource(pTargetFbo->getColorTexture(0).get(), m_outputU8.get());
 
         m_frameCount++;
     }
 
     void onResizeSwapChain(SampleCallbacks* pSample, uint32_t width, uint32_t height)
     {
-        m_output = Texture::create2D(width, height, ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
+        m_outputU8 = Texture::create2D(width, height, ResourceFormat::RGBA8Unorm, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
+        m_outputF32 = Texture::create2D(width, height, ResourceFormat::RGBA32Float, 1, 1, nullptr, Resource::BindFlags::ShaderResource | Resource::BindFlags::UnorderedAccess);
 
         UpdateProjectionMatrix(pSample);
     }
