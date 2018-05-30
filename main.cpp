@@ -18,8 +18,12 @@ Sphere g_spheres[] =
     {{ 3.0f, 0.0f, 10.0f }, 1.4f, { 0.1f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
     {{ 1.5f, 0.0f, 13.0f }, 1.4f, { 0.1f, 0.1f, 1.0f }, {0.0f, 0.0f, 0.0f}},
 
-    {{ 1.5f, -5.0f, 10.0f }, 1.4f, { 0.0f, 0.0f, 0.0f }, {5.0f, 5.0f, 5.0f}},
+    {{ 1.5f, 2.2f, 11.0f }, 1.4f, { 1.0f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
 
+    // bright light
+    {{ 1.5f, -5.0f, 10.0f }, 1.4f, { 0.0f, 0.0f, 0.0f }, {50.0f, 50.0f, 50.0f}},
+
+    // grey background
     {{ 0.0f, 0.0f, 0.0f }, 100.0f, { 0.0f, 0.0f, 0.0f }, {0.1f, 0.1f, 0.1f}},
 };
 
@@ -138,17 +142,23 @@ public:
         sprintf(buffer, "%zu samples", m_sampleCount);
         pGui->addText(buffer);
         size_t rayCount = m_sampleCount * size_t(width) * size_t(height);
-        sprintf(buffer, "%zu rays", rayCount);
+        sprintf(buffer, "%f M primary rays", double(rayCount) / 1000000.0);
         pGui->addText(buffer);
 
         float duration = pSample->getCurrentTime() - m_startTime;
-
         if (duration == 0.0f)
             duration = pSample->getLastFrameTime();
 
+        sprintf(buffer, "%f seconds", duration);
+        pGui->addText(buffer);
+
+        double sps = double(m_sampleCount) / double(duration);
+        sprintf(buffer, "%f samples per second", sps);
+        pGui->addText(buffer);
+
         double rps = double(rayCount) / double(duration);
         rps /= 1000000.0;
-        sprintf(buffer, "%f M rays per second", rps);
+        sprintf(buffer, "%f M primary rays per second", rps);
         pGui->addText(buffer);
     }
 

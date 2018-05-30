@@ -49,6 +49,8 @@ But also:
 
 * try profiling wiht renderdoc or vtune or who knows what else?
 
+? is there a way to hide UI in falcor?
+
 * directly sample lights?
 
 * don't need to jitter camera because the shader jitters the rays inside
@@ -59,11 +61,10 @@ But also:
 
 * clean up code. eg put hash21 into a header?
 
-* make jitter options: none, white noise, vdc
-
 * try using blue noise in cosine weighted hemispheres? or bn as an RNG seed somehow.
  * could also have other noise types
  * blue noise only good for low sample counts
+* make jitter options: none, white noise, vdc?
 * add temporal AA?
 * have imgui options for these.
 
@@ -73,10 +74,6 @@ But also:
 
 * implement russian roulette? or wait for specular maybe
 
-Next: specular!  Make a short blog post about this and a tag / release to link to from the blog post?
-
-* vsync toggle? how do you change it? it's in the device desc. maybe let it be off.
-
 * fix the debug spam.
  * does it happen to the compute shader example? yes it does!
 
@@ -84,12 +81,11 @@ Next: specular!  Make a short blog post about this and a tag / release to link t
 
 * rename compute.hlsl to pathtrace.hlsl or something
 
+* if ray generation details get complex (russian roullette), have it somehow atomic count raycount like aras does.
+
 * look for TODOs
 
+? tone mapping?
+
+Next: specular!  Make a short blog post about this and a tag / release to link to from the blog post?
 * show this source to patrick so he can see how falcor works
-
-* is X,Y,Z the orientation you expect?
-
-* is your white noise good enough?
- * I feel like it might not be. It looks pretty noisy
- * seems to have some subtle patterns in the output and takes too long to converge
