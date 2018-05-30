@@ -2,6 +2,8 @@
 
 I pulled down this falcor, built it and ran one of the samples to make sure it worked ok: "SimpleDeferred"
 https://github.com/NVIDIAGameWorks/Falcor/commit/0b561caae19e8325853166cc4c93d4763570774a
+* git clone https://github.com/Atrix256/FalcorPathTracer.git
+* git checkout 0b561caae19e8325853166cc4c93d4763570774a
 
 I followed the instructions for "creating a new project" in the readme.md file
 * If you haven't done so already, create a Visual Studio solution and project for your code. Falcor only supports 64-bit builds, so make sure you have a 64-bit build configuration
@@ -43,11 +45,18 @@ But also:
 
 ## TODOs
 
+* get the cornel box scene from the other path tracer
+
+* are you multiplying by cosine theta correctly when cosine weighted hemisphere sampling is off?
+ * reason through it and maybe make it more explicit that it's correct
+
+* depth of field, before specular?
+
+* is falcor next to this project? when i have it that way, it seems to have found it... ?!?!?!
+
 * Read Aras' stuf before too long
 
-* also try aras' cosine weighted function, see if it behaves better?
-
-* try profiling wiht renderdoc or vtune or who knows what else?
+* try profiling with renderdoc or vtune or who knows what else to see if you can find any obvious bottlenecks to fix
 
 ? is there a way to hide UI in falcor?
 
@@ -56,10 +65,12 @@ But also:
 * don't need to jitter camera because the shader jitters the rays inside
  * do this even w/ TAA? Well no... because we need to find the pixel from last frame.
 
-* an option for non cosine weighted hemispherical samples (pure white noise)
- * maybe also blue noise hemispherical samples?
+* TAA may want IGN as a noise source.
 
-* clean up code. eg put hash21 into a header?
+* clean up code. eg put rng stuff into a header?
+ * or maybe it'd be better & simpler to have everything in a single file. if so, bring geo.h in!
+
+* comment code better, especially main?
 
 * try using blue noise in cosine weighted hemispheres? or bn as an RNG seed somehow.
  * could also have other noise types
@@ -67,6 +78,7 @@ But also:
 * make jitter options: none, white noise, vdc?
 * add temporal AA?
 * have imgui options for these.
+* blue noise isn't that compelling as you've implemented it. keep it? ditch it? modify it?
 
 * presets if it makes sense...
  * path tracer
@@ -82,6 +94,8 @@ But also:
 * rename compute.hlsl to pathtrace.hlsl or something
 
 * if ray generation details get complex (russian roullette), have it somehow atomic count raycount like aras does.
+
+* organize UI into logical groups
 
 * look for TODOs
 

@@ -14,9 +14,9 @@ struct Sphere
 
 Sphere g_spheres[] =
 {
-    {{ 0.0f, 0.0f, 10.0f }, 1.4f, { 1.0f, 0.1f, 0.1f }, {0.0f, 0.0f, 0.0f}},
-    {{ 3.0f, 0.0f, 10.0f }, 1.4f, { 0.1f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
-    {{ 1.5f, 0.0f, 13.0f }, 1.4f, { 0.1f, 0.1f, 1.0f }, {0.0f, 0.0f, 0.0f}},
+    {{ 0.0f, 0.0f, 10.0f }, 1.1f, { 1.0f, 0.1f, 0.1f }, {0.0f, 0.0f, 0.0f}},
+    {{ 3.0f, 0.0f, 10.0f }, 1.2f, { 0.1f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
+    {{ 1.5f, 0.0f, 13.0f }, 1.3f, { 0.1f, 0.1f, 1.0f }, {0.0f, 0.0f, 0.0f}},
 
     {{ 1.5f, 2.2f, 11.0f }, 1.4f, { 1.0f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
 
@@ -72,6 +72,7 @@ private:
     size_t m_frameCount = 0;
     size_t m_sampleCount = 0;
     float m_startTime = 0.0f;
+    float m_stopTime = 0.0f;
 
     // values controled by the UI
     float m_fov = 45.0f;
@@ -79,6 +80,12 @@ private:
     bool m_integrate = true;
     int m_samplesPerFrame = 1;
     int m_maxRayBounces = 4;
+    int m_StopAtSampleCount = 0;
+
+    bool m_useBlueNoiseRNG = false;
+
+    // options to speed up rendering
+    bool m_cosineWeightedhemisphereSampling = true;
 
 private:
 
@@ -118,6 +125,9 @@ public:
 
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     {
+        if (pGui->addCheckBox("Use Cosine Weighted Hemisphere Samples", m_cosineWeightedhemisphereSampling))
+            ResetIntegration(pSample);
+
         if (pGui->addFloatVar("FOV", m_fov, 1.0f, 180.0f, 1.0f))
             UpdateProjectionMatrix(pSample);
 
@@ -127,8 +137,13 @@ public:
         if (pGui->addCheckBox("Jitter Camera", m_jitter))
             ResetIntegration(pSample);
 
+        if (pGui->addCheckBox("Use Blue Noise RNG", m_useBlueNoiseRNG))
+            ResetIntegration(pSample);
+
         if (pGui->addCheckBox("Integrate", m_integrate))
             ResetIntegration(pSample);
+
+        pGui->addIntVar("Stop At Sample Count", m_StopAtSampleCount, 0);
 
         pGui->addIntVar("Samples Per Frame", m_samplesPerFrame, 1, 10);
 
@@ -145,7 +160,7 @@ public:
         sprintf(buffer, "%f M primary rays", double(rayCount) / 1000000.0);
         pGui->addText(buffer);
 
-        float duration = pSample->getCurrentTime() - m_startTime;
+        float duration = m_stopTime - m_startTime;
         if (duration == 0.0f)
             duration = pSample->getLastFrameTime();
 
@@ -208,6 +223,12 @@ public:
 
     void onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
     {
+        if (m_StopAtSampleCount > 0 && m_sampleCount >= m_StopAtSampleCount)
+        {
+            pContext->copyResource(pTargetFbo->getColorTexture(0).get(), m_outputU8.get());
+            return;
+        }
+
         if (!m_integrate)
             ResetIntegration(pSample);
 
@@ -222,6 +243,16 @@ public:
 
         sprintf(buffer, "%i", m_maxRayBounces);
         m_computeProgram->addDefine("MAX_RAY_BOUNCES", buffer);
+
+        if (m_cosineWeightedhemisphereSampling)
+            m_computeProgram->addDefine("COSINE_WEIGHTED_HEMISPHERE_SAMPLING");
+        else
+            m_computeProgram->removeDefine("COSINE_WEIGHTED_HEMISPHERE_SAMPLING");
+
+        if (m_useBlueNoiseRNG)
+            m_computeProgram->addDefine("USE_BLUENOISE_RNG");
+        else
+            m_computeProgram->removeDefine("USE_BLUENOISE_RNG");
 
         // jitter the camera if we should
         glm::mat4x4 invViewProjMtx = m_invViewProjMtx;
@@ -265,6 +296,8 @@ public:
 
         m_frameCount++;
         m_sampleCount += m_samplesPerFrame;
+
+        m_stopTime = pSample->getCurrentTime();
     }
 
     void onResizeSwapChain(SampleCallbacks* pSample, uint32_t width, uint32_t height)

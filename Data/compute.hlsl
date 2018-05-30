@@ -40,6 +40,16 @@ float RandomFloat01(inout uint state)
     return (RNG(state) & 0xFFFFFF) / 16777216.0f;
 }
 
+float3 RandomUnitVector(inout uint state)
+{
+    float z = RandomFloat01(state) * 2.0f - 1.0f;
+    float a = RandomFloat01(state) * 2.0f * 3.1415926f;
+    float r = sqrt(1.0f - z * z);
+    float x = r * cos(a);
+    float y = r * sin(a);
+    return float3(x, y, z);
+}
+
 Ray GetRayForPixel(float2 uv)
 {
     // convert from [0,1] space to [-1,1] space
@@ -80,44 +90,28 @@ CollisionInfo RayIntersectsScene(Ray ray)
     return collisionInfo;
 }
 
-float3 CosineSampleHemisphere (in float3 normal, inout uint rngState)
-{
-    float2 rnd;
-    rnd.x = RandomFloat01(rngState);
-    rnd.y = RandomFloat01(rngState);
-
-    float r1 = 2.0f * c_pi * rnd.x;
-    float r2 = rnd.y;
-    float r2s = sqrt(r2);
-
-    float3 w = normal;
-    float3 u;
-    if (abs(w[0]) > 0.1f)
-        u = cross(float3(0.0f, 1.0f, 0.0f), w);
-    else
-        u = cross(float3(1.0f, 0.0f, 0.0f), w);
-
-    u = normalize(u);
-    float3 v = cross(w, u);
-    float3 d = (u*cos(r1)*r2s + v*sin(r1)*r2s + w*sqrt(1.0f - r2));
-    d = normalize(d);
-
-    return d;
-}
-
 float3 LightOutgoing(in CollisionInfo collisionInfo, float3 rayHitPos, inout uint rngState)
 {
     float3 lightSum = float3(0.0f, 0.0f, 0.0f);
     float3 lightMultiplier = float3(1.0f, 1.0f, 1.0f);
+    float cosTheta = 1.0f;
 
     for (int i = 0; i <= MAX_RAY_BOUNCES; ++i)
     {
         // update our light sum and future light multiplier
         lightSum += collisionInfo.emissive * lightMultiplier;
-        lightMultiplier *= collisionInfo.albedo;
+        lightMultiplier *= collisionInfo.albedo * cosTheta;
 
         // add a random recursive sample for global illumination
-        float3 newRayDir = CosineSampleHemisphere(collisionInfo.normal, rngState);
+        #ifdef COSINE_WEIGHTED_HEMISPHERE_SAMPLING
+        float3 newRayDir = normalize(collisionInfo.normal + RandomUnitVector(rngState));
+        #else
+        float3 newRayDir = RandomUnitVector(rngState);
+        if (dot(collisionInfo.normal, newRayDir) < 0.0f)
+            newRayDir *= -1.0f;
+        cosTheta = dot(collisionInfo.normal, newRayDir);
+        #endif
+
         Ray newRay;
         newRay.origin = rayHitPos;
         newRay.direction = newRayDir;
@@ -148,22 +142,23 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
     uint2 pixel = groupId.xy + groupThreadId.xy;
     float2 uv = float2(pixel) / float2(resolution);
 
-    uint rngState = (pixel.x * 1973 + pixel.y * 9277 + frameNumber * 26699) | 1;
-    rngState = rngState ^ frameRand;
+    #ifdef USE_BLUENOISE_RNG
+        uint2 blueNoiseDims;
+        gBlueNoiseTexture.GetDimensions(blueNoiseDims.x, blueNoiseDims.y);
 
-    float3 ret = float3(0.0f, 0.0f, 0.0f);
+        uint2 texturePixel = pixel;
+        texturePixel.x = texturePixel.x % blueNoiseDims.x;
+        texturePixel.y = texturePixel.y % blueNoiseDims.y;
 
-    /*
-    uint2 blueNoiseDims;
-    gBlueNoiseTexture.GetDimensions(blueNoiseDims.x, blueNoiseDims.y);
+        float bnValue = frac(gBlueNoiseTexture[texturePixel].r + float(frameNumber) * c_goldenRatioConjugate);
+        //bnValue = frac(bnValue + float(frameRand & 0xFFFFFF) / float(0xFFFFFF));
+        uint rngState = uint(float(0xFFFFFF) * float(bnValue));
+    #else
+        uint rngState = (pixel.x * 1973 + pixel.y * 9277 + frameNumber * 26699) | 1;
+        rngState = rngState ^ frameRand;
+    #endif
 
-    uint2 texturePixel = pixel;
-    texturePixel.x = texturePixel.x % blueNoiseDims.x;
-    texturePixel.y = texturePixel.y % blueNoiseDims.y;
-
-    ret = gBlueNoiseTexture[texturePixel].rgb;
-    */
-
+        float3 ret = float3(0.0f, 0.0f, 0.0f);
     for (uint i = 0; i < SAMPLES_PER_FRAME; ++i)
     {
         // get a random offset to jitter the pixel by
@@ -177,7 +172,6 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
         if (collisionInfo.collisionTime > 0.0f)
             ret += LightOutgoing(collisionInfo, ray.origin + ray.direction * collisionInfo.collisionTime, rngState);
     }
-
     ret /= float(SAMPLES_PER_FRAME);
 
     // incremental average to integrate when you get one sample at a time
