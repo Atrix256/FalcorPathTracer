@@ -43,6 +43,16 @@ But also:
 
 ## TODOs
 
+* maybe send a random uint eac frame to xor with the random seed, to break things up a bit more
+ * there are some visible patterns when using a low sample count each frame ):
+ * also try aras' cosine weighted function, see if it behaves better?
+
+* don't need to jitter camera because the shader jitters the rays inside
+ * do this even w/ TAA? Well no... because we need to find the pixel from last frame.
+
+? why am i only getting 45M rays per second when aras was getting double that?
+ * my machine maybe?
+
 * an option for non cosine weighted hemispherical samples (pure white noise)
  * maybe also blue noise hemispherical samples?
 

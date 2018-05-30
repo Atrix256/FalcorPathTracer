@@ -2,6 +2,10 @@
 
 #define MAX_RAY_BOUNCES 4
 
+#ifndef SAMPLES_PER_FRAME
+    #define SAMPLES_PER_FRAME 1
+#endif
+
 static const float c_pi = 3.14159265359f;
 static const float c_goldenRatioConjugate = 0.61803398875f;
 
@@ -13,10 +17,27 @@ cbuffer ShaderConstants
 {
     float4x4 invViewProjMtx;
     float lerpAmount;
-    float4 frameRand;
+    uint frameRand;
+    uint frameNumber;
 };
 
 StructuredBuffer<Sphere> gSpheres;
+
+// From https://github.com/aras-p/ToyPathTracer/blob/05-gpumetal/Cpp/Mac/Shaders.metal#L32
+uint RNG(inout uint state)
+{
+    uint x = state;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 15;
+    state = x;
+    return x;
+}
+
+float RandomFloat01(inout uint state)
+{
+    return (RNG(state) & 0xFFFFFF) / 16777216.0f;
+}
 
 Ray GetRayForPixel(float2 uv)
 {
@@ -92,10 +113,11 @@ float hash13(float3 p3)
 
 //----------------------------------------------------------------------------
 // from smallpt path tracer: http://www.kevinbeason.com/smallpt/
-float3 CosineSampleHemisphere (in float3 normal, inout float rngSeed)
+float3 CosineSampleHemisphere (in float3 normal, inout uint rngState)
 {
-    float2 rnd = hash21(rngSeed);
-    rngSeed += c_goldenRatioConjugate;
+    float2 rnd;
+    rnd.x = RandomFloat01(rngState);
+    rnd.y = RandomFloat01(rngState);
 
     float r1 = 2.0f * c_pi * rnd.x;
     float r2 = rnd.y;
@@ -116,7 +138,7 @@ float3 CosineSampleHemisphere (in float3 normal, inout float rngSeed)
     return d;
 }
 
-float3 LightOutgoing(in CollisionInfo collisionInfo, float3 rayHitPos, inout float rngSeed)
+float3 LightOutgoing(in CollisionInfo collisionInfo, float3 rayHitPos, inout uint rngState)
 {
     float3 lightSum = float3(0.0f, 0.0f, 0.0f);
     float3 lightMultiplier = float3(1.0f, 1.0f, 1.0f);
@@ -128,7 +150,7 @@ float3 LightOutgoing(in CollisionInfo collisionInfo, float3 rayHitPos, inout flo
         lightMultiplier *= collisionInfo.albedo;
 
         // add a random recursive sample for global illumination
-        float3 newRayDir = CosineSampleHemisphere(collisionInfo.normal, rngSeed);
+        float3 newRayDir = CosineSampleHemisphere(collisionInfo.normal, rngState);
         Ray newRay;
         newRay.origin = rayHitPos;
         newRay.direction = newRayDir;
@@ -159,8 +181,8 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
     uint2 pixel = groupId.xy + groupThreadId.xy;
     float2 uv = float2(pixel) / float2(resolution);
 
-    // get the ray for this pixel
-    Ray ray = GetRayForPixel(uv);
+    uint rngState = (pixel.x * 1973 + pixel.y * 9277 + frameNumber * 26699) | 1;
+    rngState = rngState ^ frameRand;
 
     float3 ret = float3(0.0f, 0.0f, 0.0f);
 
@@ -180,13 +202,24 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
     ret = gBlueNoiseTexture[texturePixel].rgb;
     */
 
-    float frameRngSeed = hash13(frameRand.xyz);
-    float rngSeed = hash13(float3(uv, frameRngSeed)); 
+    for (uint i = 0; i < SAMPLES_PER_FRAME; ++i)
+    {
+        float2 uvOffset = float2(RandomFloat01(rngState), RandomFloat01(rngState)) * float2(1.0f / float(resolution.x), 1.0f / float(resolution.y));
+        uv += uvOffset;
 
-    CollisionInfo collisionInfo = RayIntersectsScene(ray);
+        //float u = float(gid.x + RandomFloat01(rngState)) * params->invWidth;
+        //float v = float(gid.y + RandomFloat01(rngState)) * params->invHeight;
 
-    if (collisionInfo.collisionTime > 0.0f)
-        ret = LightOutgoing(collisionInfo, ray.origin + ray.direction * collisionInfo.collisionTime, rngSeed);
+        // get the ray for this pixel
+        Ray ray = GetRayForPixel(uv + uvOffset);
+
+        CollisionInfo collisionInfo = RayIntersectsScene(ray);
+
+        if (collisionInfo.collisionTime > 0.0f)
+            ret += LightOutgoing(collisionInfo, ray.origin + ray.direction * collisionInfo.collisionTime, rngState);
+    }
+
+    ret /= float(SAMPLES_PER_FRAME);
 
 #endif
 

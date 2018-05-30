@@ -32,6 +32,15 @@ static float RandomFloat()
     return dist(mt);
 }
 
+static uint32 RandomUint32()
+{
+    // from 0 to 1
+    static std::random_device rd;
+    static std::mt19937 mt(rd());
+    static std::uniform_int_distribution<uint32> dist(0,(uint32)-1);
+    return dist(mt);
+}
+
 class Application : public Renderer
 {
 private:
@@ -57,14 +66,25 @@ private:
     float m_yaw = 90.0f;
     float m_pitch = 0.0f;
     size_t m_frameCount = 0;
+    size_t m_sampleCount = 0;
+    float m_startTime = 0.0f;
 
     // values controled by the UI
     bool m_pixelate = false;
     float m_fov = 45.0f;
-    bool m_jitter = true;
+    bool m_jitter = false;
     bool m_integrate = true;
 
+    int m_samplesPerFrame = 1;
+
 private:
+
+    void ResetIntegration(SampleCallbacks* pSample)
+    {
+        m_frameCount = 0;
+        m_sampleCount = 0;
+        m_startTime = pSample->getCurrentTime();
+    }
 
     void UpdateProjectionMatrix(SampleCallbacks* pSample)
     {
@@ -73,10 +93,10 @@ private:
 
         m_projMtx = glm::perspective(glm::radians(m_fov), float(width) / float(height), 0.1f, 100.0f);
 
-        UpdateViewMatrix();
+        UpdateViewMatrix(pSample);
     }
 
-    void UpdateViewMatrix()
+    void UpdateViewMatrix(SampleCallbacks* pSample)
     {
         glm::vec3 forward;
         forward.x = cos(glm::radians(m_pitch)) * cos(glm::radians(m_yaw));
@@ -88,7 +108,7 @@ private:
         glm::mat4x4 viewProjMtx = m_projMtx * m_viewMtx;
         m_invViewProjMtx = glm::inverse(viewProjMtx);
 
-        m_frameCount = 0;
+        ResetIntegration(pSample);
     }
 
 public:
@@ -101,16 +121,34 @@ public:
             UpdateProjectionMatrix(pSample);
 
         if (pGui->addButton("Restart Integration"))
-            m_frameCount = 0;
+            ResetIntegration(pSample);
 
         if (pGui->addCheckBox("Jitter Camera", m_jitter))
-            m_frameCount = 0;
+            ResetIntegration(pSample);
 
         if (pGui->addCheckBox("Integrate", m_integrate))
-            m_frameCount = 0;
+            ResetIntegration(pSample);
+
+        pGui->addIntVar("Samples Per Frame", m_samplesPerFrame, 1, 10);
+
+        uint32_t width = pSample->getWindow()->getClientAreaWidth();
+        uint32_t height = pSample->getWindow()->getClientAreaHeight();
 
         char buffer[256];
-        sprintf(buffer, "%zu samples per pixel", m_frameCount);
+        sprintf(buffer, "%zu samples", m_sampleCount);
+        pGui->addText(buffer);
+        size_t rayCount = m_sampleCount * size_t(width) * size_t(height);
+        sprintf(buffer, "%zu rays", rayCount);
+        pGui->addText(buffer);
+
+        float duration = pSample->getCurrentTime() - m_startTime;
+
+        if (duration == 0.0f)
+            duration = pSample->getLastFrameTime();
+
+        double rps = double(rayCount) / double(duration);
+        rps /= 1000000.0;
+        sprintf(buffer, "%f M rays per second", rps);
         pGui->addText(buffer);
     }
 
@@ -154,12 +192,15 @@ public:
         {
             offset *= pSample->getLastFrameTime() * c_moveSpeed;
             m_cameraPos += offset;
-            UpdateViewMatrix();
+            UpdateViewMatrix(pSample);
         }
     }
 
     void onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
     {
+        if (!m_integrate)
+            ResetIntegration(pSample);
+
         UpdateCamera(pSample);
 
         uint32_t width = pSample->getWindow()->getClientAreaWidth();
@@ -174,12 +215,16 @@ public:
             m_computeProgram->removeDefine("_PIXELATE");
         }
 
+        char buffer[256];
+        sprintf(buffer, "%i", m_samplesPerFrame);
+        m_computeProgram->addDefine("SAMPLES_PER_FRAME", buffer);
+
         // jitter the camera if we should
         glm::mat4x4 invViewProjMtx = m_invViewProjMtx;
         if (m_jitter)
         {
-            float jitterX = RandomFloat() / float(width);
-            float jitterY = RandomFloat() / float(height);
+            float jitterX = (RandomFloat() - 0.5f) / float(width);
+            float jitterY = (RandomFloat() - 0.5f) / float(height);
 
             glm::mat4x4 viewProjMtx = m_projMtx * m_viewMtx;
 
@@ -190,13 +235,12 @@ public:
             invViewProjMtx = glm::inverse(tempMtx);
         }
 
-        if (!m_integrate)
-            m_frameCount = 0;
-
         ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
         pShaderConstants["invViewProjMtx"] = invViewProjMtx;
         pShaderConstants["lerpAmount"] = 1.0f / float(m_frameCount + 1);
-        pShaderConstants["frameRand"] = glm::vec4(RandomFloat(), RandomFloat(), RandomFloat(), RandomFloat());
+        pShaderConstants["frameRand"] = (uint)RandomUint32();
+        pShaderConstants["frameNumber"] = (uint)m_frameCount;
+
 
         for (uint i = 0; i < countof(g_spheres); ++i)
         {
@@ -216,6 +260,7 @@ public:
         pContext->copyResource(pTargetFbo->getColorTexture(0).get(), m_outputU8.get());
 
         m_frameCount++;
+        m_sampleCount += m_samplesPerFrame;
     }
 
     void onResizeSwapChain(SampleCallbacks* pSample, uint32_t width, uint32_t height)
@@ -258,7 +303,7 @@ public:
                     else if (m_pitch < -89.0f)
                         m_pitch = -89.0f;
 
-                    UpdateViewMatrix();
+                    UpdateViewMatrix(pSample);
 
                     return true;
                 }
