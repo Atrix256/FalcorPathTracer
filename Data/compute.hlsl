@@ -1,6 +1,8 @@
 #include "geo.h"
 
-#define MAX_RAY_BOUNCES 4
+#ifndef MAX_RAY_BOUNCES
+    #define MAX_RAY_BOUNCES 4
+#endif
 
 #ifndef SAMPLES_PER_FRAME
     #define SAMPLES_PER_FRAME 1
@@ -23,7 +25,6 @@ cbuffer ShaderConstants
 
 StructuredBuffer<Sphere> gSpheres;
 
-// From https://github.com/aras-p/ToyPathTracer/blob/05-gpumetal/Cpp/Mac/Shaders.metal#L32
 uint RNG(inout uint state)
 {
     uint x = state;
@@ -79,40 +80,6 @@ CollisionInfo RayIntersectsScene(Ray ray)
     return collisionInfo;
 }
 
-//----------------------------------------------------------------------------
-// Links to some shader friendly prngs:
-// https://www.shadertoy.com/view/4djSRW "Hash Without Sine" by Dave_Hoskins
-// https://www.shadertoy.com/view/MsV3z3 2d Weyl Hash by MBR
-// https://github.com/gheshu/gputracer/blob/master/src/depth.glsl#L43 From Lauren @lh0xfb
-// https://www.shadertoy.com/view/4tl3z4
-//----------------------------------------------------------------------------
-// from "hash without sine" https://www.shadertoy.com/view/4djSRW
-//  2 out, 1 in...
-float2 hash21(inout float p)
-{
-    float3 p3 = frac(float3(p,p,p) * float3(443.897, 441.423, 437.195));
-    p3 += dot(p3, p3.yzx + 19.19);
-    return frac((p3.xx + p3.yz)*p3.zy);
-}
-
-//  1 out, 2 in...
-float hash12(in float2 p)
-{
-    float3 p3 = frac(float3(p.xyx) * float3(443.8975f, 443.8975f, 443.8975f));
-    p3 += dot(p3, p3.yzx + 19.19);
-    return frac((p3.x + p3.y) * p3.z);
-}
-
-//  1 out, 3 in...
-float hash13(float3 p3)
-{
-    p3 = frac(p3 * float3(443.8975f, 443.8975f, 443.8975f));
-    p3 += dot(p3, p3.yzx + 19.19);
-    return frac((p3.x + p3.y) * p3.z);
-}
-
-//----------------------------------------------------------------------------
-// from smallpt path tracer: http://www.kevinbeason.com/smallpt/
 float3 CosineSampleHemisphere (in float3 normal, inout uint rngState)
 {
     float2 rnd;
@@ -186,11 +153,6 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
 
     float3 ret = float3(0.0f, 0.0f, 0.0f);
 
-#ifdef _PIXELATE
-    ret = abs(ray.direction);// *0.5f + 0.5f;
-    ret *= float3(10.0f, 10.0f, 0.1f);
-#else
-
     /*
     uint2 blueNoiseDims;
     gBlueNoiseTexture.GetDimensions(blueNoiseDims.x, blueNoiseDims.y);
@@ -204,11 +166,8 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
 
     for (uint i = 0; i < SAMPLES_PER_FRAME; ++i)
     {
+        // get a random offset to jitter the pixel by
         float2 uvOffset = float2(RandomFloat01(rngState), RandomFloat01(rngState)) * float2(1.0f / float(resolution.x), 1.0f / float(resolution.y));
-        uv += uvOffset;
-
-        //float u = float(gid.x + RandomFloat01(rngState)) * params->invWidth;
-        //float v = float(gid.y + RandomFloat01(rngState)) * params->invHeight;
 
         // get the ray for this pixel
         Ray ray = GetRayForPixel(uv + uvOffset);
@@ -220,8 +179,6 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
     }
 
     ret /= float(SAMPLES_PER_FRAME);
-
-#endif
 
     // incremental average to integrate when you get one sample at a time
     // https://blog.demofox.org/2016/08/23/incremental-averaging/

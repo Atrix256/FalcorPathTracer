@@ -70,12 +70,11 @@ private:
     float m_startTime = 0.0f;
 
     // values controled by the UI
-    bool m_pixelate = false;
     float m_fov = 45.0f;
     bool m_jitter = false;
     bool m_integrate = true;
-
     int m_samplesPerFrame = 1;
+    int m_maxRayBounces = 4;
 
 private:
 
@@ -115,8 +114,6 @@ public:
 
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     {
-        pGui->addCheckBox("Pixelate", m_pixelate);
-
         if (pGui->addFloatVar("FOV", m_fov, 1.0f, 180.0f, 1.0f))
             UpdateProjectionMatrix(pSample);
 
@@ -130,6 +127,9 @@ public:
             ResetIntegration(pSample);
 
         pGui->addIntVar("Samples Per Frame", m_samplesPerFrame, 1, 10);
+
+        if (pGui->addIntVar("Max Ray Bounces", m_maxRayBounces, 1, 10))
+            ResetIntegration(pSample);
 
         uint32_t width = pSample->getWindow()->getClientAreaWidth();
         uint32_t height = pSample->getWindow()->getClientAreaHeight();
@@ -206,18 +206,12 @@ public:
         uint32_t width = pSample->getWindow()->getClientAreaWidth();
         uint32_t height = pSample->getWindow()->getClientAreaHeight();
 
-        if (m_pixelate)
-        {
-            m_computeProgram->addDefine("_PIXELATE");
-        }
-        else
-        {
-            m_computeProgram->removeDefine("_PIXELATE");
-        }
-
         char buffer[256];
         sprintf(buffer, "%i", m_samplesPerFrame);
         m_computeProgram->addDefine("SAMPLES_PER_FRAME", buffer);
+
+        sprintf(buffer, "%i", m_maxRayBounces);
+        m_computeProgram->addDefine("MAX_RAY_BOUNCES", buffer);
 
         // jitter the camera if we should
         glm::mat4x4 invViewProjMtx = m_invViewProjMtx;
