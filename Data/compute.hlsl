@@ -56,6 +56,8 @@ Ray GetRayForPixel(float2 uv)
     // convert from [0,1] space to [-1,1] space
     float2 pixelClipSpace = uv * 2.0f - 1.0f;
 
+    pixelClipSpace.x *= -1.0f;
+
     // transform the clip space pixel at z 0 to get the ray origin in world space
     Ray ret;
     float4 origin = mul(float4(pixelClipSpace, 0.0f, 1.0f), invViewProjMtx);
@@ -63,7 +65,7 @@ Ray GetRayForPixel(float2 uv)
     ret.origin = origin.xyz;
 
     // transform the clip space pixel at a different z to get another world space point along the ray, to make the direction from
-    float4 destination = mul(float4(pixelClipSpace, 0.1f, 1.0f), invViewProjMtx);
+    float4 destination = mul(float4(pixelClipSpace, -0.1f, 1.0f), invViewProjMtx);
     destination /= destination.w;
     ret.direction = normalize(destination.xyz - origin.xyz);
 

@@ -45,11 +45,14 @@ But also:
 
 ## TODOs
 
+* get camera settings from your other path tracer for the cornell box
+
 * fix up the mess...
  * quads have emissive / albedo flipped in declaration
  * quadsz
- * axes are flipped
  * quads are / 100.0 in units. (maybe make this the new standard, adjust camera and camera movement speed accordingly)
+
+* check out aras' sphere test code
 
 * the axes of orientation are off somehow. maybe y is just flipped, i'm not really sure.
  * do orientation tests and find out.

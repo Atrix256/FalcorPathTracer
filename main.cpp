@@ -21,9 +21,8 @@ struct Quad
 };
 
 
-Sphere g_spheres[] =
+Sphere g_spheresZ[] =
 {
-    /*
     {{ 0.0f, 0.0f, 10.0f }, 1.1f, { 1.0f, 0.1f, 0.1f }, {0.0f, 0.0f, 0.0f}},
     {{ 3.0f, 0.0f, 10.0f }, 1.2f, { 0.1f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
     {{ 1.5f, 0.0f, 13.0f }, 1.3f, { 0.1f, 0.1f, 1.0f }, {0.0f, 0.0f, 0.0f}},
@@ -32,19 +31,29 @@ Sphere g_spheres[] =
 
     // bright light
     {{ 1.5f, -5.0f, 10.0f }, 1.4f, { 0.0f, 0.0f, 0.0f }, {50.0f, 50.0f, 50.0f}},
-    */
+
+    // grey background
+    {{ 0.0f, 0.0f, 0.0f }, 100.0f, { 0.0f, 0.0f, 0.0f }, {0.1f, 0.1f, 0.1f}},
+};
+
+Sphere g_spheres[] =
+{
+    {{ 0.0f, 0.0f, 10.0f }, 1.0f, { 0.0f, 0.0f, 0.0f }, {1.0f, 1.0f, 1.0f}},
+    {{ 3.0f, 0.0f, 10.0f }, 1.0f, { 0.0f, 0.0f, 0.0f }, {1.0f, 0.0f, 0.0f}},
+    {{ 0.0f, 3.0f, 10.0f }, 1.0f, { 0.0f, 0.0f, 0.0f }, {0.0f, 1.0f, 0.0f}},
+    {{ 0.0f, 0.0f, 13.0f }, 1.0f, { 0.0f, 0.0f, 0.0f }, {0.0f, 0.0f, 1.0f}},
 
     // grey background
     {{ 0.0f, 0.0f, 0.0f }, 100.0f, { 0.0f, 0.0f, 0.0f }, {0.1f, 0.1f, 0.1f}},
 };
 
 
-Quad g_quadsZ[] =
+Quad g_quads[] =
 {
-    { { 20, 5, -20 },{ 20, 5, 20 },{ -20, 5, 20 },{ -20, 5, -20 }, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f} }
+    { { 20, 105, -20 },{ 20, 105, 20 },{ -20, 105, 20 },{ -20, 105, -20 }, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f} }
 };
 
-Quad g_quads[] =
+Quad g_quadsZ[] =
 {
     // floor
     {{ 552.8f, 0.0f, 0.0f }, { 0.0f, 0.0f,   0.0f }, {   0.0f, 0.0f, 559.2f },{ 549.6f, 0.0f, 559.2f }, {0.0f, 0.0f, 0.0f}, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }},
@@ -101,7 +110,7 @@ private:
 
     bool m_keyState[256];
 
-    glm::vec3 m_cameraPos = { 0.0f, 0.0f, 0.0f };
+    glm::vec3 m_cameraPos = { 0.0f, 0.0f, -10.0f };
 
     glm::vec2 m_mouseDragPos;
     bool m_mouseDown = false;
@@ -151,7 +160,7 @@ private:
         forward.y = sin(glm::radians(m_pitch));
         forward.z = cos(glm::radians(m_pitch)) * sin(glm::radians(m_yaw));
 
-        m_viewMtx = glm::lookAt(m_cameraPos, m_cameraPos + forward, glm::vec3(0.0f, 1.0f, 0.0f));
+        m_viewMtx = glm::lookAtLH(m_cameraPos, m_cameraPos + forward, glm::vec3(0.0f, 1.0f, 0.0f));
 
         glm::mat4x4 viewProjMtx = m_projMtx * m_viewMtx;
         m_invViewProjMtx = glm::inverse(viewProjMtx);
@@ -253,8 +262,8 @@ public:
 
         glm::vec3 offset(0.0f, 0.0f, 0.0f);
 
-        glm::vec4 forward = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f) * m_viewMtx;
-        glm::vec4 left = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f) * m_viewMtx;
+        glm::vec4 forward = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f) * m_viewMtx;
+        glm::vec4 left = glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f) * m_viewMtx;
 
         if (m_keyState['W'])
             offset += glm::vec3(forward.x, forward.y, forward.z);
@@ -263,10 +272,10 @@ public:
             offset -= glm::vec3(forward.x, forward.y, forward.z);
 
         if (m_keyState['A'])
-            offset -= glm::vec3(left.x, left.y, left.z);
+            offset += glm::vec3(left.x, left.y, left.z);
 
         if (m_keyState['D'])
-            offset += glm::vec3(left.x, left.y, left.z);
+            offset -= glm::vec3(left.x, left.y, left.z);
 
         if (offset.x != 0 || offset.y != 0)
         {
@@ -398,8 +407,8 @@ public:
                     m_mouseDragPos = mouseEvent.pos;
 
                     mouseDelta *= pSample->getLastFrameTime() * 100000.0f;
-                    m_yaw += mouseDelta.x;
-                    m_pitch += mouseDelta.y;
+                    m_yaw -= mouseDelta.x;
+                    m_pitch -= mouseDelta.y;
 
                     if (m_pitch > 89.0f)
                         m_pitch = 89.0f;
