@@ -47,6 +47,9 @@ But also:
 
 * check out aras' sphere test code
 
+* convert from linear to sRGB.
+ * a copy shader that does this (and tone mapping?), not a copy resource operation.
+
 * the axes of orientation are off somehow. maybe y is just flipped, i'm not really sure.
  * do orientation tests and find out.
 
