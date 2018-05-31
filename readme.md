@@ -45,6 +45,15 @@ But also:
 
 ## TODOs
 
+* fix up the mess...
+ * quads have emissive / albedo flipped in declaration
+ * quadsz
+ * axes are flipped
+ * quads are / 100.0 in units. (maybe make this the new standard, adjust camera and camera movement speed accordingly)
+
+* the axes of orientation are off somehow. maybe y is just flipped, i'm not really sure.
+ * do orientation tests and find out.
+
 * get the cornel box scene from the other path tracer
 
 * are you multiplying by cosine theta correctly when cosine weighted hemisphere sampling is off?
@@ -53,6 +62,7 @@ But also:
 * depth of field, before specular?
 
 * is falcor next to this project? when i have it that way, it seems to have found it... ?!?!?!
+ * yep. Maybe falcor registers somehow like via an environment variable?
 
 * Read Aras' stuf before too long
 

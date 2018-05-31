@@ -12,8 +12,18 @@ struct Sphere
     float3 emissive;
 };
 
+struct Quad
+{
+    float3 a, b, c, d;
+    float3 normal;
+    float3 albedo;
+    float3 emissive;
+};
+
+
 Sphere g_spheres[] =
 {
+    /*
     {{ 0.0f, 0.0f, 10.0f }, 1.1f, { 1.0f, 0.1f, 0.1f }, {0.0f, 0.0f, 0.0f}},
     {{ 3.0f, 0.0f, 10.0f }, 1.2f, { 0.1f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
     {{ 1.5f, 0.0f, 13.0f }, 1.3f, { 0.1f, 0.1f, 1.0f }, {0.0f, 0.0f, 0.0f}},
@@ -22,9 +32,37 @@ Sphere g_spheres[] =
 
     // bright light
     {{ 1.5f, -5.0f, 10.0f }, 1.4f, { 0.0f, 0.0f, 0.0f }, {50.0f, 50.0f, 50.0f}},
+    */
 
     // grey background
     {{ 0.0f, 0.0f, 0.0f }, 100.0f, { 0.0f, 0.0f, 0.0f }, {0.1f, 0.1f, 0.1f}},
+};
+
+
+Quad g_quadsZ[] =
+{
+    { { 20, 5, -20 },{ 20, 5, 20 },{ -20, 5, 20 },{ -20, 5, -20 }, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f} }
+};
+
+Quad g_quads[] =
+{
+    // floor
+    {{ 552.8f, 0.0f, 0.0f }, { 0.0f, 0.0f,   0.0f }, {   0.0f, 0.0f, 559.2f },{ 549.6f, 0.0f, 559.2f }, {0.0f, 0.0f, 0.0f}, { 0.0f, 0.0f, 0.0f }, { 1.0f, 1.0f, 1.0f }},
+
+    // Light
+    {{ 343.0f, 548.6f, 227.0f },{ 343.0f, 548.6f, 332.0f },{ 213.0f, 548.6f, 332.0f },{ 213.0f, 548.6f, 227.0f },{ 0.0f, 0.0f, 0.0f },{25.0f, 25.0f, 25.0f}, {0.78f, 0.78f, 0.78f}},
+
+    // Cieling
+    {{ 556.0f, 548.8f,   0.0f },{ 556.0f, 548.8f, 559.2f },{ 0.0f, 548.8f, 559.2f },{ 0.0f, 548.8f,   0.0f },{ 0.0f, 0.0f, 0.0f },{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
+
+    // back wall
+    {{549.6f,   0.0f, 559.2f},{  0.0f,   0.0f, 559.2f},{  0.0f, 548.8f, 559.2f},{556.0f, 548.8f, 559.2f},{ 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, 0.0f },{ 1.0f, 1.0f, 1.0f }},
+
+    // left wall
+    {{0.0f,   0.0f, 559.2f},{0.0f,   0.0f,   0.0f},{0.0f, 548.8f,   0.0f},{0.0f, 548.8f, 559.2f},{ 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f, 0.0f }},
+
+    // right wall
+    {{552.8f,   0.0f,   0.0f},{549.6f,   0.0f, 559.2f},{556.0f, 548.8f, 559.2f},{556.0f, 548.8f,   0.0f},{ 0.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f }},
 };
 
 static float RandomFloat()
@@ -188,8 +226,25 @@ public:
         m_computeVars->setTexture("gBlueNoiseTexture", m_blueNoiseTexture);
 
         m_computeVars->setStructuredBuffer("gSpheres", StructuredBuffer::create(m_computeProgram, "gSpheres", countof(g_spheres)));
+        m_computeVars->setStructuredBuffer("gQuads", StructuredBuffer::create(m_computeProgram, "gQuads", countof(g_quads)));
 
         std::fill(&m_keyState[0], &m_keyState[255], false);
+
+        for (uint i = 0; i < countof(g_quads); ++i)
+        {
+            g_quads[i].a *= 0.01f;
+            g_quads[i].b *= 0.01f;
+            g_quads[i].c *= 0.01f;
+            g_quads[i].d *= 0.01f;
+
+            float3 swap = g_quads[i].albedo;
+            g_quads[i].albedo = g_quads[i].emissive;
+            g_quads[i].emissive = swap;
+
+            float3 ab = g_quads[i].b - g_quads[i].a;
+            float3 ac = g_quads[i].c - g_quads[i].a;
+            g_quads[i].normal = normalize(-cross(ab, ac));
+        }
     }
 
     void UpdateCamera(SampleCallbacks* pSample)
@@ -283,6 +338,17 @@ public:
             m_computeVars->getStructuredBuffer("gSpheres")[i]["radius"]   = g_spheres[i].radius;
             m_computeVars->getStructuredBuffer("gSpheres")[i]["albedo"]   = g_spheres[i].albedo;
             m_computeVars->getStructuredBuffer("gSpheres")[i]["emissive"] = g_spheres[i].emissive;
+        }
+
+        for (uint i = 0; i < countof(g_quads); ++i)
+        {
+            m_computeVars->getStructuredBuffer("gQuads")[i]["a"] = g_quads[i].a;
+            m_computeVars->getStructuredBuffer("gQuads")[i]["b"] = g_quads[i].b;
+            m_computeVars->getStructuredBuffer("gQuads")[i]["c"] = g_quads[i].c;
+            m_computeVars->getStructuredBuffer("gQuads")[i]["d"] = g_quads[i].d;
+            m_computeVars->getStructuredBuffer("gQuads")[i]["normal"] = g_quads[i].normal;
+            m_computeVars->getStructuredBuffer("gQuads")[i]["albedo"] = g_quads[i].albedo;
+            m_computeVars->getStructuredBuffer("gQuads")[i]["emissive"] = g_quads[i].emissive;
         }
 
         m_computeVars->setTexture("gOutputF32", m_outputF32);

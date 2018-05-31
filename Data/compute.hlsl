@@ -24,6 +24,7 @@ cbuffer ShaderConstants
 };
 
 StructuredBuffer<Sphere> gSpheres;
+StructuredBuffer<Quad> gQuads;
 
 uint RNG(inout uint state)
 {
@@ -84,7 +85,17 @@ CollisionInfo RayIntersectsScene(Ray ray)
         gSpheres.GetDimensions(count, stride);
 
         for (uint i = 0; i < count; i++)
-            RayIntersectsSphere(ray, gSpheres[i], collisionInfo);
+            RayIntersects(ray, gSpheres[i], collisionInfo);
+    }
+
+    // test the quads
+    {
+        uint count = 0;
+        uint stride;
+        gQuads.GetDimensions(count, stride);
+
+        for (uint i = 0; i < count; i++)
+            RayIntersects(ray, gQuads[i], collisionInfo);
     }
 
     return collisionInfo;
@@ -109,7 +120,7 @@ float3 LightOutgoing(in CollisionInfo collisionInfo, float3 rayHitPos, inout uin
         float3 newRayDir = RandomUnitVector(rngState);
         if (dot(collisionInfo.normal, newRayDir) < 0.0f)
             newRayDir *= -1.0f;
-        cosTheta = dot(collisionInfo.normal, newRayDir);
+        cosTheta = 2.0f * dot(collisionInfo.normal, newRayDir);
         #endif
 
         Ray newRay;
