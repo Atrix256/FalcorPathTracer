@@ -4,6 +4,7 @@ I pulled down this falcor, built it and ran one of the samples to make sure it w
 https://github.com/NVIDIAGameWorks/Falcor/commit/0b561caae19e8325853166cc4c93d4763570774a
 * git clone https://github.com/Atrix256/FalcorPathTracer.git
 * git checkout 0b561caae19e8325853166cc4c93d4763570774a
+* somehow it was able to find the location of falcor... weird.
 
 I followed the instructions for "creating a new project" in the readme.md file
 * If you haven't done so already, create a Visual Studio solution and project for your code. Falcor only supports 64-bit builds, so make sure you have a 64-bit build configuration
@@ -36,6 +37,9 @@ But also:
 * ... and about TAA / blue noise?
 * possibly also about whitted raytracing?
 
+* quadrupling sample count halves error
+ * https://en.wikipedia.org/wiki/Monte_Carlo_method#Integration
+
 ## Links
 
 * blue noise textures: http://momentsingraphics.de/?p=127
@@ -45,49 +49,30 @@ But also:
 
 ## TODOs
 
-* check out aras' sphere test code
-
-* convert from linear to sRGB.
- * a copy shader that does this (and tone mapping?), not a copy resource operation.
-
-* the axes of orientation are off somehow. maybe y is just flipped, i'm not really sure.
- * do orientation tests and find out.
-
-* get the cornel box scene from the other path tracer
-
 * are you multiplying by cosine theta correctly when cosine weighted hemisphere sampling is off?
  * reason through it and maybe make it more explicit that it's correct
 
 * depth of field, before specular?
 
-* is falcor next to this project? when i have it that way, it seems to have found it... ?!?!?!
- * yep. Maybe falcor registers somehow like via an environment variable?
-
 * Read Aras' stuf before too long
 
 * try profiling with renderdoc or vtune or who knows what else to see if you can find any obvious bottlenecks to fix
 
-? is there a way to hide UI in falcor?
-
 * directly sample lights?
 
-* don't need to jitter camera because the shader jitters the rays inside
- * do this even w/ TAA? Well no... because we need to find the pixel from last frame.
-
-* TAA may want IGN as a noise source.
+* TAA version
+ * jitter camera
+ * use IGN 5.5 noise
+ * need world position per pixel to project to previous frame - either by actually storing the position, or getting it via depth.
+ * probably not compatible with DOF.
 
 * clean up code. eg put rng stuff into a header?
  * or maybe it'd be better & simpler to have everything in a single file. if so, bring geo.h in!
 
 * comment code better, especially main?
 
-* try using blue noise in cosine weighted hemispheres? or bn as an RNG seed somehow.
- * could also have other noise types
- * blue noise only good for low sample counts
-* make jitter options: none, white noise, vdc?
-* add temporal AA?
-* have imgui options for these.
 * blue noise isn't that compelling as you've implemented it. keep it? ditch it? modify it?
+ * ditching it is probably fine, but i like the example of how to use a texture, so... ??
 
 * presets if it makes sense...
  * path tracer

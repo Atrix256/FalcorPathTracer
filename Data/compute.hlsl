@@ -192,5 +192,7 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
     ret = lerp(gOutputF32[pixel].rgb, ret.bgr, lerpAmount);
 
     gOutputF32[pixel] = float4(ret, 1.0f);
-    gOutputU8[pixel] = float4(ret, 1.0f);
+
+    // convert from linear to sRGB for output
+    gOutputU8[pixel] = float4(pow(ret, 1.0f / 2.2f), 1.0f);
 }
