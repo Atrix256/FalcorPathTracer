@@ -59,6 +59,7 @@ But also:
  * also direct light sampling and russian roulette
 
 * Read Aras' stuf before too long
+ * compare with mitsuba too, but aras has a post on that
 
 * try profiling with renderdoc or vtune or who knows what else to see if you can find any obvious bottlenecks to fix
 
@@ -100,10 +101,17 @@ Next: specular!  Make a short blog post about this and a tag / release to link t
 
 Links:
 * a pretty good read on lots of things pathtracing: https://computergraphics.stackexchange.com/questions/5152/progressive-path-tracing-with-explicit-light-sampling
+* deriving lambertian BRDF 1/pi: http://www.rorydriscoll.com/2009/01/25/energy-conservation-in-games/
+* a good explanation of what importance sampling is all about: https://computergraphics.stackexchange.com/questions/4979/what-is-importance-sampling
 
 Questions:
 * how does direct light sampling work?
 * how do you importance sample arbitrary BRDFs / BSDFs?
 * how does multiple importance sampling work?
 * how and why does russian roulete work?
-* a lot of path tracers have a pdf value they multiply by. whats that about?
+* lambertian BRDF is 1/pi as explained in that link, but why is there the 2 in 2 * cosTheta * LOut * albedo? You mention it in your pathtracing post, maybe figure out why.
+* a lot of path tracers have a pdf value they multiply by. whats that about
+ * It's the probability of having chosen that ray direction. If uniform sampling it's 1 / total area.
+ ? this is the 1/pi in non cosine weighted hemispherical samples, right?
+
+Answered questions:
