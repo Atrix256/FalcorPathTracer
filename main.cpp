@@ -211,8 +211,8 @@ public:
         m_blueNoiseTexture = createTextureFromFile("Data/BlueNoise.bmp", false, false);
         m_computeVars->setTexture("gBlueNoiseTexture", m_blueNoiseTexture);
 
-        m_computeVars->setStructuredBuffer("gSpheres", StructuredBuffer::create(m_computeProgram, "gSpheres", countof(g_spheres)));
-        m_computeVars->setStructuredBuffer("gQuads", StructuredBuffer::create(m_computeProgram, "gQuads", countof(g_quads)));
+        m_computeVars->setStructuredBuffer("g_spheres", StructuredBuffer::create(m_computeProgram, "g_spheres", countof(g_spheres)));
+        m_computeVars->setStructuredBuffer("g_quads", StructuredBuffer::create(m_computeProgram, "g_quads", countof(g_quads)));
 
         std::fill(&m_keyState[0], &m_keyState[255], false);
 
@@ -313,21 +313,21 @@ public:
 
         for (uint i = 0; i < countof(g_spheres); ++i)
         {
-            m_computeVars->getStructuredBuffer("gSpheres")[i]["position"] = g_spheres[i].position;
-            m_computeVars->getStructuredBuffer("gSpheres")[i]["radius"]   = g_spheres[i].radius;
-            m_computeVars->getStructuredBuffer("gSpheres")[i]["albedo"]   = g_spheres[i].albedo;
-            m_computeVars->getStructuredBuffer("gSpheres")[i]["emissive"] = g_spheres[i].emissive;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["position"] = g_spheres[i].position;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["radius"]   = g_spheres[i].radius;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["albedo"]   = g_spheres[i].albedo;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["emissive"] = g_spheres[i].emissive;
         }
 
         for (uint i = 0; i < countof(g_quads); ++i)
         {
-            m_computeVars->getStructuredBuffer("gQuads")[i]["a"] = g_quads[i].a;
-            m_computeVars->getStructuredBuffer("gQuads")[i]["b"] = g_quads[i].b;
-            m_computeVars->getStructuredBuffer("gQuads")[i]["c"] = g_quads[i].c;
-            m_computeVars->getStructuredBuffer("gQuads")[i]["d"] = g_quads[i].d;
-            m_computeVars->getStructuredBuffer("gQuads")[i]["normal"] = g_quads[i].normal;
-            m_computeVars->getStructuredBuffer("gQuads")[i]["albedo"] = g_quads[i].albedo;
-            m_computeVars->getStructuredBuffer("gQuads")[i]["emissive"] = g_quads[i].emissive;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["a"] = g_quads[i].a;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["b"] = g_quads[i].b;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["c"] = g_quads[i].c;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["d"] = g_quads[i].d;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["normal"] = g_quads[i].normal;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["albedo"] = g_quads[i].albedo;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["emissive"] = g_quads[i].emissive;
         }
 
         m_computeVars->setTexture("gOutputF32", m_outputF32);

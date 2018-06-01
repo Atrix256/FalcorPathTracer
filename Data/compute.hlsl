@@ -24,8 +24,8 @@ cbuffer ShaderConstants
     uint frameNumber;
 };
 
-StructuredBuffer<Sphere> gSpheres;
-StructuredBuffer<Quad> gQuads;
+StructuredBuffer<Sphere> g_spheres;
+StructuredBuffer<Quad> g_quads;
 
 uint RNG(inout uint state)
 {
@@ -85,20 +85,20 @@ CollisionInfo RayIntersectsScene(Ray ray)
     {
         uint count = 0;
         uint stride;
-        gSpheres.GetDimensions(count, stride);
+        g_spheres.GetDimensions(count, stride);
 
         for (uint i = 0; i < count; i++)
-            RayIntersects(ray, gSpheres[i], collisionInfo);
+            RayIntersects(ray, g_spheres[i], collisionInfo);
     }
 
     // test the quads
     {
         uint count = 0;
         uint stride;
-        gQuads.GetDimensions(count, stride);
+        g_quads.GetDimensions(count, stride);
 
         for (uint i = 0; i < count; i++)
-            RayIntersects(ray, gQuads[i], collisionInfo);
+            RayIntersects(ray, g_quads[i], collisionInfo);
     }
 
     return collisionInfo;
