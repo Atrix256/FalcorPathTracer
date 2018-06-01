@@ -98,6 +98,8 @@ But also:
 Next: specular!  Make a short blog post about this and a tag / release to link to from the blog post?
 * show this source to patrick so he can see how falcor works
 
+Notes:
+* color is assumed to be divided by pi already, so diffuse 1/pi multiplier isn't there. Does the value not divided by pi have real world units of measurement then?
 
 Links:
 * a pretty good read on lots of things pathtracing: https://computergraphics.stackexchange.com/questions/5152/progressive-path-tracing-with-explicit-light-sampling
