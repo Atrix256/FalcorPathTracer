@@ -26,9 +26,6 @@ Sphere g_spheres[] =
     {{ 4.5f, 1.5f, 2.5f }, 0.8f, { 0.1f, 1.0f, 1.0f }, {0.0f, 0.0f, 0.0f}},
     {{ 2.0f, 3.5f, 3.5f }, 0.8f, { 1.0f, 0.1f, 1.0f }, {0.0f, 0.0f, 0.0f}},
     {{ 3.0f, 1.5f, 4.5f }, 0.8f, { 1.0f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
-
-    // grey background
-    {{ 0.0f, 0.0f, 0.0f }, 100.0f, { 0.0f, 0.0f, 0.0f }, {0.01f, 0.01f, 0.01f}},
 };
 
 Quad g_quads[] =
@@ -98,6 +95,8 @@ private:
     size_t m_sampleCount = 0;
     float m_startTime = 0.0f;
     float m_stopTime = 0.0f;
+
+    float3 m_skyColor{ 0.01f, 0.01f, 0.01f };
 
     // values controled by the UI
     float m_fov = 45.0f;
@@ -306,6 +305,7 @@ public:
 
         ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
         pShaderConstants["invViewProjMtx"] = invViewProjMtx;
+        pShaderConstants["skyColor"] = m_skyColor;
         pShaderConstants["lerpAmount"] = 1.0f / float(m_frameCount + 1);
         pShaderConstants["frameRand"] = (uint)RandomUint32();
         pShaderConstants["frameNumber"] = (uint)m_frameCount;

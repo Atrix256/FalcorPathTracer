@@ -53,12 +53,11 @@ But also:
  * reason through it and maybe make it more explicit that it's correct
 
 * depth of field, before specular?
+ * also direct light sampling and russian roulette
 
 * Read Aras' stuf before too long
 
 * try profiling with renderdoc or vtune or who knows what else to see if you can find any obvious bottlenecks to fix
-
-* directly sample lights?
 
 * TAA version
  * jitter camera
@@ -73,21 +72,17 @@ But also:
 
 * blue noise isn't that compelling as you've implemented it. keep it? ditch it? modify it?
  * ditching it is probably fine, but i like the example of how to use a texture, so... ??
+ * may want it for TAA
 
 * presets if it makes sense...
  * path tracer
  * TAA path tracer
 
-* implement russian roulette? or wait for specular maybe
-
-* fix the debug spam.
- * does it happen to the compute shader example? yes it does!
-
-* more geo types and a specific scene
+* should there be a better scene? or maybe a couple scenes you can choose from the drop down?
 
 * rename compute.hlsl to pathtrace.hlsl or something
 
-* if ray generation details get complex (russian roullette), have it somehow atomic count raycount like aras does.
+* if ray generation details get complex (russian roullette), have it somehow atomic count raycount like aras does? or leave it primary rays?
 
 * organize UI into logical groups
 
@@ -97,3 +92,14 @@ But also:
 
 Next: specular!  Make a short blog post about this and a tag / release to link to from the blog post?
 * show this source to patrick so he can see how falcor works
+
+
+Links:
+* a pretty good read on lots of things pathtracing: https://computergraphics.stackexchange.com/questions/5152/progressive-path-tracing-with-explicit-light-sampling
+
+Questions:
+* how does direct light sampling work?
+* how do you importance sample arbitrary BRDFs / BSDFs?
+* how does multiple importance sampling work?
+* how and why does russian roulete work?
+* a lot of path tracers have a pdf value they multiply by. whats that about?

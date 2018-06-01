@@ -18,6 +18,7 @@ RWTexture2D<float4> gOutputU8;
 cbuffer ShaderConstants
 {
     float4x4 invViewProjMtx;
+    float3 skyColor;
     float lerpAmount;
     uint frameRand;
     uint frameNumber;
@@ -139,6 +140,7 @@ float3 LightOutgoing(in CollisionInfo collisionInfo, float3 rayHitPos, inout uin
         // else we missed so we are done
         else
         {
+            lightSum += skyColor * lightMultiplier;
             i = MAX_RAY_BOUNCES;
         }
     }
@@ -171,7 +173,7 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
         rngState = rngState ^ frameRand;
     #endif
 
-        float3 ret = float3(0.0f, 0.0f, 0.0f);
+    float3 ret = float3(0.0f, 0.0f, 0.0f);
     for (uint i = 0; i < SAMPLES_PER_FRAME; ++i)
     {
         // get a random offset to jitter the pixel by
@@ -184,6 +186,8 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
 
         if (collisionInfo.collisionTime > 0.0f)
             ret += LightOutgoing(collisionInfo, ray.origin + ray.direction * collisionInfo.collisionTime, rngState);
+        else
+            ret += skyColor;
     }
     ret /= float(SAMPLES_PER_FRAME);
 
