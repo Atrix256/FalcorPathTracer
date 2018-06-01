@@ -52,6 +52,9 @@ But also:
 * are you multiplying by cosine theta correctly when cosine weighted hemisphere sampling is off?
  * reason through it and maybe make it more explicit that it's correct
 
+* direct light sampling
+ * have an option to turn it on and off to compare the difference
+
 * depth of field, before specular?
  * also direct light sampling and russian roulette
 
@@ -75,7 +78,8 @@ But also:
  * may want it for TAA
 
 * presets if it makes sense...
- * path tracer
+ * path tracer slow
+ * path tracer fast
  * TAA path tracer
 
 * should there be a better scene? or maybe a couple scenes you can choose from the drop down?
