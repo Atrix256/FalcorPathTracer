@@ -49,6 +49,9 @@ But also:
 
 ## TODOs
 
+* info here about pathtracing from the smallpt path tracer, including how basic DOF works
+ * https://drive.google.com/file/d/0B8g97JkuSSBwUENiWTJXeGtTOHFmSm51UC01YWtCZw/view
+
 * are you multiplying by cosine theta correctly when cosine weighted hemisphere sampling is off?
  * reason through it and maybe make it more explicit that it's correct
 
