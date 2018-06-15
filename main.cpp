@@ -8,7 +8,9 @@ struct Sphere
 {
     float3 position;
     float radius;
-    float3 color; // albedo if a sphere. emissive if a light sphere
+    float3 albedo;
+    float3 emissive;
+    uint geoID;
 };
 
 struct Quad
@@ -17,19 +19,21 @@ struct Quad
     float3 normal;
     float3 albedo;
     float3 emissive;
+    uint geoID;
 };
 
 Sphere g_spheres[] =
 {
-    {{ 1.5f, 1.5f, 2.5f }, 0.8f, { 1.0f, 1.0f, 1.0f }},
-    {{ 4.5f, 1.5f, 2.5f }, 0.8f, { 0.1f, 1.0f, 1.0f }},
-    {{ 2.0f, 3.5f, 3.5f }, 0.8f, { 1.0f, 0.1f, 1.0f }},
-    {{ 3.0f, 1.5f, 4.5f }, 0.8f, { 1.0f, 1.0f, 0.1f }},
+    {{ 1.5f, 1.5f, 2.5f }, 0.8f, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
+    {{ 4.5f, 1.5f, 2.5f }, 0.8f, { 0.1f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
+    {{ 2.0f, 3.5f, 3.5f }, 0.8f, { 1.0f, 0.1f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
+    {{ 3.0f, 1.5f, 4.5f }, 0.8f, { 1.0f, 1.0f, 0.1f }, { 0.0f, 0.0f, 0.0f }},
 };
 
 Sphere g_lightSpheres[] =
 {
-    {{ 5.0f, 0.5f, 1.0f }, 0.2f, { 5.0f, 5.0f, 5.0f }},
+    {{ 5.0f, 0.5f, 1.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, { 1.0f, 5.0f, 5.0f }},
+    {{ 0.4f, 1.5f, 1.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, { 1.0f, 5.0f, 5.0f }},
 };
 
 Quad g_quads[] =
@@ -232,6 +236,15 @@ public:
             float3 ac = g_quads[i].c - g_quads[i].a;
             g_quads[i].normal = normalize(-cross(ab, ac));
         }
+
+        // give all geo a geo id.
+        uint nextID = 0;
+        for (Sphere& s : g_spheres)
+            s.geoID = nextID++;
+        for (Sphere& s : g_lightSpheres)
+            s.geoID = nextID++;
+        for (Quad& q : g_quads)
+            q.geoID = nextID++;
     }
 
     void UpdateCamera(SampleCallbacks* pSample)
@@ -326,14 +339,18 @@ public:
         {
             m_computeVars->getStructuredBuffer("g_spheres")[i]["position"] = g_spheres[i].position;
             m_computeVars->getStructuredBuffer("g_spheres")[i]["radius"]   = g_spheres[i].radius;
-            m_computeVars->getStructuredBuffer("g_spheres")[i]["color"]   = g_spheres[i].color;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["albedo"]   = g_spheres[i].albedo;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["emissive"] = g_spheres[i].emissive;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["geoID"] = g_spheres[i].geoID;
         }
 
         for (uint i = 0; i < countof(g_lightSpheres); ++i)
         {
             m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["position"] = g_lightSpheres[i].position;
-            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["radius"] = g_lightSpheres[i].radius;
-            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["color"] = g_lightSpheres[i].color;
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["radius"]   = g_lightSpheres[i].radius;
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["albedo"]   = g_lightSpheres[i].albedo;
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["emissive"] = g_lightSpheres[i].emissive;
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["geoID"] = g_lightSpheres[i].geoID;
         }
 
         for (uint i = 0; i < countof(g_quads); ++i)
@@ -345,6 +362,7 @@ public:
             m_computeVars->getStructuredBuffer("g_quads")[i]["normal"] = g_quads[i].normal;
             m_computeVars->getStructuredBuffer("g_quads")[i]["albedo"] = g_quads[i].albedo;
             m_computeVars->getStructuredBuffer("g_quads")[i]["emissive"] = g_quads[i].emissive;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["geoID"] = g_quads[i].geoID;
         }
 
         m_computeVars->setTexture("gOutputF32", m_outputF32);

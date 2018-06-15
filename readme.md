@@ -50,6 +50,8 @@ But also:
 
 ## TODOs
 
+* need to figure out why explicit light sampling breaks when doing the raytrace - and works when not?!
+
 * maybe we need to always look for emissive objects, but don't accept their emissiveness if we are directly sampling lights
 
 * the punctual light is far too bright! Maybe falloff issue? don't need punctual lights though so just get the spherical area lights working.

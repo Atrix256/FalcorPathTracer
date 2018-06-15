@@ -78,14 +78,13 @@ Ray GetRayForPixel(float2 uv)
     return ret;
 }
 
-CollisionInfo RayIntersectsScene(Ray ray, bool testLights, float maxT = -1.0f)
+CollisionInfo RayIntersectsScene(Ray ray, bool allowEmissive, float maxT = -1.0f)
 {
     CollisionInfo collisionInfo;
     collisionInfo.collisionTime = maxT;
     collisionInfo.normal = float3(0.0f, 0.0f, 0.0f);
     collisionInfo.albedo = float3(0.0f, 0.0f, 0.0f);
     collisionInfo.emissive = float3(0.0f, 0.0f, 0.0f);
-    collisionInfo.foundHit = false;
 
     // test the spheres
     {
@@ -94,18 +93,17 @@ CollisionInfo RayIntersectsScene(Ray ray, bool testLights, float maxT = -1.0f)
         g_spheres.GetDimensions(count, stride);
 
         for (uint i = 0; i < count; i++)
-            RayIntersects(ray, g_spheres[i], collisionInfo, false);
+            RayIntersects(ray, g_spheres[i], collisionInfo);
     }
 
     // test the light spheres
-    if (testLights || SAMPLE_LIGHTS == 0)
     {
         uint count = 0;
         uint stride;
         g_lightSpheres.GetDimensions(count, stride);
 
         for (uint i = 0; i < count; i++)
-            RayIntersects(ray, g_lightSpheres[i], collisionInfo, true);
+            RayIntersects(ray, g_lightSpheres[i], collisionInfo);
     }
 
     // test the quads
@@ -118,6 +116,9 @@ CollisionInfo RayIntersectsScene(Ray ray, bool testLights, float maxT = -1.0f)
             RayIntersects(ray, g_quads[i], collisionInfo);
     }
 
+    if (!allowEmissive)
+        collisionInfo.emissive = float3(0.0f, 0.0f, 0.0f);
+
     return collisionInfo;
 }
 
@@ -128,14 +129,16 @@ float lengthSq(float3 v)
 
 float3 SampleLight(in CollisionInfo collisionInfo, in float3 position, inout uint rngState, in Sphere sphere)
 {
-    // see https://github.com/aras-p/ToyPathTracer/blob/01-initial/Cpp/Source/Test.cpp#L83
+    // for sampling the spherical light, see:
+    // https://github.com/aras-p/ToyPathTracer/blob/01-initial/Cpp/Source/Test.cpp#L83
+
+    // don't sample self
+    if (collisionInfo.geoID == sphere.geoID)
+        return float3(0.0f, 0.0f, 0.0f);
 
     // TODO: clean this up
 
-    //float3 vectorToLight = sphere.position - position;
     float distToLight = length(sphere.position - position);
-    //float3 dirToLight = normalize(vectorToLight);
-
 
     // create a random direction towards sphere
     // coord system for sampling: sw, su, sv
@@ -145,28 +148,31 @@ float3 SampleLight(in CollisionInfo collisionInfo, in float3 position, inout uin
 
     // sample sphere by solid angle
     float cosAMax = sqrt(1.0f - sphere.radius*sphere.radius / lengthSq(position - sphere.position));
-    float eps1 = RandomFloat01(rngState), eps2 = RandomFloat01(rngState);
+    float eps1 = RandomFloat01(rngState);
+    float eps2 = RandomFloat01(rngState);
     float cosA = 1.0f - eps1 + eps1 * cosAMax;
     float sinA = sqrt(1.0f - cosA * cosA);
     float phi = 2 * c_pi* eps2;
     float3 l = su * cos(phi) * sinA + sv * sin(phi) * sinA + sw * cosA;
     l = normalize(l);
 
-
-
+    // raytrace against the scene
     Ray ray;
     ray.origin = position;
     ray.direction = l;
-    CollisionInfo newCollisionInfo = RayIntersectsScene(ray, false, distToLight);
+    CollisionInfo newCollisionInfo = RayIntersectsScene(ray, true);
     
-    if (!newCollisionInfo.foundHit)
+    // if we hit, return the light amount
+    //if (newCollisionInfo.collisionTime < 0.0f || newCollisionInfo.collisionTime > distToLight)
+    if (true)
     {
         float omega = 2 * c_pi * (1 - cosAMax);
 
         float3 nDotL = max(dot(collisionInfo.normal, l), 0.0f);
 
-        return collisionInfo.albedo * sphere.color * nDotL * omega / c_pi;
+        return collisionInfo.albedo * sphere.emissive * nDotL * omega / c_pi;
     }
+    // otherwise, return no light
     else
         return float3(0.0f, 0.0f, 0.0f);
 }
@@ -196,6 +202,12 @@ float3 LightOutgoing(in CollisionInfo collisionInfo, in float3 rayHitPos, inout 
     float3 lightMultiplier = float3(1.0f, 1.0f, 1.0f);
     float cosTheta = 1.0f;
 
+    #if SAMPLE_LIGHTS == 1
+    bool allowEmissive = false;
+    #else
+    bool allowEmissive = true;
+    #endif
+
     for (int i = 0; i <= MAX_RAY_BOUNCES; ++i)
     {
         // do explicit light sampling if we should
@@ -220,7 +232,7 @@ float3 LightOutgoing(in CollisionInfo collisionInfo, in float3 rayHitPos, inout 
         Ray newRay;
         newRay.origin = rayHitPos;
         newRay.direction = newRayDir;
-        CollisionInfo newCollisionInfo = RayIntersectsScene(newRay, false);
+        CollisionInfo newCollisionInfo = RayIntersectsScene(newRay, allowEmissive);
 
         // if we hit something new, we continue
         if (newCollisionInfo.collisionTime >= 0.0f)
