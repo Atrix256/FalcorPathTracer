@@ -121,23 +121,51 @@ CollisionInfo RayIntersectsScene(Ray ray, bool testLights, float maxT = -1.0f)
     return collisionInfo;
 }
 
+float lengthSq(float3 v)
+{
+    return dot(v, v);
+}
+
 float3 SampleLight(in CollisionInfo collisionInfo, in float3 position, inout uint rngState, in Sphere sphere)
 {
-    // TODO: random point on light
-    // like here: https://github.com/aras-p/ToyPathTracer/blob/01-initial/Cpp/Source/Test.cpp#L83
-    float3 vectorToLight = sphere.position - position;
-    float distToLight = length(vectorToLight);
-    float3 dirToLight = normalize(vectorToLight);
+    // see https://github.com/aras-p/ToyPathTracer/blob/01-initial/Cpp/Source/Test.cpp#L83
+
+    // TODO: clean this up
+
+    //float3 vectorToLight = sphere.position - position;
+    float distToLight = length(sphere.position - position);
+    //float3 dirToLight = normalize(vectorToLight);
+
+
+    // create a random direction towards sphere
+    // coord system for sampling: sw, su, sv
+    float3 sw = normalize(sphere.position - position);
+    float3 su = normalize(cross(abs(sw.x)>0.01f ? float3(0, 1, 0) : float3(1, 0, 0), sw));
+    float3 sv = cross(sw, su);
+
+    // sample sphere by solid angle
+    float cosAMax = sqrt(1.0f - sphere.radius*sphere.radius / lengthSq(position - sphere.position));
+    float eps1 = RandomFloat01(rngState), eps2 = RandomFloat01(rngState);
+    float cosA = 1.0f - eps1 + eps1 * cosAMax;
+    float sinA = sqrt(1.0f - cosA * cosA);
+    float phi = 2 * c_pi* eps2;
+    float3 l = su * cos(phi) * sinA + sv * sin(phi) * sinA + sw * cosA;
+    l = normalize(l);
+
+
 
     Ray ray;
     ray.origin = position;
-    ray.direction = dirToLight;
+    ray.direction = l;
     CollisionInfo newCollisionInfo = RayIntersectsScene(ray, false, distToLight);
     
     if (!newCollisionInfo.foundHit)
     {
-        float3 nDotL = max(dot(collisionInfo.normal, dirToLight), 0.0f);
-        return sphere.color * collisionInfo.albedo * nDotL / c_pi;
+        float omega = 2 * c_pi * (1 - cosAMax);
+
+        float3 nDotL = max(dot(collisionInfo.normal, l), 0.0f);
+
+        return collisionInfo.albedo * sphere.color * nDotL * omega / c_pi;
     }
     else
         return float3(0.0f, 0.0f, 0.0f);

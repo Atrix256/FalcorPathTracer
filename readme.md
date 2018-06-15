@@ -36,6 +36,7 @@ But also:
 * also about sub pixel jitter for AA and cosine weighted hemisphere sampling
 * ... and about TAA / blue noise?
 * possibly also about whitted raytracing?
+* also about explicit light sampling?
 
 * quadrupling sample count halves error
  * https://en.wikipedia.org/wiki/Monte_Carlo_method#Integration
@@ -49,6 +50,8 @@ But also:
 
 ## TODOs
 
+* maybe we need to always look for emissive objects, but don't accept their emissiveness if we are directly sampling lights
+
 * the punctual light is far too bright! Maybe falloff issue? don't need punctual lights though so just get the spherical area lights working.
  * then quads!
 
@@ -59,6 +62,8 @@ But also:
 * when you have sphere explicit light sampling working, hide the quad light for a run to see how it works w/o any other lighting.
 
 * i need to make it so quads are either lights or not, and contribute to albedo or emissive but never both
+
+* add support for punctual light sources so you know that you understand them
 
 * check vs mitsuba after you have some stuff working
 
