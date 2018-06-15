@@ -8,6 +8,10 @@
     #define SAMPLES_PER_FRAME 1
 #endif
 
+#ifndef SAMPLE_LIGHTS
+    #define SAMPLE_LIGHTS 1
+#endif
+
 static const float c_pi = 3.14159265359f;
 static const float c_goldenRatioConjugate = 0.61803398875f;
 
@@ -25,6 +29,7 @@ cbuffer ShaderConstants
 };
 
 StructuredBuffer<Sphere> g_spheres;
+StructuredBuffer<Sphere> g_lightSpheres;
 StructuredBuffer<Quad> g_quads;
 
 uint RNG(inout uint state)
@@ -73,7 +78,7 @@ Ray GetRayForPixel(float2 uv)
     return ret;
 }
 
-CollisionInfo RayIntersectsScene(Ray ray)
+CollisionInfo RayIntersectsScene(Ray ray, bool testLights)
 {
     CollisionInfo collisionInfo;
     collisionInfo.collisionTime = -1.0f;
@@ -88,7 +93,18 @@ CollisionInfo RayIntersectsScene(Ray ray)
         g_spheres.GetDimensions(count, stride);
 
         for (uint i = 0; i < count; i++)
-            RayIntersects(ray, g_spheres[i], collisionInfo);
+            RayIntersects(ray, g_spheres[i], collisionInfo, false);
+    }
+
+    // test the light spheres
+    if (testLights || SAMPLE_LIGHTS == 0)
+    {
+        uint count = 0;
+        uint stride;
+        g_lightSpheres.GetDimensions(count, stride);
+
+        for (uint i = 0; i < count; i++)
+            RayIntersects(ray, g_lightSpheres[i], collisionInfo, true);
     }
 
     // test the quads
@@ -104,7 +120,30 @@ CollisionInfo RayIntersectsScene(Ray ray)
     return collisionInfo;
 }
 
-float3 LightOutgoing(in CollisionInfo collisionInfo, float3 rayHitPos, inout uint rngState)
+float3 SampleLight(in CollisionInfo collisionInfo, in float3 rayHitPos, inout uint rngState, in Sphere sphere)
+{
+    // TODO: shoot a ray at a random point on the light. If it misses the world, apply lighting!
+    return float3(0.0f, 0.0f, 0.0f);
+}
+
+float3 SampleLights(in CollisionInfo collisionInfo, in float3 rayHitPos, inout uint rngState)
+{
+    float3 ret = float3(0.0f, 0.0f, 0.0f);
+
+    // test the light spheres
+    {
+        uint count = 0;
+        uint stride;
+        g_lightSpheres.GetDimensions(count, stride);
+
+        for (uint i = 0; i < count; i++)
+            ret += SampleLight(collisionInfo, rayHitPos, rngState, g_lightSpheres[i]);
+    }
+
+    return ret;
+}
+
+float3 LightOutgoing(in CollisionInfo collisionInfo, in float3 rayHitPos, inout uint rngState)
 {
     float3 lightSum = float3(0.0f, 0.0f, 0.0f);
     float3 lightMultiplier = float3(1.0f, 1.0f, 1.0f);
@@ -112,6 +151,11 @@ float3 LightOutgoing(in CollisionInfo collisionInfo, float3 rayHitPos, inout uin
 
     for (int i = 0; i <= MAX_RAY_BOUNCES; ++i)
     {
+        // do explicit light sampling if we should
+        #if SAMPLE_LIGHTS == 1
+        lightSum += SampleLights(collisionInfo, rayHitPos, rngState) * lightMultiplier;
+        #endif
+
         // update our light sum and future light multiplier
         lightSum += collisionInfo.emissive * lightMultiplier;
         lightMultiplier *= collisionInfo.albedo * cosTheta;
@@ -129,7 +173,7 @@ float3 LightOutgoing(in CollisionInfo collisionInfo, float3 rayHitPos, inout uin
         Ray newRay;
         newRay.origin = rayHitPos;
         newRay.direction = newRayDir;
-        CollisionInfo newCollisionInfo = RayIntersectsScene(newRay);
+        CollisionInfo newCollisionInfo = RayIntersectsScene(newRay, false);
 
         // if we hit something new, we continue
         if (newCollisionInfo.collisionTime >= 0.0f)
@@ -182,7 +226,7 @@ void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
         // get the ray for this pixel
         Ray ray = GetRayForPixel(uv + uvOffset);
 
-        CollisionInfo collisionInfo = RayIntersectsScene(ray);
+        CollisionInfo collisionInfo = RayIntersectsScene(ray, true);
 
         if (collisionInfo.collisionTime > 0.0f)
             ret += LightOutgoing(collisionInfo, ray.origin + ray.direction * collisionInfo.collisionTime, rngState);

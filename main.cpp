@@ -8,8 +8,7 @@ struct Sphere
 {
     float3 position;
     float radius;
-    float3 albedo;
-    float3 emissive;
+    float3 color; // albedo if a sphere. emissive if a light sphere
 };
 
 struct Quad
@@ -22,12 +21,15 @@ struct Quad
 
 Sphere g_spheres[] =
 {
-    {{ 1.5f, 1.5f, 2.5f }, 0.8f, { 1.0f, 1.0f, 1.0f }, {0.0f, 0.0f, 0.0f}},
-    {{ 4.5f, 1.5f, 2.5f }, 0.8f, { 0.1f, 1.0f, 1.0f }, {0.0f, 0.0f, 0.0f}},
-    {{ 2.0f, 3.5f, 3.5f }, 0.8f, { 1.0f, 0.1f, 1.0f }, {0.0f, 0.0f, 0.0f}},
-    {{ 3.0f, 1.5f, 4.5f }, 0.8f, { 1.0f, 1.0f, 0.1f }, {0.0f, 0.0f, 0.0f}},
+    {{ 1.5f, 1.5f, 2.5f }, 0.8f, { 1.0f, 1.0f, 1.0f }},
+    {{ 4.5f, 1.5f, 2.5f }, 0.8f, { 0.1f, 1.0f, 1.0f }},
+    {{ 2.0f, 3.5f, 3.5f }, 0.8f, { 1.0f, 0.1f, 1.0f }},
+    {{ 3.0f, 1.5f, 4.5f }, 0.8f, { 1.0f, 1.0f, 0.1f }},
+};
 
-    {{ 5.0f, 0.5f, 1.0f }, 0.2f, { 1.0f, 1.0f, 1.0f }, {5.0f, 5.0f, 0.0f}},
+Sphere g_lightSpheres[] =
+{
+    {{ 5.0f, 0.5f, 1.0f }, 0.2f, { 5.0f, 5.0f, 0.0f }},
 };
 
 Quad g_quads[] =
@@ -107,6 +109,7 @@ private:
     int m_samplesPerFrame = 1;
     int m_maxRayBounces = 4;
     int m_StopAtSampleCount = 0;
+    bool m_sampleLights = true;
 
     bool m_useBlueNoiseRNG = false;
 
@@ -169,6 +172,9 @@ public:
         if (pGui->addCheckBox("Integrate", m_integrate))
             ResetIntegration(pSample);
 
+        if (pGui->addCheckBox("Explicit Light Sampling", m_sampleLights))
+            ResetIntegration(pSample);
+
         pGui->addIntVar("Stop At Sample Count", m_StopAtSampleCount, 0);
 
         pGui->addIntVar("Samples Per Frame", m_samplesPerFrame, 1, 10);
@@ -214,6 +220,7 @@ public:
         m_computeVars->setTexture("gBlueNoiseTexture", m_blueNoiseTexture);
 
         m_computeVars->setStructuredBuffer("g_spheres", StructuredBuffer::create(m_computeProgram, "g_spheres", countof(g_spheres)));
+        m_computeVars->setStructuredBuffer("g_lightSpheres", StructuredBuffer::create(m_computeProgram, "g_lightSpheres", countof(g_lightSpheres)));
         m_computeVars->setStructuredBuffer("g_quads", StructuredBuffer::create(m_computeProgram, "g_quads", countof(g_quads)));
 
         std::fill(&m_keyState[0], &m_keyState[255], false);
@@ -276,6 +283,9 @@ public:
         sprintf(buffer, "%i", m_samplesPerFrame);
         m_computeProgram->addDefine("SAMPLES_PER_FRAME", buffer);
 
+        sprintf(buffer, "%i", m_sampleLights ? 1 : 0);
+        m_computeProgram->addDefine("SAMPLE_LIGHTS", buffer);
+
         sprintf(buffer, "%i", m_maxRayBounces);
         m_computeProgram->addDefine("MAX_RAY_BOUNCES", buffer);
 
@@ -312,13 +322,18 @@ public:
         pShaderConstants["frameRand"] = (uint)RandomUint32();
         pShaderConstants["frameNumber"] = (uint)m_frameCount;
 
-
         for (uint i = 0; i < countof(g_spheres); ++i)
         {
             m_computeVars->getStructuredBuffer("g_spheres")[i]["position"] = g_spheres[i].position;
             m_computeVars->getStructuredBuffer("g_spheres")[i]["radius"]   = g_spheres[i].radius;
-            m_computeVars->getStructuredBuffer("g_spheres")[i]["albedo"]   = g_spheres[i].albedo;
-            m_computeVars->getStructuredBuffer("g_spheres")[i]["emissive"] = g_spheres[i].emissive;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["color"]   = g_spheres[i].color;
+        }
+
+        for (uint i = 0; i < countof(g_lightSpheres); ++i)
+        {
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["position"] = g_lightSpheres[i].position;
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["radius"] = g_lightSpheres[i].radius;
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["color"] = g_lightSpheres[i].color;
         }
 
         for (uint i = 0; i < countof(g_quads); ++i)

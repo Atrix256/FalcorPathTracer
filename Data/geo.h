@@ -26,8 +26,7 @@ struct Sphere
 {
     float3 position;
     float  radius;
-    float3 albedo;
-    float3 emissive;
+    float3 color;  // albedo if it's a sphere. emissive if it's a light sphere
 };
 
 float ScalarTriple(in float3 a, in float3 b, in float3 c)
@@ -35,7 +34,7 @@ float ScalarTriple(in float3 a, in float3 b, in float3 c)
     return dot(cross(a, b), c);
 }
 
-bool RayIntersects (in Ray ray, in Sphere sphere, inout CollisionInfo collisionInfo)
+bool RayIntersects (in Ray ray, in Sphere sphere, inout CollisionInfo collisionInfo, bool isALight)
 {
     //get the vector from the center of this circle to where the ray begins.
     float3 m = ray.origin - sphere.position;
@@ -76,8 +75,18 @@ bool RayIntersects (in Ray ray, in Sphere sphere, inout CollisionInfo collisionI
 
     collisionInfo.collisionTime = collisionTime;
     collisionInfo.normal = normal;
-    collisionInfo.albedo = sphere.albedo;
-    collisionInfo.emissive = sphere.emissive;
+
+    if (isALight)
+    {
+        collisionInfo.albedo = float3(0.0f, 0.0f, 0.0f);
+        collisionInfo.emissive = sphere.color;
+    }
+    else
+    {
+        collisionInfo.albedo = sphere.color;
+        collisionInfo.emissive = float3(0.0f, 0.0f, 0.0f);
+    }
+
     return true;
 }
 
