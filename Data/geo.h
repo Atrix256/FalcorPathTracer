@@ -12,6 +12,7 @@ struct CollisionInfo
     float3 normal;
     float3 albedo;
     float3 emissive;
+    bool foundHit; // init to false;
 };
 
 struct Quad
@@ -86,6 +87,7 @@ bool RayIntersects (in Ray ray, in Sphere sphere, inout CollisionInfo collisionI
         collisionInfo.albedo = sphere.color;
         collisionInfo.emissive = float3(0.0f, 0.0f, 0.0f);
     }
+    collisionInfo.foundHit = true;
 
     return true;
 }
@@ -158,5 +160,6 @@ bool RayIntersects(in Ray ray, in Quad quad, inout CollisionInfo collisionInfo)
     collisionInfo.normal = normal;
     collisionInfo.albedo = quad.albedo;
     collisionInfo.emissive = quad.emissive;
+    collisionInfo.foundHit = true;
     return true;
 }

@@ -78,13 +78,14 @@ Ray GetRayForPixel(float2 uv)
     return ret;
 }
 
-CollisionInfo RayIntersectsScene(Ray ray, bool testLights)
+CollisionInfo RayIntersectsScene(Ray ray, bool testLights, float maxT = -1.0f)
 {
     CollisionInfo collisionInfo;
-    collisionInfo.collisionTime = -1.0f;
+    collisionInfo.collisionTime = maxT;
     collisionInfo.normal = float3(0.0f, 0.0f, 0.0f);
     collisionInfo.albedo = float3(0.0f, 0.0f, 0.0f);
     collisionInfo.emissive = float3(0.0f, 0.0f, 0.0f);
+    collisionInfo.foundHit = false;
 
     // test the spheres
     {
@@ -120,13 +121,29 @@ CollisionInfo RayIntersectsScene(Ray ray, bool testLights)
     return collisionInfo;
 }
 
-float3 SampleLight(in CollisionInfo collisionInfo, in float3 rayHitPos, inout uint rngState, in Sphere sphere)
+float3 SampleLight(in CollisionInfo collisionInfo, in float3 position, inout uint rngState, in Sphere sphere)
 {
-    // TODO: shoot a ray at a random point on the light. If it misses the world, apply lighting!
-    return float3(0.0f, 0.0f, 0.0f);
+    // TODO: random point on light
+    // like here: https://github.com/aras-p/ToyPathTracer/blob/01-initial/Cpp/Source/Test.cpp#L83
+    float3 vectorToLight = sphere.position - position;
+    float distToLight = length(vectorToLight);
+    float3 dirToLight = normalize(vectorToLight);
+
+    Ray ray;
+    ray.origin = position;
+    ray.direction = dirToLight;
+    CollisionInfo newCollisionInfo = RayIntersectsScene(ray, false, distToLight);
+    
+    if (!newCollisionInfo.foundHit)
+    {
+        float3 nDotL = max(dot(collisionInfo.normal, dirToLight), 0.0f);
+        return sphere.color * collisionInfo.albedo * nDotL / c_pi;
+    }
+    else
+        return float3(0.0f, 0.0f, 0.0f);
 }
 
-float3 SampleLights(in CollisionInfo collisionInfo, in float3 rayHitPos, inout uint rngState)
+float3 SampleLights(in CollisionInfo collisionInfo, in float3 position, inout uint rngState)
 {
     float3 ret = float3(0.0f, 0.0f, 0.0f);
 
@@ -137,7 +154,9 @@ float3 SampleLights(in CollisionInfo collisionInfo, in float3 rayHitPos, inout u
         g_lightSpheres.GetDimensions(count, stride);
 
         for (uint i = 0; i < count; i++)
-            ret += SampleLight(collisionInfo, rayHitPos, rngState, g_lightSpheres[i]);
+            ret += SampleLight(collisionInfo, position, rngState, g_lightSpheres[i]);
+
+        // TODO: sample quad lights
     }
 
     return ret;

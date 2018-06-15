@@ -49,6 +49,13 @@ But also:
 
 ## TODOs
 
+* the punctual light is far too bright! Maybe falloff issue? don't need punctual lights though so just get the spherical area lights working.
+ * then quads!
+
+* rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point!
+
+* get better RNG from here? http://simonstechblog.blogspot.com/2018/06/simple-gpu-path-tracer.html?m=1
+
 * when you have sphere explicit light sampling working, hide the quad light for a run to see how it works w/o any other lighting.
 
 * i need to make it so quads are either lights or not, and contribute to albedo or emissive but never both
