@@ -50,10 +50,6 @@ But also:
 
 ## TODOs
 
-* it's so slow!!
-
-* try making it run more at once? could see what aras does
-
 * support punctual lights so you understand them
 
 * quad light support

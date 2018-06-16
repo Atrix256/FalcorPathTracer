@@ -250,13 +250,13 @@ float3 LightOutgoing(in CollisionInfo collisionInfo, in float3 rayHitPos, inout 
     return lightSum;
 }
 
-[numthreads(1, 1, 1)]
-void main(uint3 groupId : SV_GroupID, uint3 groupThreadId : SV_GroupThreadId)
+[numthreads(16, 16, 1)]
+void main(uint3 gid : SV_DispatchThreadID)
 {
     // calculate the percentage across the screen that we are
     uint2 resolution;
     gOutputF32.GetDimensions(resolution.x, resolution.y);
-    uint2 pixel = groupId.xy + groupThreadId.xy;
+    uint2 pixel = gid.xy;
     float2 uv = float2(pixel) / float2(resolution);
 
     #ifdef USE_BLUENOISE_RNG

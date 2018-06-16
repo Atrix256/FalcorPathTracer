@@ -370,7 +370,7 @@ public:
         pContext->setComputeState(m_computeState);
         pContext->setComputeVars(m_computeVars);
 
-        pContext->dispatch(width, height, 1);
+        pContext->dispatch(width/16, height/16, 1);
         pContext->copyResource(pTargetFbo->getColorTexture(0).get(), m_outputU8.get());
 
         m_frameCount++;
