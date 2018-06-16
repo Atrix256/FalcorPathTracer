@@ -163,8 +163,7 @@ float3 SampleLight(in CollisionInfo collisionInfo, in float3 position, inout uin
     CollisionInfo newCollisionInfo = RayIntersectsScene(ray, true);
     
     // if we hit, return the light amount
-    //if (newCollisionInfo.collisionTime < 0.0f || newCollisionInfo.collisionTime > distToLight)
-    if (true)
+    if (newCollisionInfo.collisionTime < 0.0f || newCollisionInfo.geoID == sphere.geoID)
     {
         float omega = 2 * c_pi * (1 - cosAMax);
 

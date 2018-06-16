@@ -50,39 +50,30 @@ But also:
 
 ## TODOs
 
-* need to figure out why explicit light sampling breaks when doing the raytrace - and works when not?!
+* it's so slow!!
 
-* maybe we need to always look for emissive objects, but don't accept their emissiveness if we are directly sampling lights
+* try making it run more at once? could see what aras does
 
-* the punctual light is far too bright! Maybe falloff issue? don't need punctual lights though so just get the spherical area lights working.
- * then quads!
+* support punctual lights so you understand them
+
+* quad light support
+
+* mitsuba verificiation
 
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point!
 
 * get better RNG from here? http://simonstechblog.blogspot.com/2018/06/simple-gpu-path-tracer.html?m=1
-
-* when you have sphere explicit light sampling working, hide the quad light for a run to see how it works w/o any other lighting.
-
-* i need to make it so quads are either lights or not, and contribute to albedo or emissive but never both
-
-* add support for punctual light sources so you know that you understand them
-
-* check vs mitsuba after you have some stuff working
+ * put in links when done
 
 * info here about pathtracing from the smallpt path tracer, including how basic DOF works
  * https://drive.google.com/file/d/0B8g97JkuSSBwUENiWTJXeGtTOHFmSm51UC01YWtCZw/view
+ * put in links when done
 
 * are you multiplying by cosine theta correctly when cosine weighted hemisphere sampling is off?
  * reason through it and maybe make it more explicit that it's correct
 
-* direct light sampling
- * have an option to turn it on and off to compare the difference
-
 * depth of field, before specular?
  * also direct light sampling and russian roulette
-
-* Read Aras' stuf before too long
- * compare with mitsuba too, but aras has a post on that
 
 * try profiling with renderdoc or vtune or who knows what else to see if you can find any obvious bottlenecks to fix
 
