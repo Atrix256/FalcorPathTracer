@@ -36,19 +36,19 @@ StructuredBuffer<Sphere> g_spheres;
 StructuredBuffer<Sphere> g_lightSpheres;
 StructuredBuffer<Quad> g_quads;
 
-uint RNG(inout uint state)
+uint wang_hash(inout uint seed)
 {
-    uint x = state;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 15;
-    state = x;
-    return x;
+    seed = (seed ^ 61) ^ (seed >> 16);
+    seed *= 9;
+    seed = seed ^ (seed >> 4);
+    seed *= 0x27d4eb2d;
+    seed = seed ^ (seed >> 15);
+    return seed;
 }
 
 float RandomFloat01(inout uint state)
 {
-    return (RNG(state) & 0xFFFFFF) / 16777216.0f;
+    return float(wang_hash(state)) / 4294967296.0;
 }
 
 float3 RandomUnitVector(inout uint state)

@@ -47,23 +47,31 @@ But also:
 * Aras' path tracing: http://aras-p.info/blog/2018/03/28/Daily-Pathtracer-Part-0-Intro/
   * (READ HIS STUFF TOO)
 * mine: https://blog.demofox.org/2016/09/21/path-tracing-getting-started-with-diffuse-and-emissive/
+* http://simonstechblog.blogspot.com/2018/06/simple-gpu-path-tracer.html?m=1
+* smallpt: https://drive.google.com/file/d/0B8g97JkuSSBwUENiWTJXeGtTOHFmSm51UC01YWtCZw/view
 
 ## TODOs
 
-* support punctual lights so you understand them
+(mini?) Blog post on...
+* hemispherical cosine sampling? (show a compelling case for it, and also a case where it isn't compelling)
+* camera jittering
+
+? why isn't jittered sampling on by default? is it not working or??
+
+
+* support explicitly sampling punctual lights so you understand them
 
 * quad light support
 
 * mitsuba verificiation
 
-* rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point!
+* rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
-* get better RNG from here? http://simonstechblog.blogspot.com/2018/06/simple-gpu-path-tracer.html?m=1
- * put in links when done
+* read this and see what you want to take. it's already in the links section
+ *  http://simonstechblog.blogspot.com/2018/06/simple-gpu-path-tracer.html?m=1
 
-* info here about pathtracing from the smallpt path tracer, including how basic DOF works
+* info here about pathtracing from the smallpt path tracer, including how basic DOF works. already in links section
  * https://drive.google.com/file/d/0B8g97JkuSSBwUENiWTJXeGtTOHFmSm51UC01YWtCZw/view
- * put in links when done
 
 * are you multiplying by cosine theta correctly when cosine weighted hemisphere sampling is off?
  * reason through it and maybe make it more explicit that it's correct
