@@ -12,6 +12,10 @@
     #define SAMPLE_LIGHTS 1
 #endif
 
+#ifndef WORK_GROUP_SIZE
+    #define WORK_GROUP_SIZE 16
+#endif
+
 static const float c_pi = 3.14159265359f;
 static const float c_goldenRatioConjugate = 0.61803398875f;
 
@@ -250,7 +254,7 @@ float3 LightOutgoing(in CollisionInfo collisionInfo, in float3 rayHitPos, inout 
     return lightSum;
 }
 
-[numthreads(16, 16, 1)]
+[numthreads(WORK_GROUP_SIZE, WORK_GROUP_SIZE, 1)]
 void main(uint3 gid : SV_DispatchThreadID)
 {
     // calculate the percentage across the screen that we are

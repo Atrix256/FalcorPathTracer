@@ -32,9 +32,9 @@ Sphere g_spheres[] =
 
 Sphere g_lightSpheres[] =
 {
-    {{ 5.0f, 0.5f, 1.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, { 1.0f, 5.0f, 5.0f }},
-    {{ 0.4f, 1.5f, 1.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, { 5.0f, 1.0f, 5.0f }},
-    {{ 4.0f, 3.5f, 4.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, { 5.0f, 5.0f, 1.0f }},
+    {{ 5.0f, 0.5f, 1.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, {  1.0f, 25.0f, 25.0f }},
+    {{ 0.4f, 1.5f, 1.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, { 25.0f,  1.0f, 25.0f }},
+    {{ 4.0f, 3.5f, 4.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, { 25.0f, 25.0f,  1.0f }},
 };
 
 Quad g_quads[] =
@@ -115,6 +115,7 @@ private:
     int m_maxRayBounces = 4;
     int m_StopAtSampleCount = 0;
     bool m_sampleLights = true;
+    int m_workGroupSize = 8;
 
     bool m_useBlueNoiseRNG = false;
 
@@ -181,6 +182,8 @@ public:
             ResetIntegration(pSample);
 
         pGui->addIntVar("Stop At Sample Count", m_StopAtSampleCount, 0);
+
+        pGui->addIntVar("Work Group Size", m_workGroupSize, 1);
 
         pGui->addIntVar("Samples Per Frame", m_samplesPerFrame, 1, 10);
 
@@ -303,6 +306,9 @@ public:
         sprintf(buffer, "%i", m_maxRayBounces);
         m_computeProgram->addDefine("MAX_RAY_BOUNCES", buffer);
 
+        sprintf(buffer, "%i", m_workGroupSize);
+        m_computeProgram->addDefine("WORK_GROUP_SIZE", buffer);
+
         if (m_cosineWeightedhemisphereSampling)
             m_computeProgram->addDefine("COSINE_WEIGHTED_HEMISPHERE_SAMPLING");
         else
@@ -372,7 +378,7 @@ public:
         pContext->setComputeState(m_computeState);
         pContext->setComputeVars(m_computeVars);
 
-        pContext->dispatch(width/16, height/16, 1);
+        pContext->dispatch(width/m_workGroupSize, height/m_workGroupSize, 1);
         pContext->copyResource(pTargetFbo->getColorTexture(0).get(), m_outputU8.get());
 
         m_frameCount++;
