@@ -68,7 +68,8 @@ But also:
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
 * read this and see what you want to take. it's already in the links section
- *  http://simonstechblog.blogspot.com/2018/06/simple-gpu-path-tracer.html?m=1
+ * http://simonstechblog.blogspot.com/2018/06/simple-gpu-path-tracer.html?m=1
+ * it talks about cosine weighted explicit rectangular light sampling, and needing to use the jacobian. Should understand that better!
 
 * info here about pathtracing from the smallpt path tracer, including how basic DOF works. already in links section
  * https://drive.google.com/file/d/0B8g97JkuSSBwUENiWTJXeGtTOHFmSm51UC01YWtCZw/view
@@ -78,6 +79,8 @@ But also:
 
 * depth of field, before specular?
  * also direct light sampling and russian roulette
+
+* refraction at some point
 
 * try profiling with renderdoc or vtune or who knows what else to see if you can find any obvious bottlenecks to fix
 
@@ -112,6 +115,8 @@ But also:
 * look for TODOs
 
 ? tone mapping?
+
+* should you have a denoise option?
 
 Next: specular!  Make a short blog post about this and a tag / release to link to from the blog post?
 * show this source to patrick so he can see how falcor works
