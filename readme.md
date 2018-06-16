@@ -50,11 +50,17 @@ But also:
 * http://simonstechblog.blogspot.com/2018/06/simple-gpu-path-tracer.html?m=1
 * smallpt: https://drive.google.com/file/d/0B8g97JkuSSBwUENiWTJXeGtTOHFmSm51UC01YWtCZw/view
 
+* DOF: http://cg.skeelogy.com/depth-of-field-using-raytracing/
+
 ## TODOs
 
-(mini?) Blog post on...
-* hemispherical cosine sampling? (show a compelling case for it, and also a case where it isn't compelling)
-* camera jittering
+* DOF -
+ * params: aperature size (controls blur), focal length (controls where the focused objects are)
+ * could also do shaped bokeh!
+
+* if doing DOF, don't need jitter I don't think.
+ * maybe want to be able to turn DOF though
+ * and also, jitter still seems to possibly be applicable - like to in focus objects - since you still want to integrate over the pixel
 
 ? why isn't jittered sampling on by default? is it not working or??
 
