@@ -54,6 +54,8 @@ But also:
 
 ## TODOs
 
+* i see anti aliasing even when jittering is off... what is up with that? where is it coming from?
+
 * DOF -
  * params: aperature size (controls blur), focal length (controls where the focused objects are)
  * could also do shaped bokeh!
