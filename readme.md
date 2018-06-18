@@ -60,7 +60,17 @@ But also:
 
 * DOF: http://cg.skeelogy.com/depth-of-field-using-raytracing/
 
+* mitsuba xml file format: https://mynameismjp.wordpress.com/2015/04/04/mitsuba-quick-start-guide/
+
 ## TODOs
+
+* maybe make this program able to generate a mitsuba path tracer xml scene file?
+ * probably need it to make an obj, and then can import into mitsuba.
+ * can obj handle spheres? or does mitsuba xml file support spheres?
+ ! actually it looks like it can do spheres. mjp's shows this in the adding emitters section
+ * aras' path tracing thing also has the mitsuba scene available.
+  * https://github.com/aras-p/ToyPathTracer/blob/04-fixes/Mitsuba/scene.xml
+ ? can it do triangles / quads? if so, can avoid obj files and make mitsuba files directly!
 
 * is the point light calculation correct? I don't think so... check out the non cosine weighted hemisphere equation to make sure
 
