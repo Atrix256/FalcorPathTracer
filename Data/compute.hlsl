@@ -193,11 +193,10 @@ float3 SampleLight(in CollisionInfo collisionInfo, in float3 position, in PLight
     Ray ray;
     ray.origin = position;
     ray.direction = dirToLight;
-    CollisionInfo newCollisionInfo = RayIntersectsScene(ray, true, distToLight);
+    CollisionInfo newCollisionInfo = RayIntersectsScene(ray, true);
 
     // if we didn't hit anything, apply the lighting
-    //if (newCollisionInfo.collisionTime < 0.0f)
-    if(true)
+    if (newCollisionInfo.collisionTime < 0.0f || newCollisionInfo.collisionTime > distToLight)
     {
         // TODO: is this correct?
         float3 nDotL = max(dot(collisionInfo.normal, dirToLight), 0.0f);

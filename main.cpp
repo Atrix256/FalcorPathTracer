@@ -66,7 +66,7 @@ Quad g_quads[] =
 
 PLight g_plights[] =
 {
-    {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}}
+    {{ 2.0f, 1.5f, 0.5f }, {0.0f, 0.0f, 1.0f}}
 };
 
 static float RandomFloat()
