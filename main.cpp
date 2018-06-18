@@ -22,6 +22,12 @@ struct Quad
     uint geoID;
 };
 
+struct PLight
+{
+    float3 position;
+    float3 color;
+};
+
 Sphere g_spheres[] =
 {
     {{ 1.5f, 1.5f, 2.5f }, 0.8f, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
@@ -56,6 +62,11 @@ Quad g_quads[] =
 
     // right wall
     {{5.528f,   0.0f,   0.0f},{5.496f,   0.0f, 5.592f},{5.56f, 5.488f, 5.592f},{5.56f, 5.488f,   0.0f},{ 0.0f, 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, 0.0f }},
+};
+
+PLight g_plights[] =
+{
+    {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}}
 };
 
 static float RandomFloat()
@@ -230,6 +241,7 @@ public:
         m_computeVars->setStructuredBuffer("g_spheres", StructuredBuffer::create(m_computeProgram, "g_spheres", countof(g_spheres)));
         m_computeVars->setStructuredBuffer("g_lightSpheres", StructuredBuffer::create(m_computeProgram, "g_lightSpheres", countof(g_lightSpheres)));
         m_computeVars->setStructuredBuffer("g_quads", StructuredBuffer::create(m_computeProgram, "g_quads", countof(g_quads)));
+        m_computeVars->setStructuredBuffer("g_plights", StructuredBuffer::create(m_computeProgram, "g_plights", countof(g_plights)));
 
         std::fill(&m_keyState[0], &m_keyState[255], false);
 
@@ -370,6 +382,12 @@ public:
             m_computeVars->getStructuredBuffer("g_quads")[i]["albedo"] = g_quads[i].albedo;
             m_computeVars->getStructuredBuffer("g_quads")[i]["emissive"] = g_quads[i].emissive;
             m_computeVars->getStructuredBuffer("g_quads")[i]["geoID"] = g_quads[i].geoID;
+        }
+
+        for (uint i = 0; i < countof(g_plights); ++i)
+        {
+            m_computeVars->getStructuredBuffer("g_plights")[i]["position"] = g_plights[i].position;
+            m_computeVars->getStructuredBuffer("g_plights")[i]["color"] = g_plights[i].color;
         }
 
         m_computeVars->setTexture("gOutputF32", m_outputF32);

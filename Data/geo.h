@@ -33,6 +33,12 @@ struct Sphere
     uint geoID;
 };
 
+struct PLight
+{
+    float3 position;
+    float3 color;
+};
+
 float ScalarTriple(in float3 a, in float3 b, in float3 c)
 {
     return dot(cross(a, b), c);

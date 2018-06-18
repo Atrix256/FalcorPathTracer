@@ -28,6 +28,14 @@ But also:
 * jittering the camera
 
 
+## Explicit Light Sampling Notes
+
+* show how sampling point lights are really the answer to the integral, because there is only one place that has non zero value!
+ * you need distance attenuation though... which complicates the explanation
+ * i think point lights have different unit of measurement. radiance vs irrandiance.
+* then spherical lights being sampled from solid angle
+* then quad lights / generalize to other shapes and non solid angle.
+
 
 
 ## Notes
@@ -54,7 +62,14 @@ But also:
 
 ## TODOs
 
+* is the point light calculation correct? I don't think so... check out the non cosine weighted hemisphere equation to make sure
+
+* distance attentuation of point lights too. square falloff
+
+* get mitsuba working after point lights. maybe a small blog post about what's involved?
+
 * i see anti aliasing even when jittering is off... what is up with that? where is it coming from?
+ * yeah, the jitter is for TAA. maybe remove it for now?
 
 * DOF -
  * params: aperature size (controls blur), focal length (controls where the focused objects are)

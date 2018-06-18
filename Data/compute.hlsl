@@ -35,6 +35,7 @@ cbuffer ShaderConstants
 StructuredBuffer<Sphere> g_spheres;
 StructuredBuffer<Sphere> g_lightSpheres;
 StructuredBuffer<Quad> g_quads;
+StructuredBuffer<PLight> g_plights;
 
 uint wang_hash(inout uint seed)
 {
@@ -166,7 +167,9 @@ float3 SampleLight(in CollisionInfo collisionInfo, in float3 position, inout uin
     ray.direction = l;
     CollisionInfo newCollisionInfo = RayIntersectsScene(ray, true);
     
-    // if we hit, return the light amount
+    // TODO: maybe give a max distance. the below "missing" counting as valid doesn't make sense w/o that btw.
+
+    // if we missed the world, or hit the light we wanted to, return the light
     if (newCollisionInfo.collisionTime < 0.0f || newCollisionInfo.geoID == sphere.geoID)
     {
         float omega = 2 * c_pi * (1 - cosAMax);
@@ -174,6 +177,35 @@ float3 SampleLight(in CollisionInfo collisionInfo, in float3 position, inout uin
         float3 nDotL = max(dot(collisionInfo.normal, l), 0.0f);
 
         return collisionInfo.albedo * sphere.emissive * nDotL * omega / c_pi;
+    }
+    // otherwise, return no light
+    else
+        return float3(0.0f, 0.0f, 0.0f);
+}
+
+float3 SampleLight(in CollisionInfo collisionInfo, in float3 position, in PLight light)
+{
+    float3 vecToLight = light.position - position;
+    float distToLight = length(vecToLight);
+    float3 dirToLight = normalize(vecToLight);
+
+    // raytrace against the scene
+    Ray ray;
+    ray.origin = position;
+    ray.direction = dirToLight;
+    CollisionInfo newCollisionInfo = RayIntersectsScene(ray, true, distToLight);
+
+    // if we didn't hit anything, apply the lighting
+    //if (newCollisionInfo.collisionTime < 0.0f)
+    if(true)
+    {
+        // TODO: is this correct?
+        float3 nDotL = max(dot(collisionInfo.normal, dirToLight), 0.0f);
+
+        // distance attenuation
+        float atten = 1.0f / (distToLight*distToLight);
+
+        return collisionInfo.albedo * light.color * atten * 2.0f * nDotL;
     }
     // otherwise, return no light
     else
@@ -192,8 +224,18 @@ float3 SampleLights(in CollisionInfo collisionInfo, in float3 position, inout ui
 
         for (uint i = 0; i < count; i++)
             ret += SampleLight(collisionInfo, position, rngState, g_lightSpheres[i]);
+    }
 
-        // TODO: sample quad lights
+    // TODO: sample quad lights
+
+    // test the point lights
+    {
+        uint count = 0;
+        uint stride;
+        g_plights.GetDimensions(count, stride);
+
+        for (uint i = 0; i < count; i++)
+            ret += SampleLight(collisionInfo, position, g_plights[i]);
     }
 
     return ret;
