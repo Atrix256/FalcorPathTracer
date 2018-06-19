@@ -69,6 +69,24 @@ PLight g_plights[] =
     {{ 2.0f, 1.5f, 0.5f }, {0.0f, 0.0f, 1.0f}}
 };
 
+// keep in sync with defines in compute.hlsl
+enum class BokehShape : uint32
+{
+    Circle,
+    Square,
+    Ring,
+
+    Count
+};
+
+const char* BokehShapeNames[] =
+{
+    "Circle",
+    "Square",
+    "Ring",
+};
+static_assert(countof(BokehShapeNames) == (uint)BokehShape::Count, "Wrong number of entries in BokehShapeNames");
+
 static float RandomFloat()
 {
     // from 0 to 1
@@ -131,6 +149,7 @@ private:
     bool m_DOFEnable = true;
     float m_DOFFocalLength = 8.0f;
     float m_DOFApertureRadius = 0.1f;
+    BokehShape m_DOFBokehShape = BokehShape::Circle;
 
     bool m_useBlueNoiseRNG = false;
 
@@ -191,6 +210,18 @@ public:
             ResetIntegration(pSample);
 
         if(pGui->addFloatVar("DOF Aperture Size", m_DOFApertureRadius))
+            ResetIntegration(pSample);
+
+        Falcor::Gui::DropdownList bokehShapes;
+        for (uint i = 0; i < (uint)BokehShape::Count; ++i)
+        {
+            Falcor::Gui::DropdownValue v;
+            v.label = BokehShapeNames[i];
+            v.value = i;
+            bokehShapes.push_back(v);
+        }
+
+        if (pGui->addDropdown("DOF Bokeh Shape", bokehShapes, *(uint32*)&m_DOFBokehShape))
             ResetIntegration(pSample);
 
         if (pGui->addCheckBox("Jitter Camera", m_jitter))
@@ -333,6 +364,9 @@ public:
 
         sprintf(buffer, "%i", m_workGroupSize);
         m_computeProgram->addDefine("WORK_GROUP_SIZE", buffer);
+
+        sprintf(buffer, "%u", (uint32)m_DOFBokehShape);
+        m_computeProgram->addDefine("BOKEH_SHAPE", buffer);
 
         if (m_cosineWeightedhemisphereSampling)
             m_computeProgram->addDefine("COSINE_WEIGHTED_HEMISPHERE_SAMPLING");

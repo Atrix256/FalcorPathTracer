@@ -43,6 +43,7 @@ But also:
 * DOF
  * both length and radius are in world units
  * talk about shaped bokeh! (random point in shape!)
+ ? should we show cosine weighted hemisphere too? not sure how to show it off so maybe not. maybe too off topic
 
 * DOF: http://cg.skeelogy.com/depth-of-field-using-raytracing/
 
@@ -73,7 +74,12 @@ But also:
 ## TODOs
 
 * make a better scene at some point, or have a drop down of different scenes.
+ * for bokeh blog post
 
+* more interesting shaped bokeh?
+ * triangle?
+ * make a star from triangles?
+ 
 * shaped aperature support? doesn't mean much until we have specular highlights, but small bright lights will do it too i guess...
 
 * could write a super quick raytracing depth of field blog post.

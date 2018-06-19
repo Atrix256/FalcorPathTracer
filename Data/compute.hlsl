@@ -16,6 +16,15 @@
     #define WORK_GROUP_SIZE 16
 #endif
 
+#ifndef BOKEH_SHAPE
+    #define BOKEH_SHAPE 0
+#endif
+
+// keep in sync with main.cpp enum BokehShape
+#define BOKEH_SHAPE_CIRCLE  0
+#define BOKEH_SHAPE_SQUARE  1
+#define BOKEH_SHAPE_RING    2
+
 static const float c_pi = 3.14159265359f;
 static const float c_goldenRatioConjugate = 0.61803398875f;
 
@@ -81,7 +90,6 @@ Ray GetRayForPixel(float2 uv, inout uint state)
     destination /= destination.w;
     ret.direction = normalize(destination.xyz - origin.xyz);
 
-
     // if DOF is on, need to adjust the origin and direction based on aperture size and shape
     #ifdef ENABLE_DOF
         float3 fwdVector = ret.direction;
@@ -89,8 +97,16 @@ Ray GetRayForPixel(float2 uv, inout uint state)
         float3 leftVector = normalize(cross(fwdVector, upVector.xyz));
         float3 focusPoint = ret.origin + ret.direction * DOFFocalLength;
 
-        // TODO: shaped bokeh!
-        float2 offset = float2(RandomFloat01(state), RandomFloat01(state)) * DOFApertureRadius;
+        #if BOKEH_SHAPE ==  BOKEH_SHAPE_SQUARE
+            float2 offset = (float2(RandomFloat01(state), RandomFloat01(state)) * 2.0f - 1.0f) * DOFApertureRadius;
+        #elif BOKEH_SHAPE ==  BOKEH_SHAPE_CIRCLE
+            float angle = RandomFloat01(state) * 2.0f * c_pi;
+            float radius = sqrt(RandomFloat01(state));
+            float2 offset = float2(cos(angle), sin(angle)) * radius * DOFApertureRadius;
+        #elif BOKEH_SHAPE ==  BOKEH_SHAPE_RING
+            float angle = RandomFloat01(state) * 2.0f * c_pi;
+            float2 offset = float2(cos(angle), sin(angle)) * DOFApertureRadius;
+        #endif
 
         ret.origin = ret.origin + leftVector * offset.x + upVector.xyz * offset.y;
         ret.direction = normalize(focusPoint - ret.origin);
