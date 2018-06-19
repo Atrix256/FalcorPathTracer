@@ -128,6 +128,10 @@ private:
     bool m_sampleLights = true;
     int m_workGroupSize = 8;
 
+    bool m_DOFEnable = true;
+    float m_DOFFocalLength = 1.0f;
+    float m_DOFApertureSize = 0.1f;
+
     bool m_useBlueNoiseRNG = false;
 
     // options to speed up rendering
@@ -178,6 +182,15 @@ public:
             UpdateProjectionMatrix(pSample);
 
         if (pGui->addButton("Restart Integration"))
+            ResetIntegration(pSample);
+
+        if(pGui->addCheckBox("Enable Depth Of Field", m_DOFEnable))
+            ResetIntegration(pSample);
+
+        if(pGui->addFloatVar("DOF Focal Length", m_DOFFocalLength))
+            ResetIntegration(pSample);
+
+        if(pGui->addFloatVar("DOF Aperture Size", m_DOFApertureSize))
             ResetIntegration(pSample);
 
         if (pGui->addCheckBox("Jitter Camera", m_jitter))
@@ -331,6 +344,11 @@ public:
         else
             m_computeProgram->removeDefine("USE_BLUENOISE_RNG");
 
+        if (m_DOFEnable)
+            m_computeProgram->addDefine("ENABLE_DOF");
+        else
+            m_computeProgram->removeDefine("ENABLE_DOF");
+
         // jitter the camera if we should
         glm::mat4x4 invViewProjMtx = m_invViewProjMtx;
         if (m_jitter)
@@ -353,6 +371,9 @@ public:
         pShaderConstants["lerpAmount"] = 1.0f / float(m_frameCount + 1);
         pShaderConstants["frameRand"] = (uint)RandomUint32();
         pShaderConstants["frameNumber"] = (uint)m_frameCount;
+
+        pShaderConstants["DOFFocalLength"] = m_DOFFocalLength;
+        pShaderConstants["DOFApertureSize"] = m_DOFApertureSize;
 
         for (uint i = 0; i < countof(g_spheres); ++i)
         {

@@ -30,6 +30,8 @@ cbuffer ShaderConstants
     float lerpAmount;
     uint frameRand;
     uint frameNumber;
+    float DOFFocalLength;
+    float DOFApertureSize;
 };
 
 StructuredBuffer<Sphere> g_spheres;
@@ -62,21 +64,30 @@ float3 RandomUnitVector(inout uint state)
     return float3(x, y, z);
 }
 
-Ray GetRayForPixel(float2 uv)
+Ray GetRayForPixel(float2 uv, inout uint state)
 {
     // convert from [0,1] space to [-1,1] space
-    float2 pixelClipSpace = uv * 2.0f - 1.0f;
+    float2 pixelClipSpaceEnd = uv * 2.0f - 1.0f;
+    pixelClipSpaceEnd.x *= -1.0f;
 
-    pixelClipSpace.x *= -1.0f;
+    #ifdef ENABLE_DOF
+        // TODO: random point in offset circle.
+        // TODO: take into account DOFFocalLength and DOFApertureSize;
+        // TODO: focal length controls where pixelClipSpaceEnd is kinda...
+        float2 startOffset = DOFApertureSize * (float2(RandomFloat01(state), RandomFloat01(state))*2.0f - 1.0f) / 100.0f;
+        float2 pixelClipSpaceStart = pixelClipSpaceEnd + startOffset;
+    #else
+        float2 pixelClipSpaceStart = pixelClipSpaceEnd;
+    #endif
 
     // transform the clip space pixel at z 0 to get the ray origin in world space
     Ray ret;
-    float4 origin = mul(float4(pixelClipSpace, 0.0f, 1.0f), invViewProjMtx);
+    float4 origin = mul(float4(pixelClipSpaceStart, 0.0f, 1.0f), invViewProjMtx);
     origin /= origin.w;
     ret.origin = origin.xyz;
 
     // transform the clip space pixel at a different z to get another world space point along the ray, to make the direction from
-    float4 destination = mul(float4(pixelClipSpace, -0.1f, 1.0f), invViewProjMtx);
+    float4 destination = mul(float4(pixelClipSpaceEnd, -0.1f, 1.0f), invViewProjMtx);
     destination /= destination.w;
     ret.direction = normalize(destination.xyz - origin.xyz);
 
@@ -327,7 +338,7 @@ void main(uint3 gid : SV_DispatchThreadID)
         float2 uvOffset = float2(RandomFloat01(rngState), RandomFloat01(rngState)) * float2(1.0f / float(resolution.x), 1.0f / float(resolution.y));
 
         // get the ray for this pixel
-        Ray ray = GetRayForPixel(uv + uvOffset);
+        Ray ray = GetRayForPixel(uv + uvOffset, rngState);
 
         CollisionInfo collisionInfo = RayIntersectsScene(ray, true);
 

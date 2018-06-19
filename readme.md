@@ -64,6 +64,15 @@ But also:
 
 ## TODOs
 
+* shaped aperature support? doesn't mean much until we have specular highlights, but small bright lights will do it too i guess...
+
+* could write a super quick raytracing depth of field blog post.
+ * including shaped bokeh?
+ ? what unit of measurement is aperture size in?
+  * well, if you do it post transformation, it is in world units aka meters!!
+
+* get rid of unuseful stuff - blue noise, jitter, integrate checkbox etc.
+
 * maybe make this program able to generate a mitsuba path tracer xml scene file?
  * probably need it to make an obj, and then can import into mitsuba.
  * can obj handle spheres? or does mitsuba xml file support spheres?
