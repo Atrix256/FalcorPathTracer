@@ -31,7 +31,7 @@ cbuffer ShaderConstants
     uint frameRand;
     uint frameNumber;
     float DOFFocalLength;
-    float DOFApertureSize;
+    float DOFApertureRadius;
 };
 
 StructuredBuffer<Sphere> g_spheres;
@@ -67,29 +67,34 @@ float3 RandomUnitVector(inout uint state)
 Ray GetRayForPixel(float2 uv, inout uint state)
 {
     // convert from [0,1] space to [-1,1] space
-    float2 pixelClipSpaceEnd = uv * 2.0f - 1.0f;
-    pixelClipSpaceEnd.x *= -1.0f;
-
-    #ifdef ENABLE_DOF
-        // TODO: random point in offset circle.
-        // TODO: take into account DOFFocalLength and DOFApertureSize;
-        // TODO: focal length controls where pixelClipSpaceEnd is kinda...
-        float2 startOffset = DOFApertureSize * (float2(RandomFloat01(state), RandomFloat01(state))*2.0f - 1.0f) / 100.0f;
-        float2 pixelClipSpaceStart = pixelClipSpaceEnd + startOffset;
-    #else
-        float2 pixelClipSpaceStart = pixelClipSpaceEnd;
-    #endif
+    float2 pixelClipSpace = uv * 2.0f - 1.0f;
+    pixelClipSpace.x *= -1.0f;
 
     // transform the clip space pixel at z 0 to get the ray origin in world space
     Ray ret;
-    float4 origin = mul(float4(pixelClipSpaceStart, 0.0f, 1.0f), invViewProjMtx);
+    float4 origin = mul(float4(pixelClipSpace, 0.0f, 1.0f), invViewProjMtx);
     origin /= origin.w;
     ret.origin = origin.xyz;
 
     // transform the clip space pixel at a different z to get another world space point along the ray, to make the direction from
-    float4 destination = mul(float4(pixelClipSpaceEnd, -0.1f, 1.0f), invViewProjMtx);
+    float4 destination = mul(float4(pixelClipSpace, -0.1f, 1.0f), invViewProjMtx);
     destination /= destination.w;
     ret.direction = normalize(destination.xyz - origin.xyz);
+
+
+    // if DOF is on, need to adjust the origin and direction based on aperture size and shape
+    #ifdef ENABLE_DOF
+        float3 fwdVector = ret.direction;
+        float3 upVector = normalize(mul(float4(0.0f, 1.0f, 0.0f, 0.0f), invViewProjMtx).xyz);
+        float3 leftVector = normalize(cross(fwdVector, upVector.xyz));
+        float3 focusPoint = ret.origin + ret.direction * DOFFocalLength;
+
+        // TODO: shaped bokeh!
+        float2 offset = float2(RandomFloat01(state), RandomFloat01(state)) * DOFApertureRadius;
+
+        ret.origin = ret.origin + leftVector * offset.x + upVector.xyz * offset.y;
+        ret.direction = normalize(focusPoint - ret.origin);
+    #endif
 
     return ret;
 }

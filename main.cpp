@@ -129,8 +129,8 @@ private:
     int m_workGroupSize = 8;
 
     bool m_DOFEnable = true;
-    float m_DOFFocalLength = 1.0f;
-    float m_DOFApertureSize = 0.1f;
+    float m_DOFFocalLength = 8.0f;
+    float m_DOFApertureRadius = 0.1f;
 
     bool m_useBlueNoiseRNG = false;
 
@@ -190,7 +190,7 @@ public:
         if(pGui->addFloatVar("DOF Focal Length", m_DOFFocalLength))
             ResetIntegration(pSample);
 
-        if(pGui->addFloatVar("DOF Aperture Size", m_DOFApertureSize))
+        if(pGui->addFloatVar("DOF Aperture Size", m_DOFApertureRadius))
             ResetIntegration(pSample);
 
         if (pGui->addCheckBox("Jitter Camera", m_jitter))
@@ -373,7 +373,7 @@ public:
         pShaderConstants["frameNumber"] = (uint)m_frameCount;
 
         pShaderConstants["DOFFocalLength"] = m_DOFFocalLength;
-        pShaderConstants["DOFApertureSize"] = m_DOFApertureSize;
+        pShaderConstants["DOFApertureRadius"] = m_DOFApertureRadius;
 
         for (uint i = 0; i < countof(g_spheres); ++i)
         {

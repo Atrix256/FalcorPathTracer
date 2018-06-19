@@ -36,7 +36,15 @@ But also:
 * then spherical lights being sampled from solid angle
 * then quad lights / generalize to other shapes and non solid angle.
 
+## DOF blog post notes
 
+* basic camera ray generation using inverse view transform matrix?
+* jitter: show with on vs off
+* DOF
+ * both length and radius are in world units
+ * talk about shaped bokeh! (random point in shape!)
+
+* DOF: http://cg.skeelogy.com/depth-of-field-using-raytracing/
 
 ## Notes
 
@@ -63,6 +71,8 @@ But also:
 * mitsuba xml file format: https://mynameismjp.wordpress.com/2015/04/04/mitsuba-quick-start-guide/
 
 ## TODOs
+
+* make a better scene at some point, or have a drop down of different scenes.
 
 * shaped aperature support? doesn't mean much until we have specular highlights, but small bright lights will do it too i guess...
 
