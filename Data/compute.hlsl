@@ -177,7 +177,7 @@ float3 SampleLight(in CollisionInfo collisionInfo, in float3 position, inout uin
     ray.origin = position;
     ray.direction = l;
     CollisionInfo newCollisionInfo = RayIntersectsScene(ray, true);
-    
+
     // TODO: maybe give a max distance. the below "missing" counting as valid doesn't make sense w/o that btw.
 
     // if we missed the world, or hit the light we wanted to, return the light
