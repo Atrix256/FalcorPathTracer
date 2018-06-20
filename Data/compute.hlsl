@@ -21,9 +21,11 @@
 #endif
 
 // keep in sync with main.cpp enum BokehShape
-#define BOKEH_SHAPE_CIRCLE  0
-#define BOKEH_SHAPE_SQUARE  1
-#define BOKEH_SHAPE_RING    2
+#define BOKEH_SHAPE_CIRCLE   0
+#define BOKEH_SHAPE_SQUARE   1
+#define BOKEH_SHAPE_RING     2
+#define BOKEH_SHAPE_TRIANGLE 3
+#define BOKEH_SHAPE_SOD      4
 
 static const float c_pi = 3.14159265359f;
 static const float c_goldenRatioConjugate = 0.61803398875f;
@@ -73,6 +75,11 @@ float3 RandomUnitVector(inout uint state)
     return float3(x, y, z);
 }
 
+float2 PointInTriangle(in float2 A, in float2 B, in float2 C, in float2 rand)
+{
+    return (1.0f - sqrt(rand.x)) * A.yx + sqrt(rand.x)*(1.0f - rand.y) * B.yx + rand.y * sqrt(rand.x) * C.yx;
+}
+
 Ray GetRayForPixel(float2 uv, inout uint state)
 {
     // convert from [0,1] space to [-1,1] space
@@ -97,15 +104,57 @@ Ray GetRayForPixel(float2 uv, inout uint state)
         float3 leftVector = normalize(cross(fwdVector, upVector.xyz));
         float3 focusPoint = ret.origin + ret.direction * DOFFocalLength;
 
-        #if BOKEH_SHAPE ==  BOKEH_SHAPE_SQUARE
+        #if BOKEH_SHAPE == BOKEH_SHAPE_SQUARE
             float2 offset = (float2(RandomFloat01(state), RandomFloat01(state)) * 2.0f - 1.0f) * DOFApertureRadius;
-        #elif BOKEH_SHAPE ==  BOKEH_SHAPE_CIRCLE
+        #elif BOKEH_SHAPE == BOKEH_SHAPE_CIRCLE
             float angle = RandomFloat01(state) * 2.0f * c_pi;
             float radius = sqrt(RandomFloat01(state));
             float2 offset = float2(cos(angle), sin(angle)) * radius * DOFApertureRadius;
-        #elif BOKEH_SHAPE ==  BOKEH_SHAPE_RING
+        #elif BOKEH_SHAPE == BOKEH_SHAPE_RING
             float angle = RandomFloat01(state) * 2.0f * c_pi;
             float2 offset = float2(cos(angle), sin(angle)) * DOFApertureRadius;
+        #elif BOKEH_SHAPE == BOKEH_SHAPE_TRIANGLE
+            const float2 A = float2(1.0f, 0.0f); //0 degrees
+            const float2 B = float2(-0.5f, 0.866f); //120 degrees
+            const float2 C = float2(-0.5f, -0.866f); //120 degrees
+
+            float2 rand = float2(RandomFloat01(state), RandomFloat01(state));
+
+            float2 offset = PointInTriangle(A, B, C, rand);
+
+            offset *= DOFApertureRadius;
+        #elif BOKEH_SHAPE == BOKEH_SHAPE_SOD
+
+            const float2 A = float2(1.0f, 0.0f);
+            const float2 B = float2(-0.5f, 0.866f);
+            const float2 C = float2(-0.5f, -0.866f);
+
+            const float2 D = float2(0.5f, 0.866f);
+            const float2 E = float2(-1.0f, 0.0f);
+            const float2 F = float2(0.5f, -0.866f);
+
+            const float2 G = float2(0.5f, 0.288f);
+            const float2 H = float2(0.0f, 0.577f);
+            const float2 I = float2(-0.5f, 0.288f);
+
+            const float2 J = float2(-0.5f, -0.288f);
+            const float2 K = float2(0.0f, -0.577f);
+            const float2 L = float2(0.5f, -0.288f);
+
+            float triangleChoice = RandomFloat01(state);
+            float2 offset;
+
+            float2 rand = float2(RandomFloat01(state), RandomFloat01(state));
+            if (triangleChoice < 0.76)
+                offset = PointInTriangle(A, B, C, rand);
+            else if (triangleChoice < 0.84)
+                offset = PointInTriangle(G, D, H, rand);
+            else if (triangleChoice < 0.92)
+                offset = PointInTriangle(I, E, J, rand);
+            else
+                offset = PointInTriangle(K, F, L, rand);
+
+            offset *= DOFApertureRadius;
         #endif
 
         ret.origin = ret.origin + leftVector * offset.x + upVector.xyz * offset.y;

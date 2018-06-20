@@ -45,6 +45,10 @@ But also:
  * talk about shaped bokeh! (random point in shape!)
  ? should we show cosine weighted hemisphere too? not sure how to show it off so maybe not. maybe too off topic
 
+* general uniform point in 2d shape: http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=03E49E24217598863AE5A66FDEB68832?doi=10.1.1.6.6683&rep=rep1&type=pdf
+* point in triangle: https://math.stackexchange.com/q/18686/138443
+* also this: http://blog.wolfram.com/2011/07/28/how-i-made-wine-glasses-from-sunflowers/
+
 * DOF: http://cg.skeelogy.com/depth-of-field-using-raytracing/
 
 ## Notes
@@ -72,6 +76,8 @@ But also:
 * mitsuba xml file format: https://mynameismjp.wordpress.com/2015/04/04/mitsuba-quick-start-guide/
 
 ## TODOs
+
+? why does my bokeh have rounded corners??
 
 * make a better scene at some point, or have a drop down of different scenes.
  * for bokeh blog post

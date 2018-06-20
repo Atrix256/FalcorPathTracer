@@ -75,6 +75,8 @@ enum class BokehShape : uint32
     Circle,
     Square,
     Ring,
+    Triangle,
+    SOD,
 
     Count
 };
@@ -84,6 +86,8 @@ const char* BokehShapeNames[] =
     "Circle",
     "Square",
     "Ring",
+    "Triangle",
+    "Star of David"
 };
 static_assert(countof(BokehShapeNames) == (uint)BokehShape::Count, "Wrong number of entries in BokehShapeNames");
 
