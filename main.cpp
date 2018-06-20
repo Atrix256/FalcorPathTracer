@@ -28,46 +28,75 @@ struct PLight
     float3 color;
 };
 
-Sphere g_spheres[] =
+struct PTScene
 {
-    {{ 1.5f, 1.5f, 2.5f }, 0.8f, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
-    {{ 4.5f, 1.5f, 2.5f }, 0.8f, { 0.1f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
-    {{ 2.0f, 3.5f, 3.5f }, 0.8f, { 1.0f, 0.1f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
-    {{ 3.0f, 1.5f, 4.5f }, 0.8f, { 1.0f, 1.0f, 0.1f }, { 0.0f, 0.0f, 0.0f }},
+    std::vector<Sphere> spheres;
+    std::vector<Sphere> lightSpheres;
+    std::vector<Quad>   quads;
+    std::vector<PLight> pLights;
 };
 
-Sphere g_lightSpheres[] =
+PTScene Scene_Box =
 {
-    {{ 5.0f, 0.5f, 1.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, {  1.0f, 25.0f, 25.0f }},
-    {{ 0.4f, 1.5f, 1.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, { 25.0f,  1.0f, 25.0f }},
-    {{ 4.0f, 3.5f, 4.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, { 25.0f, 25.0f,  1.0f }},
+    // spheres
+    {
+        {{ 1.5f, 1.5f, 2.5f }, 0.8f, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
+        {{ 4.5f, 1.5f, 2.5f }, 0.8f, { 0.1f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
+        {{ 2.0f, 3.5f, 3.5f }, 0.8f, { 1.0f, 0.1f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
+        {{ 3.0f, 1.5f, 4.5f }, 0.8f, { 1.0f, 1.0f, 0.1f }, { 0.0f, 0.0f, 0.0f }},
+    },
+
+    // light spheres
+    {
+        {{ 5.0f, 0.5f, 1.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, {  1.0f, 25.0f, 25.0f }},
+        {{ 0.4f, 1.5f, 1.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, { 25.0f,  1.0f, 25.0f }},
+        {{ 4.0f, 3.5f, 4.0f }, 0.2f, { 1.0f, 1.0f, 0.0f }, { 25.0f, 25.0f,  1.0f }},
+    },
+
+    // quads
+    {
+        // floor
+        {{ 5.528f, 0.0f, 0.0f }, { 0.0f, 0.0f,   0.0f }, {   0.0f, 0.0f, 5.592f },{ 5.496f, 0.0f, 5.592f }, {0.0f, 0.0f, 0.0f},{ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
+
+        // Light
+        //{{ 3.430f, 5.486f, 2.270f },{ 3.43f, 5.486f, 3.32f },{ 2.13f, 5.486f, 3.32f },{ 2.13f, 5.486f, 2.27f },{ 0.0f, 0.0f, 0.0f },{ 0.78f, 0.78f, 0.78f },{25.0f, 25.0f, 25.0f}},
+
+        // Cieling
+        {{ 5.560f, 5.488f,   0.0f },{ 5.56f, 5.488f, 5.592f },{ 0.0f, 5.488f, 5.592f },{ 0.0f, 5.488f,   0.0f },{ 0.0f, 0.0f, 0.0f },{ 1.0f, 1.0f, 1.0f },{0.0f, 0.0f, 0.0f}},
+
+        // back wall
+        {{5.496f,   0.0f, 5.592f},{  0.0f,   0.0f, 5.592f},{  0.0f, 5.488f, 5.592f},{5.56f, 5.488f, 5.592f},{ 0.0f, 0.0f, 0.0f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 0.0f, 0.0f }},
+
+        // left wall
+        {{0.0f,   0.0f, 5.592f},{0.0f,   0.0f,   0.0f},{0.0f, 5.488f,   0.0f},{0.0f, 5.488f, 5.592f},{ 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 0.0f }},
+
+        // right wall
+        {{5.528f,   0.0f,   0.0f},{5.496f,   0.0f, 5.592f},{5.56f, 5.488f, 5.592f},{5.56f, 5.488f,   0.0f},{ 0.0f, 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, 0.0f }},
+    },
+
+    // point lights
+    {
+        {{ 2.0f, 1.5f, 0.5f },{ 0.0f, 0.0f, 1.0f }}
+    },
 };
 
-Quad g_quads[] =
+enum class PTScenes
 {
-    // floor
-    {{ 5.528f, 0.0f, 0.0f }, { 0.0f, 0.0f,   0.0f }, {   0.0f, 0.0f, 5.592f },{ 5.496f, 0.0f, 5.592f }, {0.0f, 0.0f, 0.0f},{ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
+    Box,
 
-    // Light
-    //{{ 3.430f, 5.486f, 2.270f },{ 3.43f, 5.486f, 3.32f },{ 2.13f, 5.486f, 3.32f },{ 2.13f, 5.486f, 2.27f },{ 0.0f, 0.0f, 0.0f },{ 0.78f, 0.78f, 0.78f },{25.0f, 25.0f, 25.0f}},
-
-    // Cieling
-    {{ 5.560f, 5.488f,   0.0f },{ 5.56f, 5.488f, 5.592f },{ 0.0f, 5.488f, 5.592f },{ 0.0f, 5.488f,   0.0f },{ 0.0f, 0.0f, 0.0f },{ 1.0f, 1.0f, 1.0f },{0.0f, 0.0f, 0.0f}},
-
-    // back wall
-    {{5.496f,   0.0f, 5.592f},{  0.0f,   0.0f, 5.592f},{  0.0f, 5.488f, 5.592f},{5.56f, 5.488f, 5.592f},{ 0.0f, 0.0f, 0.0f },{ 1.0f, 1.0f, 1.0f },{ 0.0f, 0.0f, 0.0f }},
-
-    // left wall
-    {{0.0f,   0.0f, 5.592f},{0.0f,   0.0f,   0.0f},{0.0f, 5.488f,   0.0f},{0.0f, 5.488f, 5.592f},{ 0.0f, 0.0f, 0.0f },{ 0.0f, 1.0f, 0.0f },{ 0.0f, 0.0f, 0.0f }},
-
-    // right wall
-    {{5.528f,   0.0f,   0.0f},{5.496f,   0.0f, 5.592f},{5.56f, 5.488f, 5.592f},{5.56f, 5.488f,   0.0f},{ 0.0f, 0.0f, 0.0f },{ 1.0f, 0.0f, 0.0f },{ 0.0f, 0.0f, 0.0f }},
+    Count
 };
 
-PLight g_plights[] =
+const char* PTScenesNames[] =
 {
-    {{ 2.0f, 1.5f, 0.5f }, {0.0f, 0.0f, 1.0f}}
+    "Box",
 };
+static_assert(countof(PTScenesNames) == (uint)PTScenes::Count, "Wrong number of entries in PTScenesNames");
+
+PTScene& GetScene(PTScenes scene)
+{
+    return Scene_Box;
+}
 
 // keep in sync with defines in compute.hlsl
 enum class BokehShape : uint32
@@ -155,6 +184,8 @@ private:
     float m_DOFApertureRadius = 0.1f;
     BokehShape m_DOFBokehShape = BokehShape::Circle;
 
+    PTScenes m_scene = PTScenes::Box;
+
     bool m_useBlueNoiseRNG = false;
 
     // options to speed up rendering
@@ -216,17 +247,34 @@ public:
         if(pGui->addFloatVar("DOF Aperture Size", m_DOFApertureRadius))
             ResetIntegration(pSample);
 
-        Falcor::Gui::DropdownList bokehShapes;
-        for (uint i = 0; i < (uint)BokehShape::Count; ++i)
         {
-            Falcor::Gui::DropdownValue v;
-            v.label = BokehShapeNames[i];
-            v.value = i;
-            bokehShapes.push_back(v);
+            Falcor::Gui::DropdownList bokehShapes;
+            for (uint i = 0; i < (uint)BokehShape::Count; ++i)
+            {
+                Falcor::Gui::DropdownValue v;
+                v.label = BokehShapeNames[i];
+                v.value = i;
+                bokehShapes.push_back(v);
+            }
+            if (pGui->addDropdown("DOF Bokeh Shape", bokehShapes, *(uint32*)&m_DOFBokehShape))
+                ResetIntegration(pSample);
         }
 
-        if (pGui->addDropdown("DOF Bokeh Shape", bokehShapes, *(uint32*)&m_DOFBokehShape))
-            ResetIntegration(pSample);
+        {
+            Falcor::Gui::DropdownList scenes;
+            for (uint i = 0; i < (uint)PTScenes::Count; ++i)
+            {
+                Falcor::Gui::DropdownValue v;
+                v.label = PTScenesNames[i];
+                v.value = i;
+                scenes.push_back(v);
+            }
+            if (pGui->addDropdown("Scene", scenes, *(uint32*)&m_scene))
+            {
+                OnChangeScene();
+                ResetIntegration(pSample);
+            }
+        }
 
         if (pGui->addCheckBox("Jitter Camera", m_jitter))
             ResetIntegration(pSample);
@@ -276,6 +324,35 @@ public:
         pGui->addText(buffer);
     }
 
+    void OnChangeScene()
+    {
+        PTScene& scene = GetScene(m_scene);
+
+        m_computeVars->setStructuredBuffer("g_spheres", StructuredBuffer::create(m_computeProgram, "g_spheres", scene.spheres.size()));
+        m_computeVars->setStructuredBuffer("g_lightSpheres", StructuredBuffer::create(m_computeProgram, "g_lightSpheres", scene.lightSpheres.size()));
+        m_computeVars->setStructuredBuffer("g_quads", StructuredBuffer::create(m_computeProgram, "g_quads", scene.quads.size()));
+        m_computeVars->setStructuredBuffer("g_plights", StructuredBuffer::create(m_computeProgram, "g_plights", scene.pLights.size()));
+
+        std::fill(&m_keyState[0], &m_keyState[255], false);
+
+        // calculate normals for quads
+        for (uint i = 0; i < scene.quads.size(); ++i)
+        {
+            float3 ab = scene.quads[i].b - scene.quads[i].a;
+            float3 ac = scene.quads[i].c - scene.quads[i].a;
+            scene.quads[i].normal = normalize(-cross(ab, ac));
+        }
+
+        // give all geo a geo id.
+        uint nextID = 0;
+        for (Sphere& s : scene.spheres)
+            s.geoID = nextID++;
+        for (Sphere& s : scene.lightSpheres)
+            s.geoID = nextID++;
+        for (Quad& q : scene.quads)
+            q.geoID = nextID++;
+    }
+
     void onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pContext)
     {
         m_computeProgram = ComputeProgram::createFromFile("compute.hlsl", "main");
@@ -286,29 +363,7 @@ public:
         m_blueNoiseTexture = createTextureFromFile("Data/BlueNoise.bmp", false, false);
         m_computeVars->setTexture("gBlueNoiseTexture", m_blueNoiseTexture);
 
-        m_computeVars->setStructuredBuffer("g_spheres", StructuredBuffer::create(m_computeProgram, "g_spheres", countof(g_spheres)));
-        m_computeVars->setStructuredBuffer("g_lightSpheres", StructuredBuffer::create(m_computeProgram, "g_lightSpheres", countof(g_lightSpheres)));
-        m_computeVars->setStructuredBuffer("g_quads", StructuredBuffer::create(m_computeProgram, "g_quads", countof(g_quads)));
-        m_computeVars->setStructuredBuffer("g_plights", StructuredBuffer::create(m_computeProgram, "g_plights", countof(g_plights)));
-
-        std::fill(&m_keyState[0], &m_keyState[255], false);
-
-        // calculate normals for quads
-        for (uint i = 0; i < countof(g_quads); ++i)
-        {
-            float3 ab = g_quads[i].b - g_quads[i].a;
-            float3 ac = g_quads[i].c - g_quads[i].a;
-            g_quads[i].normal = normalize(-cross(ab, ac));
-        }
-
-        // give all geo a geo id.
-        uint nextID = 0;
-        for (Sphere& s : g_spheres)
-            s.geoID = nextID++;
-        for (Sphere& s : g_lightSpheres)
-            s.geoID = nextID++;
-        for (Quad& q : g_quads)
-            q.geoID = nextID++;
+        OnChangeScene();
     }
 
     void UpdateCamera(SampleCallbacks* pSample)
@@ -342,6 +397,8 @@ public:
 
     void onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
     {
+        PTScene& scene = GetScene(m_scene);
+
         if (m_StopAtSampleCount > 0 && m_sampleCount >= m_StopAtSampleCount)
         {
             pContext->copyResource(pTargetFbo->getColorTexture(0).get(), m_outputU8.get());
@@ -413,40 +470,40 @@ public:
         pShaderConstants["DOFFocalLength"] = m_DOFFocalLength;
         pShaderConstants["DOFApertureRadius"] = m_DOFApertureRadius;
 
-        for (uint i = 0; i < countof(g_spheres); ++i)
+        for (uint i = 0; i < scene.spheres.size(); ++i)
         {
-            m_computeVars->getStructuredBuffer("g_spheres")[i]["position"] = g_spheres[i].position;
-            m_computeVars->getStructuredBuffer("g_spheres")[i]["radius"]   = g_spheres[i].radius;
-            m_computeVars->getStructuredBuffer("g_spheres")[i]["albedo"]   = g_spheres[i].albedo;
-            m_computeVars->getStructuredBuffer("g_spheres")[i]["emissive"] = g_spheres[i].emissive;
-            m_computeVars->getStructuredBuffer("g_spheres")[i]["geoID"] = g_spheres[i].geoID;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["position"] = scene.spheres[i].position;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["radius"]   = scene.spheres[i].radius;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["albedo"]   = scene.spheres[i].albedo;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["emissive"] = scene.spheres[i].emissive;
+            m_computeVars->getStructuredBuffer("g_spheres")[i]["geoID"] = scene.spheres[i].geoID;
         }
 
-        for (uint i = 0; i < countof(g_lightSpheres); ++i)
+        for (uint i = 0; i < scene.lightSpheres.size(); ++i)
         {
-            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["position"] = g_lightSpheres[i].position;
-            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["radius"]   = g_lightSpheres[i].radius;
-            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["albedo"]   = g_lightSpheres[i].albedo;
-            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["emissive"] = g_lightSpheres[i].emissive;
-            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["geoID"] = g_lightSpheres[i].geoID;
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["position"] = scene.lightSpheres[i].position;
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["radius"]   = scene.lightSpheres[i].radius;
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["albedo"]   = scene.lightSpheres[i].albedo;
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["emissive"] = scene.lightSpheres[i].emissive;
+            m_computeVars->getStructuredBuffer("g_lightSpheres")[i]["geoID"] = scene.lightSpheres[i].geoID;
         }
 
-        for (uint i = 0; i < countof(g_quads); ++i)
+        for (uint i = 0; i < scene.quads.size(); ++i)
         {
-            m_computeVars->getStructuredBuffer("g_quads")[i]["a"] = g_quads[i].a;
-            m_computeVars->getStructuredBuffer("g_quads")[i]["b"] = g_quads[i].b;
-            m_computeVars->getStructuredBuffer("g_quads")[i]["c"] = g_quads[i].c;
-            m_computeVars->getStructuredBuffer("g_quads")[i]["d"] = g_quads[i].d;
-            m_computeVars->getStructuredBuffer("g_quads")[i]["normal"] = g_quads[i].normal;
-            m_computeVars->getStructuredBuffer("g_quads")[i]["albedo"] = g_quads[i].albedo;
-            m_computeVars->getStructuredBuffer("g_quads")[i]["emissive"] = g_quads[i].emissive;
-            m_computeVars->getStructuredBuffer("g_quads")[i]["geoID"] = g_quads[i].geoID;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["a"] = scene.quads[i].a;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["b"] = scene.quads[i].b;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["c"] = scene.quads[i].c;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["d"] = scene.quads[i].d;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["normal"] = scene.quads[i].normal;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["albedo"] = scene.quads[i].albedo;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["emissive"] = scene.quads[i].emissive;
+            m_computeVars->getStructuredBuffer("g_quads")[i]["geoID"] = scene.quads[i].geoID;
         }
 
-        for (uint i = 0; i < countof(g_plights); ++i)
+        for (uint i = 0; i < scene.pLights.size(); ++i)
         {
-            m_computeVars->getStructuredBuffer("g_plights")[i]["position"] = g_plights[i].position;
-            m_computeVars->getStructuredBuffer("g_plights")[i]["color"] = g_plights[i].color;
+            m_computeVars->getStructuredBuffer("g_plights")[i]["position"] = scene.pLights[i].position;
+            m_computeVars->getStructuredBuffer("g_plights")[i]["color"] = scene.pLights[i].color;
         }
 
         m_computeVars->setTexture("gOutputF32", m_outputF32);

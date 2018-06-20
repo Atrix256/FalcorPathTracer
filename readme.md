@@ -77,7 +77,10 @@ But also:
 
 ## TODOs
 
+* make a different scene that is larger and has small bright light sources in the background
+
 ? why does my bokeh have rounded corners??
+ * the lights are large and round
 
 * make a better scene at some point, or have a drop down of different scenes.
  * for bokeh blog post
