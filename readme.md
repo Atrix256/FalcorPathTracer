@@ -38,6 +38,8 @@ But also:
 
 ## DOF blog post notes
 
+* run your DOF implementation by someone to make sure it seems ok?
+
 * basic camera ray generation using inverse view transform matrix?
 * jitter: show with on vs off
 * DOF
@@ -50,6 +52,9 @@ But also:
 * also this: http://blog.wolfram.com/2011/07/28/how-i-made-wine-glasses-from-sunflowers/
 
 * DOF: http://cg.skeelogy.com/depth-of-field-using-raytracing/
+
+* In path tracing DOF you "scatter" which means you need "random point in 2d shape" for bokeh
+ * In rasterization, a common thing is to "scatter while gathering", in which case you need "2d point in shape" test for bokeh.
 
 ## Notes
 
@@ -76,6 +81,21 @@ But also:
 * mitsuba xml file format: https://mynameismjp.wordpress.com/2015/04/04/mitsuba-quick-start-guide/
 
 ## TODOs
+
+* may need an option to sample a fixed number of lights maximum per frame.
+
+* make the generation source code file into a project even though it's barely worth doing so - don't want to waste the effort of having created it
+ * sandbox.cpp
+
+* for randomly colored lights, maybe pick a normalized color, and then pick an intensity to multiply it by?
+
+* may want to try even a simple / lame tone mapping to see if it makes the lights not show up as white.
+
+* NaN's are being generated! need to make it so content can't cause NaNs to be generated!
+
+* have starting camera settings be per scene, and set them to their defaults when switching scenes.
+ * position & orientation.
+ * not sure about DOF settings etc.
 
 * make a different scene that is larger and has small bright light sources in the background
 

@@ -30,6 +30,9 @@ struct PLight
 
 struct PTScene
 {
+    glm::vec3 cameraPos;
+    float3 skyColor;
+
     std::vector<Sphere> spheres;
     std::vector<Sphere> lightSpheres;
     std::vector<Quad>   quads;
@@ -38,6 +41,12 @@ struct PTScene
 
 PTScene Scene_Box =
 {
+    // camera position
+    { 2.780f, 2.730f, -8.0f },
+
+    // sky color
+    { 0.01f, 0.01f, 0.01f },
+
     // spheres
     {
         {{ 1.5f, 1.5f, 2.5f }, 0.8f, { 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
@@ -80,9 +89,77 @@ PTScene Scene_Box =
     },
 };
 
+PTScene Scene_PlaneSpheres =
+{
+    // camera position
+    { 0.0f, 2.0f, -10.0f },
+
+    // sky color
+    { 0.01f, 0.01f, 0.01f },
+
+    // spheres
+    {
+        { { -16.30f,1.35f,-2.51f },1.99f,{ 0.46f,0.66f,0.59f },{ 0.0f,0.0f,0.0f } },
+        { { 9.84f,2.24f,11.83f },0.76f,{ 0.64f,0.14f,0.75f },{ 0.0f,0.0f,0.0f } },
+        { { 7.17f,1.11f,-17.87f },1.92f,{ 0.13f,0.78f,0.61f },{ 0.0f,0.0f,0.0f } },
+        { { 19.09f,1.74f,-19.47f },2.31f,{ 0.50f,0.67f,0.55f },{ 0.0f,0.0f,0.0f } },
+        { { -8.08f,2.05f,-11.77f },2.35f,{ 0.91f,0.23f,0.35f },{ 0.0f,0.0f,0.0f } },
+        { { -16.68f,1.27f,-12.19f },1.91f,{ 0.30f,0.67f,0.68f },{ 0.0f,0.0f,0.0f } },
+        { { -4.29f,1.13f,-11.04f },2.02f,{ 0.57f,0.34f,0.75f },{ 0.0f,0.0f,0.0f } },
+        { { -0.61f,1.39f,9.48f },2.28f,{ 0.82f,0.40f,0.42f },{ 0.0f,0.0f,0.0f } },
+        { { -11.62f,1.83f,6.84f },2.83f,{ 0.73f,0.53f,0.43f },{ 0.0f,0.0f,0.0f } },
+        { { -14.08f,2.99f,-7.77f },1.96f,{ 0.62f,0.66f,0.43f },{ 0.0f,0.0f,0.0f } },
+        { { 7.82f,1.65f,-12.32f },2.38f,{ 0.53f,0.83f,0.15f },{ 0.0f,0.0f,0.0f } },
+        { { 9.10f,1.91f,5.50f },1.65f,{ 0.59f,0.61f,0.53f },{ 0.0f,0.0f,0.0f } },
+        { { 17.67f,2.99f,-13.78f },2.29f,{ 0.34f,0.39f,0.85f },{ 0.0f,0.0f,0.0f } },
+        { { -14.27f,1.21f,15.30f },0.97f,{ 0.53f,0.65f,0.54f },{ 0.0f,0.0f,0.0f } },
+        { { -19.16f,1.57f,14.65f },2.43f,{ 0.59f,0.34f,0.73f },{ 0.0f,0.0f,0.0f } },
+        { { -6.66f,2.00f,-15.64f },0.85f,{ 0.70f,0.61f,0.36f },{ 0.0f,0.0f,0.0f } },
+        { { -6.85f,1.27f,16.96f },2.21f,{ 0.61f,0.72f,0.32f },{ 0.0f,0.0f,0.0f } },
+        { { 1.58f,1.25f,14.96f },2.89f,{ 0.60f,0.79f,0.15f },{ 0.0f,0.0f,0.0f } },
+        { { 0.28f,1.50f,6.29f },1.38f,{ 0.22f,0.32f,0.92f },{ 0.0f,0.0f,0.0f } },
+        { { 6.79f,2.81f,-8.67f },2.19f,{ 0.35f,0.82f,0.46f },{ 0.0f,0.0f,0.0f } },
+    },
+
+    // light spheres
+    {
+        { { -14.93f,4.33f,-12.66f },0.11f,{ 0.0f,0.0f,0.0f },{ 693.56f,665.82f,763.67f } },
+        { { -13.21f,9.37f,-13.13f },0.17f,{ 0.0f,0.0f,0.0f },{ 16.60f,944.96f,593.69f } },
+        { { -19.88f,6.18f,-15.01f },0.12f,{ 0.0f,0.0f,0.0f },{ 780.40f,789.29f,851.35f } },
+        { { 4.61f,3.97f,12.76f },0.15f,{ 0.0f,0.0f,0.0f },{ 512.67f,848.88f,183.62f } },
+        { { 3.41f,7.22f,-18.33f },0.19f,{ 0.0f,0.0f,0.0f },{ 391.45f,415.40f,695.93f } },
+        { { -12.21f,3.72f,-2.17f },0.16f,{ 0.0f,0.0f,0.0f },{ 182.93f,947.90f,938.42f } },
+        { { -19.93f,7.82f,15.20f },0.17f,{ 0.0f,0.0f,0.0f },{ 723.61f,469.79f,26.05f } },
+        { { 10.17f,8.21f,-10.32f },0.19f,{ 0.0f,0.0f,0.0f },{ 475.16f,506.65f,871.29f } },
+        { { 19.24f,9.82f,9.33f },0.14f,{ 0.0f,0.0f,0.0f },{ 979.16f,61.38f,145.07f } },
+        { { 7.86f,6.59f,14.52f },0.14f,{ 0.0f,0.0f,0.0f },{ 721.67f,484.52f,433.09f } },
+        { { -7.12f,6.17f,-15.74f },0.15f,{ 0.0f,0.0f,0.0f },{ 24.08f,564.86f,41.92f } },
+        { { -14.23f,3.99f,16.02f },0.16f,{ 0.0f,0.0f,0.0f },{ 64.38f,591.51f,402.69f } },
+        { { -6.92f,8.05f,-15.41f },0.16f,{ 0.0f,0.0f,0.0f },{ 84.55f,735.65f,113.17f } },
+        { { -5.25f,7.08f,4.04f },0.13f,{ 0.0f,0.0f,0.0f },{ 568.06f,954.55f,603.87f } },
+        { { -16.08f,9.15f,15.00f },0.20f,{ 0.0f,0.0f,0.0f },{ 44.06f,249.89f,761.35f } },
+        { { 10.67f,8.56f,-6.21f },0.11f,{ 0.0f,0.0f,0.0f },{ 273.80f,883.60f,27.95f } },
+        { { -12.12f,4.01f,-1.04f },0.11f,{ 0.0f,0.0f,0.0f },{ 21.78f,680.70f,667.71f } },
+        { { 1.99f,8.16f,14.74f },0.15f,{ 0.0f,0.0f,0.0f },{ 871.56f,765.77f,897.82f } },
+        { { 6.20f,3.16f,-15.25f },0.14f,{ 0.0f,0.0f,0.0f },{ 577.82f,798.67f,350.24f } },
+        { { -11.46f,4.74f,-12.92f },0.14f,{ 0.0f,0.0f,0.0f },{ 867.04f,270.83f,923.71f } },
+    },
+
+    // quads
+    {
+        // floor
+        {{ 100.0f, 0.0f, -100.0f }, { -100.0f, 0.0f, -100.0f }, { -100.0f, 0.0f, 100.0f },{ 100.0f, 0.0f, 100.0f }, {0.0f, 0.0f, 0.0f},{ 1.0f, 1.0f, 1.0f }, { 0.0f, 0.0f, 0.0f }},
+    },
+
+    // point lights
+    {
+    },
+};
+
 enum class PTScenes
 {
     Box,
+    PlaneSpheres,
 
     Count
 };
@@ -90,11 +167,18 @@ enum class PTScenes
 const char* PTScenesNames[] =
 {
     "Box",
+    "PlaneSpheres"
 };
 static_assert(countof(PTScenesNames) == (uint)PTScenes::Count, "Wrong number of entries in PTScenesNames");
 
 PTScene& GetScene(PTScenes scene)
 {
+    switch (scene)
+    {
+        case PTScenes::Box: return Scene_Box;
+        case PTScenes::PlaneSpheres: return Scene_PlaneSpheres;
+    }
+    static_assert((uint)PTScenes::Count == 2, "Unhandled enum value");
     return Scene_Box;
 }
 
@@ -156,18 +240,18 @@ private:
 
     bool m_keyState[256];
 
-    glm::vec3 m_cameraPos = { 2.780f, 2.730f, -8.0f };
+    glm::vec3 m_cameraPos;
 
     glm::vec2 m_mouseDragPos;
     bool m_mouseDown = false;
-    float m_yaw = 90.0f;
-    float m_pitch = 0.0f;
+    float m_yaw;
+    float m_pitch;
     size_t m_frameCount = 0;
     size_t m_sampleCount = 0;
     float m_startTime = 0.0f;
     float m_stopTime = 0.0f;
 
-    float3 m_skyColor{ 0.01f, 0.01f, 0.01f };
+    float3 m_skyColor;
 
     // values controled by the UI
     float m_fov = 45.0f;
@@ -182,9 +266,9 @@ private:
     bool m_DOFEnable = true;
     float m_DOFFocalLength = 8.0f;
     float m_DOFApertureRadius = 0.1f;
-    BokehShape m_DOFBokehShape = BokehShape::Circle;
+    BokehShape m_DOFBokehShape = BokehShape::SOD;
 
-    PTScenes m_scene = PTScenes::Box;
+    PTScenes m_scene = PTScenes::PlaneSpheres;
 
     bool m_useBlueNoiseRNG = false;
 
@@ -270,10 +354,7 @@ public:
                 scenes.push_back(v);
             }
             if (pGui->addDropdown("Scene", scenes, *(uint32*)&m_scene))
-            {
-                OnChangeScene();
-                ResetIntegration(pSample);
-            }
+                OnChangeScene(pSample);
         }
 
         if (pGui->addCheckBox("Jitter Camera", m_jitter))
@@ -324,14 +405,14 @@ public:
         pGui->addText(buffer);
     }
 
-    void OnChangeScene()
+    void OnChangeScene(SampleCallbacks* pSample)
     {
         PTScene& scene = GetScene(m_scene);
 
-        m_computeVars->setStructuredBuffer("g_spheres", StructuredBuffer::create(m_computeProgram, "g_spheres", scene.spheres.size()));
-        m_computeVars->setStructuredBuffer("g_lightSpheres", StructuredBuffer::create(m_computeProgram, "g_lightSpheres", scene.lightSpheres.size()));
-        m_computeVars->setStructuredBuffer("g_quads", StructuredBuffer::create(m_computeProgram, "g_quads", scene.quads.size()));
-        m_computeVars->setStructuredBuffer("g_plights", StructuredBuffer::create(m_computeProgram, "g_plights", scene.pLights.size()));
+        m_computeVars->setStructuredBuffer("g_spheres", scene.spheres.size() == 0 ? nullptr : StructuredBuffer::create(m_computeProgram, "g_spheres", scene.spheres.size()));
+        m_computeVars->setStructuredBuffer("g_lightSpheres", scene.lightSpheres.size() == 0 ? nullptr : StructuredBuffer::create(m_computeProgram, "g_lightSpheres", scene.lightSpheres.size()));
+        m_computeVars->setStructuredBuffer("g_quads", scene.quads.size() == 0 ? nullptr : StructuredBuffer::create(m_computeProgram, "g_quads", scene.quads.size()));
+        m_computeVars->setStructuredBuffer("g_plights", scene.pLights.size() == 0 ? nullptr : StructuredBuffer::create(m_computeProgram, "g_plights", scene.pLights.size()));
 
         std::fill(&m_keyState[0], &m_keyState[255], false);
 
@@ -351,6 +432,12 @@ public:
             s.geoID = nextID++;
         for (Quad& q : scene.quads)
             q.geoID = nextID++;
+
+        m_cameraPos = scene.cameraPos;
+        m_skyColor = scene.skyColor;
+        m_yaw = 90.0f;
+        m_pitch = 0.0f;
+        UpdateViewMatrix(pSample);
     }
 
     void onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pContext)
@@ -363,7 +450,7 @@ public:
         m_blueNoiseTexture = createTextureFromFile("Data/BlueNoise.bmp", false, false);
         m_computeVars->setTexture("gBlueNoiseTexture", m_blueNoiseTexture);
 
-        OnChangeScene();
+        OnChangeScene(pSample);
     }
 
     void UpdateCamera(SampleCallbacks* pSample)
