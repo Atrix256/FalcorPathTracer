@@ -56,6 +56,9 @@ But also:
 * In path tracing DOF you "scatter" which means you need "random point in 2d shape" for bokeh
  * In rasterization, a common thing is to "scatter while gathering", in which case you need "2d point in shape" test for bokeh.
 
+* better bokeh results recipe:
+ * https://twitter.com/romainguy/status/1009528535436939266
+
 ## Notes
 
 * make this blog post about using falcor
@@ -81,6 +84,14 @@ But also:
 * mitsuba xml file format: https://mynameismjp.wordpress.com/2015/04/04/mitsuba-quick-start-guide/
 
 ## TODOs
+
+* could have a framework for animations.
+ * how many samples per frame (renders that much, writes result, runs update)
+ * number of frames or seconds of video.
+ * delta time between frames.
+ * some update function.
+
+"Longer focals, wider apertures, larger distance separation between subjects"
 
 * may need an option to sample a fixed number of lights maximum per frame.
 

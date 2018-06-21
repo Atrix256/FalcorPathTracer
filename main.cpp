@@ -28,9 +28,38 @@ struct PLight
     float3 color;
 };
 
+// keep in sync with defines in compute.hlsl
+enum class BokehShape : uint32
+{
+    Circle,
+    Square,
+    Ring,
+    Triangle,
+    SOD,
+
+    Count
+};
+
+const char* BokehShapeNames[] =
+{
+    "Circle",
+    "Square",
+    "Ring",
+    "Triangle",
+    "Star of David"
+};
+static_assert(countof(BokehShapeNames) == (uint)BokehShape::Count, "Wrong number of entries in BokehShapeNames");
+
 struct PTScene
 {
     glm::vec3 cameraPos;
+    float yaw;
+    float pitch;
+
+    BokehShape DOFBokehShape;
+    float DOFFocalLength;
+    float DOFApertureRadius;
+
     float3 skyColor;
 
     std::vector<Sphere> spheres;
@@ -43,6 +72,15 @@ PTScene Scene_Box =
 {
     // camera position
     { 2.780f, 2.730f, -8.0f },
+
+    // yaw and pitch
+    90.0f,
+    0.0f,
+
+    // DOF bokeh shape, Focal length and aperture radius
+    BokehShape::Circle,
+    8.0f,
+    0.1f,
 
     // sky color
     { 0.01f, 0.01f, 0.01f },
@@ -92,7 +130,16 @@ PTScene Scene_Box =
 PTScene Scene_PlaneSpheres =
 {
     // camera position
-    { 0.0f, 2.0f, -10.0f },
+    { -23.5f, 6.5f, -10.0f },
+
+    // yaw and pitch
+    49.868561f,
+    -12.702989f,
+
+    // DOF bokeh shape, Focal length and aperture radius
+    BokehShape::SOD,
+    8.0f,
+    0.1f,
 
     // sky color
     { 0.01f, 0.01f, 0.01f },
@@ -181,28 +228,6 @@ PTScene& GetScene(PTScenes scene)
     static_assert((uint)PTScenes::Count == 2, "Unhandled enum value");
     return Scene_Box;
 }
-
-// keep in sync with defines in compute.hlsl
-enum class BokehShape : uint32
-{
-    Circle,
-    Square,
-    Ring,
-    Triangle,
-    SOD,
-
-    Count
-};
-
-const char* BokehShapeNames[] =
-{
-    "Circle",
-    "Square",
-    "Ring",
-    "Triangle",
-    "Star of David"
-};
-static_assert(countof(BokehShapeNames) == (uint)BokehShape::Count, "Wrong number of entries in BokehShapeNames");
 
 static float RandomFloat()
 {
@@ -403,6 +428,12 @@ public:
         rps /= 1000000.0;
         sprintf(buffer, "%f M primary rays per second", rps);
         pGui->addText(buffer);
+
+        pGui->addSeparator();
+        sprintf(buffer, "Camera Pos: %f, %f, %f", m_cameraPos.x, m_cameraPos.y, m_cameraPos.z);
+        pGui->addText(buffer);
+        sprintf(buffer, "Yaw, pitch = %f, %f", m_yaw, m_pitch);
+        pGui->addText(buffer);
     }
 
     void OnChangeScene(SampleCallbacks* pSample)
@@ -435,8 +466,13 @@ public:
 
         m_cameraPos = scene.cameraPos;
         m_skyColor = scene.skyColor;
-        m_yaw = 90.0f;
-        m_pitch = 0.0f;
+        m_yaw = scene.yaw;
+        m_pitch = scene.pitch;
+
+        m_DOFBokehShape = scene.DOFBokehShape;
+        m_DOFFocalLength = scene.DOFFocalLength;
+        m_DOFApertureRadius = scene.DOFApertureRadius;
+
         UpdateViewMatrix(pSample);
     }
 
