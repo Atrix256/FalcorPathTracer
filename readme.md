@@ -85,13 +85,19 @@ But also:
 
 ## TODOs
 
+* visualize DOF debugging
+"Longer focals, wider apertures, larger distance separation between subjects"
+
+
+
+
+* group UI into logical settings. DOF, camera, etc.
+
 * could have a framework for animations.
  * how many samples per frame (renders that much, writes result, runs update)
  * number of frames or seconds of video.
  * delta time between frames.
  * some update function.
-
-"Longer focals, wider apertures, larger distance separation between subjects"
 
 * may need an option to sample a fixed number of lights maximum per frame.
 

@@ -300,6 +300,9 @@ private:
     // options to speed up rendering
     bool m_cosineWeightedhemisphereSampling = true;
 
+    // debug options
+    bool m_visualizeFocalPlane = true;
+
 private:
 
     void ResetIntegration(SampleCallbacks* pSample)
@@ -368,6 +371,9 @@ public:
             if (pGui->addDropdown("DOF Bokeh Shape", bokehShapes, *(uint32*)&m_DOFBokehShape))
                 ResetIntegration(pSample);
         }
+
+        if (pGui->addCheckBox("Visualize Focal Plane", m_visualizeFocalPlane))
+            ResetIntegration(pSample);
 
         {
             Falcor::Gui::DropdownList scenes;
@@ -556,6 +562,11 @@ public:
             m_computeProgram->addDefine("COSINE_WEIGHTED_HEMISPHERE_SAMPLING");
         else
             m_computeProgram->removeDefine("COSINE_WEIGHTED_HEMISPHERE_SAMPLING");
+
+        if (m_visualizeFocalPlane)
+            m_computeProgram->addDefine("VISUALIZE_FOCAL_PLANE");
+        else
+            m_computeProgram->removeDefine("VISUALIZE_FOCAL_PLANE");
 
         if (m_useBlueNoiseRNG)
             m_computeProgram->addDefine("USE_BLUENOISE_RNG");
