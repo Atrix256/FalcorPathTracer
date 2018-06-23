@@ -275,8 +275,6 @@ private:
 
     // values controled by the UI
     float m_fov = 45.0f;
-    bool m_jitter = false;
-    bool m_integrate = true;
     int m_samplesPerFrame = 1;
     int m_maxRayBounces = 4;
     int m_StopAtSampleCount = 0;
@@ -378,13 +376,7 @@ public:
                 OnChangeScene(pSample);
         }
 
-        if (pGui->addCheckBox("Jitter Camera", m_jitter))
-            ResetIntegration(pSample);
-
         if (pGui->addCheckBox("Use Blue Noise RNG", m_useBlueNoiseRNG))
-            ResetIntegration(pSample);
-
-        if (pGui->addCheckBox("Integrate", m_integrate))
             ResetIntegration(pSample);
 
         if (pGui->addCheckBox("Explicit Light Sampling", m_sampleLights))
@@ -524,9 +516,6 @@ public:
             return;
         }
 
-        if (!m_integrate)
-            ResetIntegration(pSample);
-
         UpdateCamera(pSample);
 
         uint32_t width = pSample->getWindow()->getClientAreaWidth();
@@ -563,24 +552,8 @@ public:
         else
             m_computeProgram->removeDefine("ENABLE_DOF");
 
-        // jitter the camera if we should
-        glm::mat4x4 invViewProjMtx = m_invViewProjMtx;
-        if (m_jitter)
-        {
-            float jitterX = (RandomFloat() - 0.5f) / float(width);
-            float jitterY = (RandomFloat() - 0.5f) / float(height);
-
-            glm::mat4x4 viewProjMtx = m_projMtx * m_viewMtx;
-
-            glm::mat4x4 jitterMtx = glm::mat4();
-            jitterMtx[3] = glm::vec4(jitterX, jitterY, 0.0f, 1.0f);
-
-            glm::mat4x4 tempMtx = jitterMtx * viewProjMtx;
-            invViewProjMtx = glm::inverse(tempMtx);
-        }
-
         ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
-        pShaderConstants["invViewProjMtx"] = invViewProjMtx;
+        pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;
         pShaderConstants["skyColor"] = m_skyColor;
         pShaderConstants["lerpAmount"] = 1.0f / float(m_frameCount + 1);
         pShaderConstants["frameRand"] = (uint)RandomUint32();

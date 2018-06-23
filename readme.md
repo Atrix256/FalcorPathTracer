@@ -38,6 +38,8 @@ But also:
 
 ## DOF blog post notes
 
+* talk about falcor
+
 * run your DOF implementation by someone to make sure it seems ok?
 
 * basic camera ray generation using inverse view transform matrix?
@@ -58,6 +60,9 @@ But also:
 
 * better bokeh results recipe:
  * https://twitter.com/romainguy/status/1009528535436939266
+
+* 3 minute dof / bokeh explanation video on youtube
+ * https://www.youtube.com/watch?v=bXpTDtU8wgU
 
 ## Notes
 
@@ -83,57 +88,60 @@ But also:
 
 * mitsuba xml file format: https://mynameismjp.wordpress.com/2015/04/04/mitsuba-quick-start-guide/
 
+## TODOs for DOF / Bokeh Blog post
+
+* do pixels all have the same focus point? if so, you are doing it wrong
+
+* put DOF into it's own UI group?
+
+* clear out UI that isn't needed
+ * including jitter
+
+* rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
+
+* look for TODOs
+
+* rename scene
+
+* when "stop at X samples" is on, it looks like you can't use WASD
+
+* make a way to do animations to make animated gifs or webm videos
+ * specify length in seconds, frames per second, and a sample count per frame.
+ * have a function that sets up the scene parameters based on current time, that gets called.
+ * write each frame to disk, use ffmpeg or gimp to make results
+
+* images to show
+ * scene without jitter or dof / bokeh
+ * add jitter
+ * add dof
+ * add shaped bokeh
+
+* animations to show:
+ * circle around the scene? toggle bokeh on and off periodically
+ * adjust focal length
+ * adjust aperature size
+
+* make a tag (?) in github for the code that goes with this blog post
+* make sure it explains how to compile etc. Maybe have someone try it before you publish
+
 ## TODOs
 
-* visualize DOF debugging
-"Longer focals, wider apertures, larger distance separation between subjects"
 
 
 
 
 * group UI into logical settings. DOF, camera, etc.
 
-* could have a framework for animations.
- * how many samples per frame (renders that much, writes result, runs update)
- * number of frames or seconds of video.
- * delta time between frames.
- * some update function.
-
 * may need an option to sample a fixed number of lights maximum per frame.
-
-* make the generation source code file into a project even though it's barely worth doing so - don't want to waste the effort of having created it
- * sandbox.cpp
-
-* for randomly colored lights, maybe pick a normalized color, and then pick an intensity to multiply it by?
+ * should have a max defined i guess... 
 
 * may want to try even a simple / lame tone mapping to see if it makes the lights not show up as white.
 
 * NaN's are being generated! need to make it so content can't cause NaNs to be generated!
-
-* have starting camera settings be per scene, and set them to their defaults when switching scenes.
- * position & orientation.
- * not sure about DOF settings etc.
-
-* make a different scene that is larger and has small bright light sources in the background
-
-? why does my bokeh have rounded corners??
- * the lights are large and round
+ * hit this when randomly generating spheres
 
 * make a better scene at some point, or have a drop down of different scenes.
  * for bokeh blog post
-
-* more interesting shaped bokeh?
- * triangle?
- * make a star from triangles?
- 
-* shaped aperature support? doesn't mean much until we have specular highlights, but small bright lights will do it too i guess...
-
-* could write a super quick raytracing depth of field blog post.
- * including shaped bokeh?
- ? what unit of measurement is aperture size in?
-  * well, if you do it post transformation, it is in world units aka meters!!
-
-* get rid of unuseful stuff - blue noise, jitter, integrate checkbox etc.
 
 * maybe make this program able to generate a mitsuba path tracer xml scene file?
  * probably need it to make an obj, and then can import into mitsuba.
@@ -145,31 +153,13 @@ But also:
 
 * is the point light calculation correct? I don't think so... check out the non cosine weighted hemisphere equation to make sure
 
-* distance attentuation of point lights too. square falloff
-
 * get mitsuba working after point lights. maybe a small blog post about what's involved?
-
-* i see anti aliasing even when jittering is off... what is up with that? where is it coming from?
- * yeah, the jitter is for TAA. maybe remove it for now?
-
-* DOF -
- * params: aperature size (controls blur), focal length (controls where the focused objects are)
- * could also do shaped bokeh!
-
-* if doing DOF, don't need jitter I don't think.
- * maybe want to be able to turn DOF though
- * and also, jitter still seems to possibly be applicable - like to in focus objects - since you still want to integrate over the pixel
-
-? why isn't jittered sampling on by default? is it not working or??
-
 
 * support explicitly sampling punctual lights so you understand them
 
 * quad light support
 
 * mitsuba verificiation
-
-* rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
 * read this and see what you want to take. it's already in the links section
  * http://simonstechblog.blogspot.com/2018/06/simple-gpu-path-tracer.html?m=1
@@ -181,8 +171,8 @@ But also:
 * are you multiplying by cosine theta correctly when cosine weighted hemisphere sampling is off?
  * reason through it and maybe make it more explicit that it's correct
 
-* depth of field, before specular?
- * also direct light sampling and russian roulette
+* direct light sampling
+* russian roulette
 
 * refraction at some point
 
