@@ -42,6 +42,8 @@ But also:
 
 * run your DOF implementation by someone to make sure it seems ok?
 
+* note that this is a diffuse path tracer only so no shiny specular highlights or reflections, but those would do bokeh too if they were there.
+
 * basic camera ray generation using inverse view transform matrix?
 * jitter: show with on vs off
 * DOF
@@ -90,6 +92,9 @@ But also:
 
 ## TODOs for DOF / Bokeh Blog post
 
+? can we get rid of the UI that's built in for frame time etc?
+? can we make it save window position etc from frame to frame?
+
 * do pixels all have the same focus point? if so, you are doing it wrong
 
 * put DOF into it's own UI group?
@@ -110,11 +115,19 @@ But also:
  * have a function that sets up the scene parameters based on current time, that gets called.
  * write each frame to disk, use ffmpeg or gimp to make results
 
+* use "captureScreen()" function to write the file?
+
 * images to show
  * scene without jitter or dof / bokeh
  * add jitter
  * add dof
  * add shaped bokeh
+
+* images for when explaining how to get good bokeh shots
+ * link to romain guy's tweet?
+ * show when it's in foreground.
+ * show when everythings in background
+ * show a nice final result
 
 * animations to show:
  * circle around the scene? toggle bokeh on and off periodically

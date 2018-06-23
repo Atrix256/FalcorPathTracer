@@ -30,7 +30,9 @@
 static const float c_pi = 3.14159265359f;
 static const float c_goldenRatioConjugate = 0.61803398875f;
 
+// Note, this is how you'd read the blue noise texture: gBlueNoiseTexture[texturePixel].r;
 Texture2D gBlueNoiseTexture;
+
 RWTexture2D<float4> gOutputF32;
 RWTexture2D<float4> gOutputU8;
 
@@ -385,21 +387,9 @@ void main(uint3 gid : SV_DispatchThreadID)
     uint2 pixel = gid.xy;
     float2 uv = float2(pixel) / float2(resolution);
 
-    #ifdef USE_BLUENOISE_RNG
-        uint2 blueNoiseDims;
-        gBlueNoiseTexture.GetDimensions(blueNoiseDims.x, blueNoiseDims.y);
-
-        uint2 texturePixel = pixel;
-        texturePixel.x = texturePixel.x % blueNoiseDims.x;
-        texturePixel.y = texturePixel.y % blueNoiseDims.y;
-
-        float bnValue = frac(gBlueNoiseTexture[texturePixel].r + float(frameNumber) * c_goldenRatioConjugate);
-        //bnValue = frac(bnValue + float(frameRand & 0xFFFFFF) / float(0xFFFFFF));
-        uint rngState = uint(float(0xFFFFFF) * float(bnValue));
-    #else
-        uint rngState = (pixel.x * 1973 + pixel.y * 9277 + frameNumber * 26699) | 1;
-        rngState = rngState ^ frameRand;
-    #endif
+    // set up our initial random number generation state
+    uint rngState = (pixel.x * 1973 + pixel.y * 9277 + frameNumber * 26699) | 1;
+    rngState = rngState ^ frameRand;
 
     float3 ret = float3(0.0f, 0.0f, 0.0f);
     for (uint i = 0; i < SAMPLES_PER_FRAME; ++i)

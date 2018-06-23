@@ -288,8 +288,6 @@ private:
 
     PTScenes m_scene = PTScenes::PlaneSpheres;
 
-    bool m_useBlueNoiseRNG = false;
-
     // options to speed up rendering
     bool m_cosineWeightedhemisphereSampling = true;
 
@@ -332,37 +330,6 @@ public:
 
     void onGuiRender(SampleCallbacks* pSample, Gui* pGui)
     {
-        if (pGui->addCheckBox("Use Cosine Weighted Hemisphere Samples", m_cosineWeightedhemisphereSampling))
-            ResetIntegration(pSample);
-
-        if (pGui->addFloatVar("FOV", m_fov, 1.0f, 180.0f, 1.0f))
-            UpdateProjectionMatrix(pSample);
-
-        if (pGui->addButton("Restart Integration"))
-            ResetIntegration(pSample);
-
-        if(pGui->addCheckBox("Enable Depth Of Field", m_DOFEnable))
-            ResetIntegration(pSample);
-
-        if(pGui->addFloatVar("DOF Focal Length", m_DOFFocalLength))
-            ResetIntegration(pSample);
-
-        if(pGui->addFloatVar("DOF Aperture Size", m_DOFApertureRadius))
-            ResetIntegration(pSample);
-
-        {
-            Falcor::Gui::DropdownList bokehShapes;
-            for (uint i = 0; i < (uint)BokehShape::Count; ++i)
-            {
-                Falcor::Gui::DropdownValue v;
-                v.label = BokehShapeNames[i];
-                v.value = i;
-                bokehShapes.push_back(v);
-            }
-            if (pGui->addDropdown("DOF Bokeh Shape", bokehShapes, *(uint32*)&m_DOFBokehShape))
-                ResetIntegration(pSample);
-        }
-
         {
             Falcor::Gui::DropdownList scenes;
             for (uint i = 0; i < (uint)PTScenes::Count; ++i)
@@ -376,20 +343,57 @@ public:
                 OnChangeScene(pSample);
         }
 
-        if (pGui->addCheckBox("Use Blue Noise RNG", m_useBlueNoiseRNG))
+        if (pGui->addButton("Reset Render"))
             ResetIntegration(pSample);
 
-        if (pGui->addCheckBox("Explicit Light Sampling", m_sampleLights))
-            ResetIntegration(pSample);
+        // the main features of this demo
+        if (pGui->beginGroup("Depth Of Field", true))
+        {
+            if (pGui->addCheckBox("Enable Depth Of Field", m_DOFEnable))
+                ResetIntegration(pSample);
 
-        pGui->addIntVar("Stop At Sample Count", m_StopAtSampleCount, 0);
+            if (pGui->addFloatVar("DOF Focal Length", m_DOFFocalLength))
+                ResetIntegration(pSample);
 
-        pGui->addIntVar("Work Group Size", m_workGroupSize, 1);
+            if (pGui->addFloatVar("DOF Aperture Size", m_DOFApertureRadius))
+                ResetIntegration(pSample);
 
-        pGui->addIntVar("Samples Per Frame", m_samplesPerFrame, 1, 10);
+            {
+                Falcor::Gui::DropdownList bokehShapes;
+                for (uint i = 0; i < (uint)BokehShape::Count; ++i)
+                {
+                    Falcor::Gui::DropdownValue v;
+                    v.label = BokehShapeNames[i];
+                    v.value = i;
+                    bokehShapes.push_back(v);
+                }
+                if (pGui->addDropdown("DOF Bokeh Shape", bokehShapes, *(uint32*)&m_DOFBokehShape))
+                    ResetIntegration(pSample);
+            }
+            pGui->endGroup();
+        }
 
-        if (pGui->addIntVar("Max Ray Bounces", m_maxRayBounces, 1, 10))
-            ResetIntegration(pSample);
+        if (pGui->beginGroup("Other Settings"))
+        {
+            if (pGui->addCheckBox("Use Cosine Weighted Hemisphere Samples", m_cosineWeightedhemisphereSampling))
+                ResetIntegration(pSample);
+
+            if (pGui->addFloatVar("FOV", m_fov, 1.0f, 180.0f, 1.0f))
+                UpdateProjectionMatrix(pSample);
+
+            if (pGui->addCheckBox("Explicit Light Sampling", m_sampleLights))
+                ResetIntegration(pSample);
+
+            pGui->addIntVar("Stop At Sample Count", m_StopAtSampleCount, 0);
+
+            pGui->addIntVar("Work Group Size", m_workGroupSize, 1);
+
+            pGui->addIntVar("Samples Per Frame", m_samplesPerFrame, 1, 10);
+
+            if (pGui->addIntVar("Max Ray Bounces", m_maxRayBounces, 1, 10))
+                ResetIntegration(pSample);
+            pGui->endGroup();
+        }
 
         uint32_t width = pSample->getWindow()->getClientAreaWidth();
         uint32_t height = pSample->getWindow()->getClientAreaHeight();
@@ -541,11 +545,6 @@ public:
             m_computeProgram->addDefine("COSINE_WEIGHTED_HEMISPHERE_SAMPLING");
         else
             m_computeProgram->removeDefine("COSINE_WEIGHTED_HEMISPHERE_SAMPLING");
-
-        if (m_useBlueNoiseRNG)
-            m_computeProgram->addDefine("USE_BLUENOISE_RNG");
-        else
-            m_computeProgram->removeDefine("USE_BLUENOISE_RNG");
 
         if (m_DOFEnable)
             m_computeProgram->addDefine("ENABLE_DOF");
