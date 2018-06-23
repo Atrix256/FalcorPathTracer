@@ -208,8 +208,8 @@ enum class PTScenes
 
 const char* PTScenesNames[] =
 {
-    "Box",
-    "PlaneSpheres"
+    "Cornell Box",
+    "Face And Bokeh"
 };
 static_assert(countof(PTScenesNames) == (uint)PTScenes::Count, "Wrong number of entries in PTScenesNames");
 

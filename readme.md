@@ -92,21 +92,11 @@ But also:
 
 ## TODOs for DOF / Bokeh Blog post
 
-? can we get rid of the UI that's built in for frame time etc?
-? can we make it save window position etc from frame to frame?
-
 * do pixels all have the same focus point? if so, you are doing it wrong
-
-* put DOF into it's own UI group?
-
-* clear out UI that isn't needed
- * including jitter
 
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
 * look for TODOs
-
-* rename scene
 
 * when "stop at X samples" is on, it looks like you can't use WASD
 
@@ -114,8 +104,7 @@ But also:
  * specify length in seconds, frames per second, and a sample count per frame.
  * have a function that sets up the scene parameters based on current time, that gets called.
  * write each frame to disk, use ffmpeg or gimp to make results
-
-* use "captureScreen()" function to write the file?
+ * use "captureScreen()" function to write the file?
 
 * images to show
  * scene without jitter or dof / bokeh
