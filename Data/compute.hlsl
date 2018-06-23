@@ -368,14 +368,6 @@ float3 LightOutgoing(in CollisionInfo collisionInfo, in float3 rayHitPos, inout 
         // else we missed so we are done
         else
         {
-            // visualize the focal plane if we should
-            #if VISUALIZE_FOCAL_PLANE
-            // TODO: if the ray intersects the focal plane, add some emissive red to the result? handle the hit case as well!
-            // TODO: calculate plane for focal plane. has normal of -viewDirection and make focal point be a point on the plane. should be able to calculate plane on CPU and send as a constant.
-            // TODO: if ray intersects plane in this case, add some color like we do with sky color
-            // TODO: if in the "hit" case, if the ray hits the plane and it happens before the collision time found, add some color too.
-            #endif
-
             lightSum += skyColor * lightMultiplier;
             i = MAX_RAY_BOUNCES;
         }
