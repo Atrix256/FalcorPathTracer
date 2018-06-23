@@ -2,6 +2,14 @@
 #include "SampleTest.h"
 #include <random>
 
+#define ANIMATION_TRACK 1
+/*
+    Animation Tracks:
+    0 = off
+    1 = Face and Bokeh Scene: Adjust Focal Length
+    2 = Face and Bokeh Scene: Adjust Aperature Size
+*/
+
 using namespace Falcor;
 
 struct Sphere
@@ -68,7 +76,7 @@ struct PTScene
     std::vector<PLight> pLights;
 };
 
-PTScene Scene_Box =
+PTScene Scene_CornellBox =
 {
     // camera position
     { 2.780f, 2.730f, -8.0f },
@@ -127,7 +135,7 @@ PTScene Scene_Box =
     },
 };
 
-PTScene Scene_PlaneSpheres =
+PTScene Scene_FaceAndBokeh =
 {
     // camera position
     { 0.0f, 5.0f, -16.0f },
@@ -200,8 +208,8 @@ PTScene Scene_PlaneSpheres =
 
 enum class PTScenes
 {
-    Box,
-    PlaneSpheres,
+    CornellBox,
+    FaceAndBokeh,
 
     Count
 };
@@ -217,11 +225,11 @@ PTScene& GetScene(PTScenes scene)
 {
     switch (scene)
     {
-        case PTScenes::Box: return Scene_Box;
-        case PTScenes::PlaneSpheres: return Scene_PlaneSpheres;
+        case PTScenes::CornellBox: return Scene_CornellBox;
+        case PTScenes::FaceAndBokeh: return Scene_FaceAndBokeh;
     }
     static_assert((uint)PTScenes::Count == 2, "Unhandled enum value");
-    return Scene_Box;
+    return Scene_CornellBox;
 }
 
 static float RandomFloat()
@@ -286,7 +294,7 @@ private:
     float m_DOFApertureRadius = 0.1f;
     BokehShape m_DOFBokehShape = BokehShape::SOD;
 
-    PTScenes m_scene = PTScenes::PlaneSpheres;
+    PTScenes m_scene = PTScenes::FaceAndBokeh;
 
     // options to speed up rendering
     bool m_cosineWeightedhemisphereSampling = true;
@@ -510,8 +518,62 @@ public:
         }
     }
 
+    template <uint TRACK_NUM>
+    void AnimationTrack(SampleCallbacks* pSample)
+    {
+
+    }
+
+    template<>
+    void AnimationTrack<1>(SampleCallbacks* pSample)
+    {
+        // video settings
+        static const size_t c_samplesPerFrame = 10;
+        static const size_t c_fps = 30;
+        static const float  c_lengthSeconds = 2.0f;
+
+        // On sample 0 do initial setup
+        static size_t rawSampleIndex = 0;
+        if (rawSampleIndex == 0)
+        {
+            pSample->toggleText(false);
+            pSample->toggleUI(false);
+            m_scene = PTScenes::FaceAndBokeh;
+            OnChangeScene(pSample);
+        }
+
+        // first couple samples seem to be black, so skip them.
+        size_t sampleIndex = rawSampleIndex;
+        if (sampleIndex > 2)
+            sampleIndex -= 2;
+        else
+            sampleIndex = 0;
+
+        // calculate current time, and stop doing animation logic / screen captures when we are done.
+        // Note: can't shut down app because we have to wait for screen caps to finish.
+        size_t frame = sampleIndex / c_samplesPerFrame;
+        size_t nextFrame = (sampleIndex + 1) / c_samplesPerFrame;
+        float timeSeconds = float(frame) / float(c_fps);
+        if (timeSeconds >= c_lengthSeconds)
+        {
+            return;
+        }
+
+        // handle writing a frame when it's done
+        if (frame != nextFrame)
+        {
+            pSample->captureScreen("frame","out");
+            ResetIntegration(pSample);
+        }
+
+        ++rawSampleIndex;
+    }
+
     void onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
     {
+        UpdateCamera(pSample);
+        AnimationTrack<ANIMATION_TRACK>(pSample);
+
         PTScene& scene = GetScene(m_scene);
 
         if (m_StopAtSampleCount > 0 && m_sampleCount >= m_StopAtSampleCount)
@@ -519,8 +581,6 @@ public:
             pContext->copyResource(pTargetFbo->getColorTexture(0).get(), m_outputU8.get());
             return;
         }
-
-        UpdateCamera(pSample);
 
         uint32_t width = pSample->getWindow()->getClientAreaWidth();
         uint32_t height = pSample->getWindow()->getClientAreaHeight();

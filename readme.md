@@ -92,13 +92,13 @@ But also:
 
 ## TODOs for DOF / Bokeh Blog post
 
+* hide UI while rendering animations
+
 * do pixels all have the same focus point? if so, you are doing it wrong
 
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
 * look for TODOs
-
-* when "stop at X samples" is on, it looks like you can't use WASD
 
 * make a way to do animations to make animated gifs or webm videos
  * specify length in seconds, frames per second, and a sample count per frame.
@@ -123,7 +123,7 @@ But also:
  * adjust focal length
  * adjust aperature size
 
-* make a tag (?) in github for the code that goes with this blog post
+* make a tag (?) in github for the code that goes with this blog post. understand how those work, but that's what you can put on your blog post i guess!
 * make sure it explains how to compile etc. Maybe have someone try it before you publish
 
 ## TODOs
