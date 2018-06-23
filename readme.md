@@ -92,13 +92,22 @@ But also:
 
 ## TODOs for DOF / Bokeh Blog post
 
-* hide UI while rendering animations
+? is there a way to get focal length displayed as text on the screen?
+
+* maybe have a minimum distance for the animation that does focal plane stuff.
+
+? does animation logic need the frame number? maybe just a bool to say 'this is the first time' would be enough.
+ * or maybe could check for percent being 0.
+
+* figure out how to use ffmpeg to make webm files
 
 * do pixels all have the same focus point? if so, you are doing it wrong
 
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
 * look for TODOs
+
+? maybe try updating falcor? might get some fixes or something.
 
 * make a way to do animations to make animated gifs or webm videos
  * specify length in seconds, frames per second, and a sample count per frame.

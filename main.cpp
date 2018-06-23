@@ -12,6 +12,8 @@
 
 using namespace Falcor;
 
+static const float c_pi = 3.14159265359f;
+
 struct Sphere
 {
     float3 position;
@@ -518,19 +520,39 @@ public:
         }
     }
 
+    static float Lerp(float A, float B, float t)
+    {
+        return A * (1.0f - t) + B * t;
+    }
+
     template <uint TRACK_NUM>
-    void AnimationTrack(SampleCallbacks* pSample)
+    void AnimationLogic(SampleCallbacks* pSample, size_t frame, float timeSeconds)
     {
 
     }
 
-    template<>
-    void AnimationTrack<1>(SampleCallbacks* pSample)
+    template <>
+    void AnimationLogic<1>(SampleCallbacks* pSample, size_t frame, float percent)
+    {
+        if (frame == 0)
+        {
+            m_scene = PTScenes::FaceAndBokeh;
+            OnChangeScene(pSample);
+        }
+
+        float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
+
+        m_DOFFocalLength = Lerp(3.0f, 32.0f, animationTime);
+    }
+
+    template <uint TRACK_NUM>
+    void AnimationTrack(SampleCallbacks* pSample)
     {
         // video settings
         static const size_t c_samplesPerFrame = 10;
         static const size_t c_fps = 30;
         static const float  c_lengthSeconds = 2.0f;
+        static const size_t c_numFrames = size_t(float(c_fps) * c_lengthSeconds);
 
         // On sample 0 do initial setup
         static size_t rawSampleIndex = 0;
@@ -538,8 +560,6 @@ public:
         {
             pSample->toggleText(false);
             pSample->toggleUI(false);
-            m_scene = PTScenes::FaceAndBokeh;
-            OnChangeScene(pSample);
         }
 
         // first couple samples seem to be black, so skip them.
@@ -549,14 +569,20 @@ public:
         else
             sampleIndex = 0;
 
-        // calculate current time, and stop doing animation logic / screen captures when we are done.
+        // calculate where we are and stop doing animation logic / screen captures when we are done.
         // Note: can't shut down app because we have to wait for screen caps to finish.
         size_t frame = sampleIndex / c_samplesPerFrame;
         size_t nextFrame = (sampleIndex + 1) / c_samplesPerFrame;
-        float timeSeconds = float(frame) / float(c_fps);
-        if (timeSeconds >= c_lengthSeconds)
+        if (frame == c_numFrames)
         {
             return;
+        }
+
+        // do animation logic
+        if (rawSampleIndex == 0 || frame != nextFrame)
+        {
+            float percent = float(nextFrame) / float(c_numFrames);
+            AnimationLogic<TRACK_NUM>(pSample, nextFrame, percent);
         }
 
         // handle writing a frame when it's done
