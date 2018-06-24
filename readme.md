@@ -92,6 +92,8 @@ But also:
 
 ## TODOs for DOF / Bokeh Blog post
 
+* the videos are kind of large in resolution (and file size). maybe make window smaller for making videos.
+
 ? is there a way to get focal length displayed as text on the screen?
 
 * maybe have a minimum distance for the animation that does focal plane stuff.
@@ -222,6 +224,9 @@ But also:
 ? tone mapping?
 
 * should you have a denoise option?
+
+* chromatic abberation
+* motion blur
 
 Next: specular!  Make a short blog post about this and a tag / release to link to from the blog post?
 * show this source to patrick so he can see how falcor works

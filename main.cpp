@@ -549,7 +549,7 @@ public:
     void AnimationTrack(SampleCallbacks* pSample)
     {
         // video settings
-        static const size_t c_samplesPerFrame = 10;
+        static const size_t c_samplesPerFrame = 1000;
         static const size_t c_fps = 30;
         static const float  c_lengthSeconds = 2.0f;
         static const size_t c_numFrames = size_t(float(c_fps) * c_lengthSeconds);
