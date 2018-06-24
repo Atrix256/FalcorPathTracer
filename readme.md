@@ -110,6 +110,9 @@ But also:
 
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
+? can we importance sample the lense? like... shoot a ray at a random point on the lights from the camera each frame, like we do for surfaces
+ * ... i think we can....
+
 * try low discrepancy sequence on the lense? may make the noise in the bokeh be less white
 
 * look for TODOs
