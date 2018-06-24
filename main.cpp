@@ -546,7 +546,7 @@ public:
 
         // do per frame logic
         float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
-        m_DOFFocalLength = Lerp(3.0f, 32.0f, animationTime);
+        m_DOFFocalLength = Lerp(5.0f, 48.0f, animationTime);
     }
 
     template <uint TRACK_NUM>

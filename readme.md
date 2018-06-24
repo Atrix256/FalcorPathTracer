@@ -98,6 +98,8 @@ But also:
 
 * the videos are kind of large in resolution (and file size). maybe make window smaller for making videos.
 
+* try putting parameters on a triangle wave instead of a sine wave.
+
 * make animation focus go farther, so you can see the point lights become non bokeh.
 
 ? is there a way to get focal length displayed as text on the screen?
@@ -105,6 +107,8 @@ But also:
 * do pixels all have the same focus point? if so, you are doing it wrong. Figure lens cameras out.
 
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
+
+* try low discrepancy sequence on the lense? may make the noise in the bokeh be less white
 
 * look for TODOs
 
