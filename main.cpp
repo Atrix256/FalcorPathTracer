@@ -2,7 +2,7 @@
 #include "SampleTest.h"
 #include <random>
 
-#define ANIMATION_TRACK 1
+#define ANIMATION_TRACK 2
 /*
     Animation Tracks:
     0 = off
@@ -12,6 +12,9 @@
 
 static const size_t c_animationSamplesPerFrame = 1000;
 static const size_t c_animationNumFrames = 60;
+
+static const size_t c_width = 400;
+static const size_t c_height = 300;
 
 using namespace Falcor;
 
@@ -549,6 +552,21 @@ public:
         m_DOFFocalLength = Lerp(5.0f, 48.0f, animationTime);
     }
 
+    template <>
+    void AnimationLogic<2>(SampleCallbacks* pSample, float percent)
+    {
+        // do initial setup
+        if (percent == 0.0f)
+        {
+            m_scene = PTScenes::FaceAndBokeh;
+            OnChangeScene(pSample);
+        }
+
+        // do per frame logic
+        float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
+        m_DOFApertureRadius = Lerp(0.1f, 10.0f, animationTime);
+    }
+
     template <uint TRACK_NUM>
     void AnimationTrack(SampleCallbacks* pSample)
     {
@@ -591,6 +609,12 @@ public:
         }
 
         ++rawSampleIndex;
+    }
+
+    template <>
+    void AnimationTrack<0>(SampleCallbacks* pSample)
+    {
+
     }
 
     void onFrameRender(SampleCallbacks* pSample, RenderContext::SharedPtr pContext, Fbo::SharedPtr pTargetFbo)
@@ -769,8 +793,8 @@ int main(int argc, char** argv)
     SampleConfig config;
     config.windowDesc.title = "Path Tracer";
     config.windowDesc.resizableWindow = true;
-    config.windowDesc.width = 800;
-    config.windowDesc.height = 600;
+    config.windowDesc.width = c_width;
+    config.windowDesc.height = c_height;
 
     config.deviceDesc.depthFormat = ResourceFormat::Unknown;
 

@@ -38,6 +38,8 @@ But also:
 
 ## DOF blog post notes
 
+* videos done at 400x300?
+
 * talk about falcor
 
 * run your DOF implementation by someone to make sure it seems ok?
