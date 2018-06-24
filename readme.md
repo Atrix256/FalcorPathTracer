@@ -66,6 +66,10 @@ But also:
 * 3 minute dof / bokeh explanation video on youtube
  * https://www.youtube.com/watch?v=bXpTDtU8wgU
 
+* pinhole camera on wikipedia: https://en.wikipedia.org/wiki/Pinhole_camera_model#The_geometry_and_mathematics_of_the_pinhole_camera
+* lens based camera: https://en.wikipedia.org/wiki/Camera_lens#Theory_of_operation
+
+
 ## Notes
 
 * make this blog post about using falcor
@@ -93,6 +97,10 @@ But also:
 ## TODOs for DOF / Bokeh Blog post
 
 * the videos are kind of large in resolution (and file size). maybe make window smaller for making videos.
+
+* rename compute.hlsl to something else. maybe pathtrace
+
+* make animation focus go farther, so you can see the point lights become non bokeh.
 
 ? is there a way to get focal length displayed as text on the screen?
 

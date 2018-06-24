@@ -3,3 +3,5 @@ bin/
 *.vcxproj.user
 *.vcxproj.filters
 x64/
+out/*.png
+out/*.webm
