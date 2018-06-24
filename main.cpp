@@ -7,8 +7,11 @@
     Animation Tracks:
     0 = off
     1 = Face and Bokeh Scene: Adjust Focal Length
-    2 = Face and Bokeh Scene: Adjust Aperature Size
+    2 = Face and Bokeh Scene: Adjust Aperature Size (TODO)
 */
+
+static const size_t c_animationSamplesPerFrame = 1000;
+static const size_t c_animationNumFrames = 60;
 
 using namespace Falcor;
 
@@ -526,34 +529,29 @@ public:
     }
 
     template <uint TRACK_NUM>
-    void AnimationLogic(SampleCallbacks* pSample, size_t frame, float timeSeconds)
+    void AnimationLogic(SampleCallbacks* pSample, float timeSeconds)
     {
 
     }
 
     template <>
-    void AnimationLogic<1>(SampleCallbacks* pSample, size_t frame, float percent)
+    void AnimationLogic<1>(SampleCallbacks* pSample, float percent)
     {
-        if (frame == 0)
+        // do initial setup
+        if (percent == 0.0f)
         {
             m_scene = PTScenes::FaceAndBokeh;
             OnChangeScene(pSample);
         }
 
+        // do per frame logic
         float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
-
         m_DOFFocalLength = Lerp(3.0f, 32.0f, animationTime);
     }
 
     template <uint TRACK_NUM>
     void AnimationTrack(SampleCallbacks* pSample)
     {
-        // video settings
-        static const size_t c_samplesPerFrame = 1000;
-        static const size_t c_fps = 30;
-        static const float  c_lengthSeconds = 2.0f;
-        static const size_t c_numFrames = size_t(float(c_fps) * c_lengthSeconds);
-
         // On sample 0 do initial setup
         static size_t rawSampleIndex = 0;
         if (rawSampleIndex == 0)
@@ -571,9 +569,9 @@ public:
 
         // calculate where we are and stop doing animation logic / screen captures when we are done.
         // Note: can't shut down app because we have to wait for screen caps to finish.
-        size_t frame = sampleIndex / c_samplesPerFrame;
-        size_t nextFrame = (sampleIndex + 1) / c_samplesPerFrame;
-        if (frame == c_numFrames)
+        size_t frame = sampleIndex / c_animationSamplesPerFrame;
+        size_t nextFrame = (sampleIndex + 1) / c_animationSamplesPerFrame;
+        if (frame == c_animationNumFrames)
         {
             return;
         }
@@ -581,8 +579,8 @@ public:
         // do animation logic
         if (rawSampleIndex == 0 || frame != nextFrame)
         {
-            float percent = float(nextFrame) / float(c_numFrames);
-            AnimationLogic<TRACK_NUM>(pSample, nextFrame, percent);
+            float percent = float(nextFrame) / float(c_animationNumFrames-1);
+            AnimationLogic<TRACK_NUM>(pSample, percent);
         }
 
         // handle writing a frame when it's done
