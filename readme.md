@@ -70,7 +70,29 @@ But also:
 
 * pinhole camera on wikipedia: https://en.wikipedia.org/wiki/Pinhole_camera_model#The_geometry_and_mathematics_of_the_pinhole_camera
 * lens based camera: https://en.wikipedia.org/wiki/Camera_lens#Theory_of_operation
+* more on pinhole: https://www.scratchapixel.com/lessons/3d-basic-rendering/3d-viewing-pinhole-camera/virtual-pinhole-camera-model
+* circle of confusion: https://en.m.wikipedia.org/wiki/Circle_of_confusion
 
+Rendering with perspective projection matrix is a pinhole camera.
+
+Smaller hole = sharper image, but also dimmer.  There's also a limit to how small it can get (diffraction limit. Could link!)
+
+To get more light (faster exposure) and also sharper images, can replace the pin hole with a lens.
+
+Unfortunately now only one point (plane?) is in focus though, unlike pin hole cameras which have focus not based on distance, but on pin hole (aperture) size! (Could do a pinhole camera with varying hole size!)
+
+The longer the focal length (the less curved the lens) the longer it takes (over distance) to make the image less focused. This means, the acceptable range of focus is bigger. A deeper depth of field.
+
+The more curved (the shorter the focal length) the shallower/shorter the depth of field is.
+
+Todo: how does aperture size fit in here?
+
+Good bokeh shots: (from Romain guy)
+* Wider aperture
+* Longer depth of field
+* Big distances between foreground and background
+
+Show diagrams and show where screen is (near and far plane) in each model.
 
 ## Notes
 
@@ -98,32 +120,18 @@ But also:
 
 ## TODOs for DOF / Bokeh Blog post
 
-* the videos are kind of large in resolution (and file size). maybe make window smaller for making videos.
+* maybe put a couple more balls in the scene in the background, so there is something to see out of focus etc
 
-* try putting parameters on a triangle wave instead of a sine wave.
-
-* make animation focus go farther, so you can see the point lights become non bokeh.
-
-? is there a way to get focal length displayed as text on the screen?
+* try simulating a pinhole camera with varying aperture sizes
 
 * do pixels all have the same focus point? if so, you are doing it wrong. Figure lens cameras out.
+ * you are close but not quite right. need to do the offset at the camera position, but yes, aim at where the pinhole camera would, at the focal distance
 
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
-? can we importance sample the lense? like... shoot a ray at a random point on the lights from the camera each frame, like we do for surfaces
- * ... i think we can....
-
-* try low discrepancy sequence on the lense? may make the noise in the bokeh be less white
+? Do I need to multiply by area of aperture or anything for bokeh? Even when circular...
 
 * look for TODOs
-
-? maybe try updating falcor? might get some fixes or something.
-
-* make a way to do animations to make animated gifs or webm videos
- * specify length in seconds, frames per second, and a sample count per frame.
- * have a function that sets up the scene parameters based on current time, that gets called.
- * write each frame to disk, use ffmpeg or gimp to make results
- * use "captureScreen()" function to write the file?
 
 * images to show
  * scene without jitter or dof / bokeh
@@ -149,7 +157,7 @@ But also:
 
 
 
-
+? maybe try updating falcor? might get some fixes or something.
 
 * group UI into logical settings. DOF, camera, etc.
 
@@ -199,6 +207,13 @@ But also:
 
 * try profiling with renderdoc or vtune or who knows what else to see if you can find any obvious bottlenecks to fix
 
+? can we importance sample the lense? like... shoot a ray at a random point on the lights from the camera each frame, like we do for surfaces
+ * put this on the todo list, can be a follow up thing
+
+* try low discrepancy sequence on the lense? may make the noise in the bokeh be less white
+ * if the importance sampling doesn't work.
+ * Do you need to multiply the result by a scaling factor or anything?
+
 * TAA version
  * jitter camera
  * use IGN 5.5 noise
@@ -233,8 +248,12 @@ But also:
 
 * should you have a denoise option?
 
+* ray marched fog
+
 * chromatic abberation
 * motion blur
+
+* textures. IQ has an aarticle on ray differentials for this
 
 Next: specular!  Make a short blog post about this and a tag / release to link to from the blog post?
 * show this source to patrick so he can see how falcor works

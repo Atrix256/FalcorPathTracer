@@ -1,16 +1,17 @@
 #include "Falcor.h"
 #include "SampleTest.h"
 #include <random>
+#include <sstream>
 
-#define ANIMATION_TRACK 2
+#define ANIMATION_TRACK 1
 /*
     Animation Tracks:
     0 = off
     1 = Face and Bokeh Scene: Adjust Focal Length
-    2 = Face and Bokeh Scene: Adjust Aperature Size (TODO)
+    2 = Face and Bokeh Scene: Adjust Aperature Size
 */
 
-static const size_t c_animationSamplesPerFrame = 1000;
+static const size_t c_animationSamplesPerFrame = 100;
 static const size_t c_animationNumFrames = 60;
 
 static const size_t c_width = 400;
@@ -162,16 +163,48 @@ PTScene Scene_FaceAndBokeh =
 
     // spheres
     {
+        // head
         { { -1.0f, 2.0f, 2.0f },3.0f,{ 1.0f, 0.25f, 0.25f },{ 0.0f,0.0f,0.0f } },
         { {  1.0f, 1.5f, -1.0f },1.5f,{ 0.25f, 1.0f, 0.25f },{ 0.0f,0.0f,0.0f } },
-
-        { {  4.0f, 2.0f, 0.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
 
         { {  -0.8f, 3.5f, -0.8f },1.0f,{ 1.0f, 1.0f, 1.0f },{ 0.0f,0.0f,0.0f } },
         { {   1.6f, 3.5f,  0.8f },1.0f,{ 1.0f, 1.0f, 1.0f },{ 0.0f,0.0f,0.0f } },
 
         { {  -0.6f, 3.5f, -1.0f },0.75f,{ 0.1f, 0.1f, 0.1f },{ 0.0f,0.0f,0.0f } },
         { {   1.8f, 3.5f,  0.6f },0.75f,{ 0.1f, 0.1f, 0.1f },{ 0.0f,0.0f,0.0f } },
+
+
+        // background spheres
+        { { 4.0f, 2.0f, 0.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { 6.0f, 2.0f, 4.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { 8.0f, 2.0f, 8.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { 10.0f, 2.0f, 12.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { 12.0f, 2.0f, 16.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { 14.0f, 2.0f, 20.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { 16.0f, 2.0f, 24.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { 18.0f, 2.0f, 28.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { 20.0f, 2.0f, 32.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { 22.0f, 2.0f, 36.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { 24.0f, 2.0f, 40.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+
+        // foreground spheres
+
+        { { -3.0f, 2.0f, -2.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { -4.0f, 2.0f, -4.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
+
+        { { -5.0f, 2.0f, -6.0f },1.0f,{ 0.25f, 0.25f, 1.0f },{ 0.0f,0.0f,0.0f } },
     },
 
     // light spheres
@@ -288,6 +321,8 @@ private:
     float m_stopTime = 0.0f;
 
     float3 m_skyColor;
+
+    std::string m_animationMessage;
 
     // values controled by the UI
     float m_fov = 45.0f;
@@ -550,6 +585,11 @@ public:
         // do per frame logic
         float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
         m_DOFFocalLength = Lerp(5.0f, 48.0f, animationTime);
+
+        // set the text
+        std::ostringstream stringStream;
+        stringStream << "Focal Length: " << m_DOFFocalLength;
+        m_animationMessage = stringStream.str();
     }
 
     template <>
@@ -565,6 +605,11 @@ public:
         // do per frame logic
         float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
         m_DOFApertureRadius = Lerp(0.1f, 10.0f, animationTime);
+
+        // set the text
+        std::ostringstream stringStream;
+        stringStream << "Aperture Radius: " << m_DOFApertureRadius;
+        m_animationMessage = stringStream.str();
     }
 
     template <uint TRACK_NUM>
@@ -718,6 +763,12 @@ public:
         m_sampleCount += m_samplesPerFrame;
 
         m_stopTime = pSample->getCurrentTime();
+
+        #if ANIMATION_TRACK != 0
+            pSample->toggleText(true);
+            pSample->renderText(m_animationMessage, glm::vec2(10, 10));
+            pSample->toggleText(false);
+        #endif
     }
 
     void onResizeSwapChain(SampleCallbacks* pSample, uint32_t width, uint32_t height)
