@@ -45,6 +45,9 @@ cbuffer ShaderConstants
     uint frameNumber;
     float DOFFocalLength;
     float DOFApertureRadius;
+    float3 cameraPos;
+    float3 cameraLeft;
+    float3 cameraUp;
 };
 
 StructuredBuffer<Sphere> g_spheres;
@@ -88,23 +91,21 @@ Ray GetRayForPixel(float2 uv, inout uint state)
     float2 pixelClipSpace = uv * 2.0f - 1.0f;
     pixelClipSpace.x *= -1.0f;
 
-    // transform the clip space pixel at z 0 to get the ray origin in world space
+    // the ray starts at the camera
     Ray ret;
-    float4 origin = mul(float4(pixelClipSpace, 0.0f, 1.0f), invViewProjMtx);
-    origin /= origin.w;
-    ret.origin = origin.xyz;
+    ret.origin = cameraPos;
 
-    // transform the clip space pixel at a different z to get another world space point along the ray, to make the direction from
-    float4 destination = mul(float4(pixelClipSpace, -0.1f, 1.0f), invViewProjMtx);
+    // transform the clip space pixel at z 0 to be able to calculate the ray origin in world space
+    float4 destination = mul(float4(pixelClipSpace, 0.0f, 1.0f), invViewProjMtx);
     destination /= destination.w;
-    ret.direction = normalize(destination.xyz - origin.xyz);
+    ret.direction = -normalize(destination.xyz - ret.origin);
 
     // if DOF is on, need to adjust the origin and direction based on aperture size and shape
     #ifdef ENABLE_DOF
         float3 fwdVector = ret.direction;
-        float3 upVector = normalize(mul(float4(0.0f, 1.0f, 0.0f, 0.0f), invViewProjMtx).xyz);
-        float3 leftVector = normalize(cross(fwdVector, upVector.xyz));
-        float3 focusPoint = ret.origin + ret.direction * DOFFocalLength;
+        float3 upVector = cameraUp;
+        float3 leftVector = cameraLeft;
+        float3 focusPoint = ret.origin + fwdVector * DOFFocalLength;
 
         #if BOKEH_SHAPE == BOKEH_SHAPE_SQUARE
             float2 offset = (float2(RandomFloat01(state), RandomFloat01(state)) * 2.0f - 1.0f) * DOFApertureRadius;

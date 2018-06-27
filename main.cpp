@@ -3,7 +3,7 @@
 #include <random>
 #include <sstream>
 
-#define ANIMATION_TRACK 1
+#define ANIMATION_TRACK 0
 /*
     Animation Tracks:
     0 = off
@@ -14,8 +14,8 @@
 static const size_t c_animationSamplesPerFrame = 100;
 static const size_t c_animationNumFrames = 60;
 
-static const size_t c_width = 400;
-static const size_t c_height = 300;
+static const size_t c_width = 800;
+static const size_t c_height = 600;
 
 using namespace Falcor;
 
@@ -45,7 +45,7 @@ struct PLight
     float3 color;
 };
 
-// keep in sync with defines in compute.hlsl
+// keep in sync with defines in pathtrace.hlsl
 enum class BokehShape : uint32
 {
     Circle,
@@ -521,7 +521,7 @@ public:
 
     void onLoad(SampleCallbacks* pSample, RenderContext::SharedPtr pContext)
     {
-        m_computeProgram = ComputeProgram::createFromFile("compute.hlsl", "main");
+        m_computeProgram = ComputeProgram::createFromFile("pathtrace.hlsl", "main");
         m_computeState = ComputeState::create();
         m_computeState->setProgram(m_computeProgram);
         m_computeVars = ComputeVars::create(m_computeProgram->getReflector());
@@ -542,16 +542,16 @@ public:
         glm::vec4 left = glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f) * m_viewMtx;
 
         if (m_keyState['W'])
-            offset += glm::vec3(forward.x, forward.y, forward.z);
+            offset += glm::vec3(forward);
         
         if (m_keyState['S'])
-            offset -= glm::vec3(forward.x, forward.y, forward.z);
+            offset -= glm::vec3(forward);
 
         if (m_keyState['A'])
-            offset += glm::vec3(left.x, left.y, left.z);
+            offset += glm::vec3(left);
 
         if (m_keyState['D'])
-            offset -= glm::vec3(left.x, left.y, left.z);
+            offset -= glm::vec3(left);
 
         if (offset.x != 0 || offset.y != 0)
         {
@@ -713,6 +713,10 @@ public:
 
         pShaderConstants["DOFFocalLength"] = m_DOFFocalLength;
         pShaderConstants["DOFApertureRadius"] = m_DOFApertureRadius;
+
+        pShaderConstants["cameraPos"] = m_cameraPos;
+        pShaderConstants["cameraLeft"] = glm::vec3(glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f) * m_viewMtx);
+        pShaderConstants["cameraUp"] = glm::vec3(glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) * m_viewMtx);
 
         for (uint i = 0; i < scene.spheres.size(); ++i)
         {

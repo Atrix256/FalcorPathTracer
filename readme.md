@@ -120,12 +120,9 @@ Show diagrams and show where screen is (near and far plane) in each model.
 
 ## TODOs for DOF / Bokeh Blog post
 
-* maybe put a couple more balls in the scene in the background, so there is something to see out of focus etc
-
 * try simulating a pinhole camera with varying aperture sizes
-
-* do pixels all have the same focus point? if so, you are doing it wrong. Figure lens cameras out.
- * you are close but not quite right. need to do the offset at the camera position, but yes, aim at where the pinhole camera would, at the focal distance
+ * pick random spot on aperature like you do with lense
+ * shoot at that from the back plane.  Where is the back plane exactly and how large is it??
 
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
