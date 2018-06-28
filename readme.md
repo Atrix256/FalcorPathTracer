@@ -120,10 +120,6 @@ Show diagrams and show where screen is (near and far plane) in each model.
 
 ## TODOs for DOF / Bokeh Blog post
 
-* try simulating a pinhole camera with varying aperture sizes
- * pick random spot on aperature like you do with lense
- * shoot at that from the back plane.  Where is the back plane exactly and how large is it??
-
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
 ? Do I need to multiply by area of aperture or anything for bokeh? Even when circular...

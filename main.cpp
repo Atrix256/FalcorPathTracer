@@ -334,6 +334,7 @@ private:
     bool m_sampleLights = true;
     int m_workGroupSize = 8;
 
+    bool m_pinholeCamera = false;
     bool m_DOFEnable = true;
     float m_DOFFocalLength = 8.0f;
     float m_DOFApertureRadius = 0.1f;
@@ -403,6 +404,9 @@ public:
         if (pGui->beginGroup("Depth Of Field", true))
         {
             if (pGui->addCheckBox("Enable Depth Of Field", m_DOFEnable))
+                ResetIntegration(pSample);
+
+            if (pGui->addCheckBox("Pinhole Camera", m_pinholeCamera))
                 ResetIntegration(pSample);
 
             if (pGui->addFloatVar("DOF Focal Length", m_DOFFocalLength))
@@ -705,6 +709,11 @@ public:
             m_computeProgram->addDefine("ENABLE_DOF");
         else
             m_computeProgram->removeDefine("ENABLE_DOF");
+
+        if (m_pinholeCamera)
+            m_computeProgram->addDefine("PINHOLE_CAMERA");
+        else
+            m_computeProgram->removeDefine("PINHOLE_CAMERA");
 
         ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
         pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;

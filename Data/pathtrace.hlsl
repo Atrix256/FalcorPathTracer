@@ -106,7 +106,6 @@ Ray GetRayForPixel(float2 uv, inout uint state)
         float3 fwdVector = ret.direction;
         float3 upVector = cameraUp;
         float3 leftVector = cameraLeft;
-        float3 focusPoint = ret.origin + fwdVector * DOFFocalLength;
 
         #if BOKEH_SHAPE == BOKEH_SHAPE_SQUARE
             float2 offset = (float2(RandomFloat01(state), RandomFloat01(state)) * 2.0f - 1.0f) * DOFApertureRadius;
@@ -168,8 +167,20 @@ Ray GetRayForPixel(float2 uv, inout uint state)
             offset *= DOFApertureRadius;
         #endif
 
-        ret.origin = ret.origin + leftVector * offset.x + upVector.xyz * offset.y;
-        ret.direction = normalize(focusPoint - ret.origin);
+        #ifdef PINHOLE_CAMERA
+            // find the spot on the image plane where z = -DOFFocalLength
+            float ztime = DOFFocalLength / ret.direction.z;
+            float3 imagePos = ret.origin - ret.direction * ztime;
+
+            // the origin of the camera ray is the random offset on the aperture
+            // the direction of the camera ray is the image position to that aperture position
+            ret.origin += leftVector * offset.x + upVector.xyz * offset.y;
+            ret.direction = normalize(ret.origin - imagePos);
+        #else
+            float3 focusPoint = ret.origin + fwdVector * DOFFocalLength;
+            ret.origin += leftVector * offset.x + upVector.xyz * offset.y;
+            ret.direction = normalize(focusPoint - ret.origin);
+        #endif
     #endif
 
     return ret;
