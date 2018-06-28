@@ -49,6 +49,7 @@ struct PLight
 enum class BokehShape : uint32
 {
     Circle,
+    CircleG,
     Square,
     Ring,
     Triangle,
@@ -59,7 +60,8 @@ enum class BokehShape : uint32
 
 const char* BokehShapeNames[] =
 {
-    "Circle",
+    "Circle - Uniform",
+    "Circle - Gaussian",
     "Square",
     "Ring",
     "Triangle",

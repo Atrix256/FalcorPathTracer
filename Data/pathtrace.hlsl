@@ -22,10 +22,11 @@
 
 // keep in sync with main.cpp enum BokehShape
 #define BOKEH_SHAPE_CIRCLE   0
-#define BOKEH_SHAPE_SQUARE   1
-#define BOKEH_SHAPE_RING     2
-#define BOKEH_SHAPE_TRIANGLE 3
-#define BOKEH_SHAPE_SOD      4
+#define BOKEH_SHAPE_CIRCLEG  1
+#define BOKEH_SHAPE_SQUARE   2
+#define BOKEH_SHAPE_RING     3
+#define BOKEH_SHAPE_TRIANGLE 4
+#define BOKEH_SHAPE_SOD      5
 
 static const float c_pi = 3.14159265359f;
 static const float c_goldenRatioConjugate = 0.61803398875f;
@@ -113,6 +114,13 @@ Ray GetRayForPixel(float2 uv, inout uint state)
             float angle = RandomFloat01(state) * 2.0f * c_pi;
             float radius = sqrt(RandomFloat01(state));
             float2 offset = float2(cos(angle), sin(angle)) * radius * DOFApertureRadius;
+        #elif BOKEH_SHAPE == BOKEH_SHAPE_CIRCLEG
+            float r = sqrt(-2.0f * log(RandomFloat01(state)));
+            float theta = 2 * c_pi*RandomFloat01(state);
+            float2 offset;
+            offset.x = r * cos(theta);
+            offset.y = r * sin(theta);
+            offset *= DOFApertureRadius;
         #elif BOKEH_SHAPE == BOKEH_SHAPE_RING
             float angle = RandomFloat01(state) * 2.0f * c_pi;
             float2 offset = float2(cos(angle), sin(angle)) * DOFApertureRadius;
