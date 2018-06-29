@@ -86,8 +86,20 @@ float2 PointInTriangle(in float2 A, in float2 B, in float2 C, in float2 rand)
     return (1.0f - sqrt(rand.x)) * A.yx + sqrt(rand.x)*(1.0f - rand.y) * B.yx + rand.y * sqrt(rand.x) * C.yx;
 }
 
-Ray GetRayForPixel(float2 uv, inout uint state)
+float SignedTriArea(float2 a, float2 b, float2 c)
 {
+    return (b.x - a.x)*(c.y - a.y) - (b.y - a.y)*(c.x - a.x);
+}
+
+float TriArea(float2 a, float2 b, float2 c)
+{
+    return abs(SignedTriArea(a, b, c));
+}
+
+Ray GetRayForPixel(float2 uv, inout uint state, out float lightMultiplier)
+{
+    lightMultiplier = 1.0f;
+
     // convert from [0,1] space to [-1,1] space
     float2 pixelClipSpace = uv * 2.0f - 1.0f;
     pixelClipSpace.x *= -1.0f;
@@ -109,10 +121,12 @@ Ray GetRayForPixel(float2 uv, inout uint state)
 
         #if BOKEH_SHAPE == BOKEH_SHAPE_SQUARE
             float2 offset = (float2(RandomFloat01(state), RandomFloat01(state)) * 2.0f - 1.0f) * DOFApertureRadius;
+            float shapeArea = 4.0f * DOFApertureRadius;
         #elif BOKEH_SHAPE == BOKEH_SHAPE_CIRCLE
             float angle = RandomFloat01(state) * 2.0f * c_pi;
             float radius = sqrt(RandomFloat01(state));
             float2 offset = float2(cos(angle), sin(angle)) * radius * DOFApertureRadius;
+            float shapeArea = c_pi * DOFApertureRadius * DOFApertureRadius;
         #elif BOKEH_SHAPE == BOKEH_SHAPE_CIRCLEG
             float r = sqrt(-2.0f * log(RandomFloat01(state)));
             float theta = 2 * c_pi*RandomFloat01(state);
@@ -120,9 +134,11 @@ Ray GetRayForPixel(float2 uv, inout uint state)
             offset.x = r * cos(theta);
             offset.y = r * sin(theta);
             offset *= DOFApertureRadius;
+            float shapeArea = c_pi * DOFApertureRadius * DOFApertureRadius;
         #elif BOKEH_SHAPE == BOKEH_SHAPE_RING
             float angle = RandomFloat01(state) * 2.0f * c_pi;
             float2 offset = float2(cos(angle), sin(angle)) * DOFApertureRadius;
+            float shapeArea = 2.0f * c_pi * DOFApertureRadius;
         #elif BOKEH_SHAPE == BOKEH_SHAPE_TRIANGLE
             const float2 A = float2(1.0f, 0.0f); //0 degrees
             const float2 B = float2(-0.5f, 0.866f); //120 degrees
@@ -133,6 +149,8 @@ Ray GetRayForPixel(float2 uv, inout uint state)
             float2 offset = PointInTriangle(A, B, C, rand);
 
             offset *= DOFApertureRadius;
+
+            float shapeArea = TriArea(A*DOFApertureRadius,B*DOFApertureRadius,C*DOFApertureRadius);
         #elif BOKEH_SHAPE == BOKEH_SHAPE_SOD
 
             const float2 A = float2(1.0f, 0.0f);
@@ -165,11 +183,22 @@ Ray GetRayForPixel(float2 uv, inout uint state)
                 offset = PointInTriangle(K, F, L, rand);
 
             offset *= DOFApertureRadius;
+
+            float shapeArea =
+                TriArea(A*DOFApertureRadius, B*DOFApertureRadius, C*DOFApertureRadius) +
+                TriArea(G*DOFApertureRadius, D*DOFApertureRadius, H*DOFApertureRadius) +
+                TriArea(I*DOFApertureRadius, E*DOFApertureRadius, J*DOFApertureRadius) +
+                TriArea(K*DOFApertureRadius, F*DOFApertureRadius, L*DOFApertureRadius);
         #endif
+
+        // we are only sampling one sample in the bokeh shape, but light is coming in from all samples so we need to account for that.
+        // a more mathematical way of looking at this is that we need to divide by the pdf to do proper monte carlo integration.
+        // the pdf is 1/shapeArea, so dividing by that pdf is the same as multiplying by shapeArea. 
+        lightMultiplier = shapeArea;
 
         #ifdef PINHOLE_CAMERA
             // find the spot on the image plane where z = -DOFFocalLength
-            float ztime = DOFFocalLength / ret.direction.z;
+            float ztime = DOFFocalLength / abs(ret.direction.z);
             float3 imagePos = ret.origin - ret.direction * ztime;
 
             // the origin of the camera ray is the random offset on the aperture
@@ -418,14 +447,15 @@ void main(uint3 gid : SV_DispatchThreadID)
         float2 uvOffset = float2(RandomFloat01(rngState), RandomFloat01(rngState)) * float2(1.0f / float(resolution.x), 1.0f / float(resolution.y));
 
         // get the ray for this pixel
-        Ray ray = GetRayForPixel(uv + uvOffset, rngState);
+        float lightMultiplier = 1.0f;
+        Ray ray = GetRayForPixel(uv + uvOffset, rngState, lightMultiplier);
 
         CollisionInfo collisionInfo = RayIntersectsScene(ray, true);
 
         if (collisionInfo.collisionTime > 0.0f)
-            ret += LightOutgoing(collisionInfo, ray.origin + ray.direction * collisionInfo.collisionTime, rngState);
+            ret += LightOutgoing(collisionInfo, ray.origin + ray.direction * collisionInfo.collisionTime, rngState) * lightMultiplier;
         else
-            ret += skyColor;
+            ret += skyColor * lightMultiplier;
     }
     ret /= float(SAMPLES_PER_FRAME);
 
