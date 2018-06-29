@@ -338,6 +338,7 @@ private:
     bool m_DOFEnable = true;
     float m_DOFFocalLength = 8.0f;
     float m_DOFApertureRadius = 0.1f;
+    float m_Exposure = 1.0f;
     BokehShape m_DOFBokehShape = BokehShape::SOD;
 
     PTScenes m_scene = PTScenes::FaceAndBokeh;
@@ -432,6 +433,8 @@ public:
 
         if (pGui->beginGroup("Other Settings"))
         {
+            pGui->addFloatVar("Exposure", m_Exposure);
+
             if (pGui->addCheckBox("Use Cosine Weighted Hemisphere Samples", m_cosineWeightedhemisphereSampling))
                 ResetIntegration(pSample);
 
@@ -724,6 +727,7 @@ public:
 
         pShaderConstants["DOFFocalLength"] = m_DOFFocalLength;
         pShaderConstants["DOFApertureRadius"] = m_DOFApertureRadius;
+        pShaderConstants["Exposure"] = m_Exposure;
 
         pShaderConstants["cameraPos"] = m_cameraPos;
         pShaderConstants["cameraLeft"] = glm::vec3(glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f) * m_viewMtx);

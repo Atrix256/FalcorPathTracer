@@ -120,8 +120,6 @@ Show diagrams and show where screen is (near and far plane) in each model.
 
 ## TODOs for DOF / Bokeh Blog post
 
-* make exposure be a linear multiplier. can do it as a post fx thing!
-
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
 * look for TODOs. there are plenty
@@ -131,6 +129,7 @@ Show diagrams and show where screen is (near and far plane) in each model.
  * add jitter
  * add dof
  * add shaped bokeh
+ * different aperture sizes affecting brightness, and why. counteracting it with exposure.
 
 * images for when explaining how to get good bokeh shots
  * link to romain guy's tweet?

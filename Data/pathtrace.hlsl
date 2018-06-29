@@ -46,6 +46,7 @@ cbuffer ShaderConstants
     uint frameNumber;
     float DOFFocalLength;
     float DOFApertureRadius;
+    float Exposure;
     float3 cameraPos;
     float3 cameraLeft;
     float3 cameraUp;
@@ -466,5 +467,5 @@ void main(uint3 gid : SV_DispatchThreadID)
     gOutputF32[pixel] = float4(ret, 1.0f);
 
     // convert from linear to sRGB for output
-    gOutputU8[pixel] = float4(pow(ret, 1.0f / 2.2f), 1.0f);
+    gOutputU8[pixel] = float4(pow(ret * Exposure, 1.0f / 2.2f), 1.0f);
 }
