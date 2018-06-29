@@ -94,6 +94,29 @@ Good bokeh shots: (from Romain guy)
 
 Show diagrams and show where screen is (near and far plane) in each model.
 
+* note that the code is a WIP for another path tracer, so there are todos and such that will get resolved as time goes on.
+
+* images to show
+ * scene without jitter or dof / bokeh
+ * add jitter
+ * add dof
+ * add shaped bokeh
+ * different aperture sizes affecting brightness, and why. counteracting it with exposure.
+
+* images for when explaining how to get good bokeh shots
+ * link to romain guy's tweet?
+ * show when it's in foreground.
+ * show when everythings in background
+ * show a nice final result
+
+* animations to show:
+ * circle around the scene? toggle bokeh on and off periodically
+ * adjust focal length
+ * adjust aperature size
+
+* make a tag (?) in github for the code that goes with this blog post. understand how those work, but that's what you can put on your blog post i guess!
+* make sure it explains how to compile etc. Maybe have someone try it before you publish
+
 ## Notes
 
 * make this blog post about using falcor
@@ -118,36 +141,12 @@ Show diagrams and show where screen is (near and far plane) in each model.
 
 * mitsuba xml file format: https://mynameismjp.wordpress.com/2015/04/04/mitsuba-quick-start-guide/
 
-## TODOs for DOF / Bokeh Blog post
+## TODOs
 
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
-* look for TODOs. there are plenty
-
-* images to show
- * scene without jitter or dof / bokeh
- * add jitter
- * add dof
- * add shaped bokeh
- * different aperture sizes affecting brightness, and why. counteracting it with exposure.
-
-* images for when explaining how to get good bokeh shots
- * link to romain guy's tweet?
- * show when it's in foreground.
- * show when everythings in background
- * show a nice final result
-
-* animations to show:
- * circle around the scene? toggle bokeh on and off periodically
- * adjust focal length
- * adjust aperature size
-
-* make a tag (?) in github for the code that goes with this blog post. understand how those work, but that's what you can put on your blog post i guess!
-* make sure it explains how to compile etc. Maybe have someone try it before you publish
-
-## TODOs
-
-
+* look at this for using blue noise for path tracing
+ * http://www.iliyan.com/publications/DitheredSampling/DitheredSampling_Sig2016.pdf
 
 ? maybe try updating falcor? might get some fixes or something.
 

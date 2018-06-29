@@ -613,7 +613,7 @@ public:
 
         // do per frame logic
         float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
-        m_DOFApertureRadius = Lerp(0.1f, 10.0f, animationTime);
+        m_DOFApertureRadius = Lerp(0.1f, 3.0f, animationTime);
 
         // set the text
         std::ostringstream stringStream;
