@@ -3,7 +3,7 @@
 #include <random>
 #include <sstream>
 
-#define ANIMATION_TRACK 1
+#define ANIMATION_TRACK 2
 /*
     Animation Tracks:
     0 = off
@@ -13,7 +13,7 @@
     4 = Face and Bokeh Scene: Adjust Aperature Size (lens)
 */
 
-static const size_t c_animationSamplesPerFrame = 10;
+static const size_t c_animationSamplesPerFrame = 1000;
 static const size_t c_animationNumFrames = 60;
 
 static const size_t c_width = 400;
@@ -603,7 +603,7 @@ public:
 
         // set the text
         std::ostringstream stringStream;
-        stringStream << "Pinhole Camera Focal Length: " << m_DOFFocalLength;
+        stringStream << "Pinhole Camera\nFocal Length: " << m_DOFFocalLength << "\nAperture Radius: " << m_DOFApertureRadius << "\nExposure:" << m_Exposure;
         m_animationMessage = stringStream.str();
     }
 
@@ -614,17 +614,24 @@ public:
         if (percent == 0.0f)
         {
             m_scene = PTScenes::FaceAndBokeh;
-            m_pinholeCamera = true;
             OnChangeScene(pSample);
+            m_pinholeCamera = true;
+            m_DOFFocalLength = 1.0f;
+            m_DOFApertureRadius = 0.001f;
+            m_Exposure = 300000.0f;
+            m_DOFBokehShape = BokehShape::Circle;
         }
 
         // do per frame logic
         float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
-        m_DOFApertureRadius = Lerp(0.1f, 3.0f, animationTime);
+        m_DOFApertureRadius = Lerp(0.001f, 0.2f, animationTime);
+
+        float invRadius = 1.0f / m_DOFApertureRadius;
+        m_Exposure = (invRadius*invRadius) * 1.0f / c_pi;
 
         // set the text
         std::ostringstream stringStream;
-        stringStream << "Aperture Radius: " << m_DOFApertureRadius;
+        stringStream << "Pinhole Camera\nFocal Length: " << m_DOFFocalLength << "\nAperture Radius: " << m_DOFApertureRadius << "\nExposure:" << m_Exposure;
         m_animationMessage = stringStream.str();
     }
 

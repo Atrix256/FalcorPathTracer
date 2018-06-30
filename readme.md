@@ -38,6 +38,8 @@ But also:
 
 ## DOF blog post notes
 
+? maybe each animation should set frame count and samples per frame.
+
 * pinhole cameras have constant blur amount
  * lenses don't!  it varies over distance
 
