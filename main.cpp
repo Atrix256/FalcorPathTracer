@@ -3,19 +3,21 @@
 #include <random>
 #include <sstream>
 
-#define ANIMATION_TRACK 0
+#define ANIMATION_TRACK 1
 /*
     Animation Tracks:
     0 = off
-    1 = Face and Bokeh Scene: Adjust Focal Length
-    2 = Face and Bokeh Scene: Adjust Aperature Size
+    1 = Face and Bokeh Scene: Adjust Focal Length (pinhole)
+    2 = Face and Bokeh Scene: Adjust Aperature Size (pinhole)
+    3 = Face and Bokeh Scene: Adjust Focal Length (lens)
+    4 = Face and Bokeh Scene: Adjust Aperature Size (lens)
 */
 
-static const size_t c_animationSamplesPerFrame = 100;
+static const size_t c_animationSamplesPerFrame = 1000;
 static const size_t c_animationNumFrames = 60;
 
-static const size_t c_width = 800;
-static const size_t c_height = 600;
+static const size_t c_width = 400;
+static const size_t c_height = 300;
 
 using namespace Falcor;
 
@@ -402,7 +404,7 @@ public:
             ResetIntegration(pSample);
 
         // the main features of this demo
-        if (pGui->beginGroup("Depth Of Field", true))
+        if (pGui->beginGroup("Camera", true))
         {
             if (pGui->addCheckBox("Enable Depth Of Field", m_DOFEnable))
                 ResetIntegration(pSample);
@@ -415,6 +417,8 @@ public:
 
             if (pGui->addFloatVar("DOF Aperture Size", m_DOFApertureRadius))
                 ResetIntegration(pSample);
+
+            pGui->addFloatVar("Exposure", m_Exposure);
 
             {
                 Falcor::Gui::DropdownList bokehShapes;
@@ -433,8 +437,6 @@ public:
 
         if (pGui->beginGroup("Other Settings"))
         {
-            pGui->addFloatVar("Exposure", m_Exposure);
-
             if (pGui->addCheckBox("Use Cosine Weighted Hemisphere Samples", m_cosineWeightedhemisphereSampling))
                 ResetIntegration(pSample);
 
@@ -589,11 +591,17 @@ public:
         {
             m_scene = PTScenes::FaceAndBokeh;
             OnChangeScene(pSample);
+            m_pinholeCamera = true;
+            m_DOFApertureRadius = 0.1f;
+            m_Exposure = 30.0f;
+            m_DOFBokehShape = BokehShape::Circle;
         }
 
         // do per frame logic
         float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
-        m_DOFFocalLength = Lerp(5.0f, 48.0f, animationTime);
+        float order = Lerp(0.0f, 2.0f, animationTime);
+
+        m_DOFFocalLength = pow(10.0f, order);
 
         // set the text
         std::ostringstream stringStream;
@@ -608,6 +616,49 @@ public:
         if (percent == 0.0f)
         {
             m_scene = PTScenes::FaceAndBokeh;
+            m_pinholeCamera = true;
+            OnChangeScene(pSample);
+        }
+
+        // do per frame logic
+        float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
+        m_DOFApertureRadius = Lerp(0.1f, 3.0f, animationTime);
+
+        // set the text
+        std::ostringstream stringStream;
+        stringStream << "Aperture Radius: " << m_DOFApertureRadius;
+        m_animationMessage = stringStream.str();
+    }
+
+    template <>
+    void AnimationLogic<3>(SampleCallbacks* pSample, float percent)
+    {
+        // do initial setup
+        if (percent == 0.0f)
+        {
+            m_scene = PTScenes::FaceAndBokeh;
+            m_pinholeCamera = false;
+            OnChangeScene(pSample);
+        }
+
+        // do per frame logic
+        float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
+        m_DOFFocalLength = Lerp(5.0f, 48.0f, animationTime);
+
+        // set the text
+        std::ostringstream stringStream;
+        stringStream << "Focal Length: " << m_DOFFocalLength;
+        m_animationMessage = stringStream.str();
+    }
+
+    template <>
+    void AnimationLogic<4>(SampleCallbacks* pSample, float percent)
+    {
+        // do initial setup
+        if (percent == 0.0f)
+        {
+            m_scene = PTScenes::FaceAndBokeh;
+            m_pinholeCamera = false;
             OnChangeScene(pSample);
         }
 

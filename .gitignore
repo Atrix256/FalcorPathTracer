@@ -5,3 +5,4 @@ bin/
 x64/
 out/*.png
 out/*.webm
+out/*.mp4
