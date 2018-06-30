@@ -3,7 +3,7 @@
 #include <random>
 #include <sstream>
 
-#define ANIMATION_TRACK 0
+#define ANIMATION_TRACK 1
 /*
     Animation Tracks:
     0 = off
@@ -13,11 +13,11 @@
     4 = Face and Bokeh Scene: Adjust Aperature Size (lens)
 */
 
-static const size_t c_animationSamplesPerFrame = 1000;
+static const size_t c_animationSamplesPerFrame = 10;
 static const size_t c_animationNumFrames = 60;
 
-static const size_t c_width = 800;
-static const size_t c_height = 600;
+static const size_t c_width = 400;
+static const size_t c_height = 300;
 
 using namespace Falcor;
 
@@ -592,20 +592,18 @@ public:
             m_scene = PTScenes::FaceAndBokeh;
             OnChangeScene(pSample);
             m_pinholeCamera = true;
-            m_DOFApertureRadius = 0.1f;
-            m_Exposure = 30.0f;
+            m_DOFApertureRadius = 0.001f;
+            m_Exposure = 300000.0f;
             m_DOFBokehShape = BokehShape::Circle;
         }
 
         // do per frame logic
         float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
-        float order = Lerp(0.0f, 2.0f, animationTime);
-
-        m_DOFFocalLength = pow(10.0f, order);
+        m_DOFFocalLength = Lerp(0.5f, 5.0f, animationTime);
 
         // set the text
         std::ostringstream stringStream;
-        stringStream << "Focal Length: " << m_DOFFocalLength;
+        stringStream << "Pinhole Camera Focal Length: " << m_DOFFocalLength;
         m_animationMessage = stringStream.str();
     }
 

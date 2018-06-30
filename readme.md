@@ -38,6 +38,9 @@ But also:
 
 ## DOF blog post notes
 
+* pinhole cameras have constant blur amount
+ * lenses don't!  it varies over distance
+
 * videos done at 400x300?
 
 * talk about falcor
