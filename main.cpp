@@ -3,7 +3,7 @@
 #include <random>
 #include <sstream>
 
-#define ANIMATION_TRACK 1
+#define ANIMATION_TRACK 0
 /*
     Animation Tracks:
     0 = off
@@ -16,8 +16,8 @@
 static const size_t c_animationSamplesPerFrame = 1000;
 static const size_t c_animationNumFrames = 60;
 
-static const size_t c_width = 400;
-static const size_t c_height = 300;
+static const size_t c_width = 800;
+static const size_t c_height = 600;
 
 using namespace Falcor;
 
@@ -771,6 +771,8 @@ public:
 
         ConstantBuffer::SharedPtr pShaderConstants = m_computeVars["ShaderConstants"];
         pShaderConstants["invViewProjMtx"] = m_invViewProjMtx;
+        pShaderConstants["viewMtx"] = m_viewMtx;
+        pShaderConstants["invViewMtx"] = glm::inverse(m_viewMtx);
         pShaderConstants["skyColor"] = m_skyColor;
         pShaderConstants["lerpAmount"] = 1.0f / float(m_frameCount + 1);
         pShaderConstants["frameRand"] = (uint)RandomUint32();
@@ -783,6 +785,17 @@ public:
         pShaderConstants["cameraPos"] = m_cameraPos;
         pShaderConstants["cameraLeft"] = glm::vec3(glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f) * m_viewMtx);
         pShaderConstants["cameraUp"] = glm::vec3(glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) * m_viewMtx);
+
+        {
+            glm::vec4 cameraForward = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f) * m_viewMtx;
+            float3 cameraImagePlanePoint = m_cameraPos - glm::vec3(cameraForward);
+
+            glm::vec4 pinholeImagePlane = cameraForward;
+
+            pinholeImagePlane.w = -(cameraForward.x * cameraImagePlanePoint.x + cameraForward.y * cameraImagePlanePoint.y + cameraForward.z * cameraImagePlanePoint.z);
+
+            pShaderConstants["pinholeImagePlane"] = pinholeImagePlane;
+        }
 
         for (uint i = 0; i < scene.spheres.size(); ++i)
         {

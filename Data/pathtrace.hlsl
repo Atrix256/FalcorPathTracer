@@ -40,6 +40,8 @@ RWTexture2D<float4> gOutputU8;
 cbuffer ShaderConstants
 {
     float4x4 invViewProjMtx;
+    float4x4 viewMtx;
+    float4x4 invViewMtx;
     float3 skyColor;
     float lerpAmount;
     uint frameRand;
@@ -50,6 +52,7 @@ cbuffer ShaderConstants
     float3 cameraPos;
     float3 cameraLeft;
     float3 cameraUp;
+    float4 pinholeImagePlane;
 };
 
 StructuredBuffer<Sphere> g_spheres;
@@ -198,14 +201,31 @@ Ray GetRayForPixel(float2 uv, inout uint state, out float lightMultiplier)
         lightMultiplier = shapeArea;
 
         #ifdef PINHOLE_CAMERA
-            // find the spot on the image plane where z = -DOFFocalLength
-            float ztime = DOFFocalLength / abs(ret.direction.z);
-            float3 imagePos = ret.origin - ret.direction * ztime;
 
-            // the origin of the camera ray is the random offset on the aperture
-            // the direction of the camera ray is the image position to that aperture position
-            ret.origin += leftVector * offset.x + upVector.xyz * offset.y;
-            ret.direction = normalize(ret.origin - imagePos);
+        // Find where the ray hits the pinhole image plane, and then keeping that same x/y camera space position, move the plane to the right focal length.
+        // Then shoot the ray towards the point randomly chosen on the aperture.
+        // Note: could also adjust FOV as focal distance for pinhole camera changed. This feels closer to the real geometry though.
+
+        // first find where the ray hits the pinhole image plane and move the image plane to the focal length distance
+        float3 imagePos;
+        {
+            float t = -(dot(ret.origin, pinholeImagePlane.xyz) + pinholeImagePlane.w) / dot(ret.direction, pinholeImagePlane.xyz);
+            imagePos = ret.origin + ret.direction * t;
+
+            // convert the imagePos from world space to camera space
+            float3 cameraSpacePos = mul(float4(imagePos, 1.0f), viewMtx).xyz;
+
+            // elongate z by the focal length
+            cameraSpacePos.z *= DOFFocalLength;
+
+            // convert back into world space
+            imagePos = mul(float4(cameraSpacePos, 1.0f), invViewMtx).xyz;
+        }
+
+        // shoot a ray from there to the aperture location chosen
+        ret.origin += leftVector * offset.x + upVector.xyz * offset.y;
+        ret.direction = normalize(ret.origin - imagePos);
+
         #else
             float3 focusPoint = ret.origin + fwdVector * DOFFocalLength;
             ret.origin += leftVector * offset.x + upVector.xyz * offset.y;
