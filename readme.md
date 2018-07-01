@@ -38,6 +38,13 @@ But also:
 
 ## DOF blog post notes
 
+! TODO: re-tune lens scene settings. re-render pictures at the top of the post.
+ * maybe have to compensate FOV / focal length. For both pinhole and lens?
+ * maybe have neither camera type FOV affected by focal length? write it in post that you are assuming sensor plane gets larger to preserve FOV.
+ * seems reasonable!
+
+* lens videos and images == ??
+
 ? maybe each animation should set frame count and samples per frame.
 
 * pinhole cameras have constant blur amount
@@ -147,6 +154,8 @@ Show diagrams and show where screen is (near and far plane) in each model.
 * mitsuba xml file format: https://mynameismjp.wordpress.com/2015/04/04/mitsuba-quick-start-guide/
 
 ## TODOs
+
+* after post, maybe get rid of the multiply by lens area, and comment in the code that there's an implicit auto-exposure so that adjusting aperture size doesn't affect brightness.
 
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 

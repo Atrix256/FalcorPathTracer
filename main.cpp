@@ -3,7 +3,7 @@
 #include <random>
 #include <sstream>
 
-#define ANIMATION_TRACK 2
+#define ANIMATION_TRACK 0
 /*
     Animation Tracks:
     0 = off
@@ -13,7 +13,7 @@
     4 = Face and Bokeh Scene: Adjust Aperature Size (lens)
 */
 
-static const size_t c_animationSamplesPerFrame = 1000;
+static const size_t c_animationSamplesPerFrame = 10;
 static const size_t c_animationNumFrames = 60;
 
 static const size_t c_width = 400;
@@ -795,11 +795,11 @@ public:
             glm::vec4 cameraForward = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f) * m_viewMtx;
             float3 cameraImagePlanePoint = m_cameraPos - glm::vec3(cameraForward);
 
-            glm::vec4 pinholeImagePlane = cameraForward;
+            glm::vec4 sensorPlane = cameraForward;
 
-            pinholeImagePlane.w = -(cameraForward.x * cameraImagePlanePoint.x + cameraForward.y * cameraImagePlanePoint.y + cameraForward.z * cameraImagePlanePoint.z);
+            sensorPlane.w = -(cameraForward.x * cameraImagePlanePoint.x + cameraForward.y * cameraImagePlanePoint.y + cameraForward.z * cameraImagePlanePoint.z);
 
-            pShaderConstants["pinholeImagePlane"] = pinholeImagePlane;
+            pShaderConstants["sensorPlane"] = sensorPlane;
         }
 
         for (uint i = 0; i < scene.spheres.size(); ++i)
