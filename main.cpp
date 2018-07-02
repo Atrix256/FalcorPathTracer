@@ -833,7 +833,7 @@ public:
         pShaderConstants["Exposure"] = m_Exposure;
 
         pShaderConstants["cameraPos"] = m_cameraPos;
-        pShaderConstants["cameraLeft"] = glm::vec3(glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f) * m_viewMtx);
+        pShaderConstants["cameraRight"] = glm::vec3(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f) * m_viewMtx);
         pShaderConstants["cameraUp"] = glm::vec3(glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) * m_viewMtx);
         pShaderConstants["cameraFwd"] = glm::vec3(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f) * m_viewMtx);
 

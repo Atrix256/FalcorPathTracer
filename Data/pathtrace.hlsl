@@ -54,7 +54,7 @@ cbuffer ShaderConstants
     float DOFApertureRadius;
     float Exposure;
     float3 cameraPos;
-    float3 cameraLeft;
+    float3 cameraRight;
     float3 cameraUp;
     float3 cameraFwd;
     float4 sensorPlane;
@@ -126,7 +126,7 @@ Ray GetRayForPixel(float2 uv, inout uint state, out float lightMultiplier)
     #ifdef ENABLE_DOF
         float3 fwdVector = ret.direction;
         float3 upVector = cameraUp;
-        float3 leftVector = cameraLeft;
+        float3 rightVector = cameraRight;
 
         #if BOKEH_SHAPE == BOKEH_SHAPE_SQUARE
             float2 offset = (float2(RandomFloat01(state), RandomFloat01(state)) * 2.0f - 1.0f) * DOFApertureRadius;
@@ -225,7 +225,7 @@ Ray GetRayForPixel(float2 uv, inout uint state, out float lightMultiplier)
         }
 
         // calculate the world space point chosen on the aperture
-        float3 aperturePos = cameraPos + leftVector * offset.x + upVector.xyz * offset.y;
+        float3 aperturePos = cameraPos + rightVector * offset.x + upVector.xyz * offset.y;
 
         // shoot the ray from the sensor position to the aperture position
         ret.origin = sensorPos;

@@ -38,45 +38,13 @@ But also:
 
 ## DOF blog post notes
 
-* get someone to pre-review it!
-
-* maybe make it cameraright instead of camerafwd?
-
-! TODO: re-tune lens scene settings. re-render pictures at the top of the post.
- * maybe have to compensate FOV / focal length. For both pinhole and lens?
- * maybe have neither camera type FOV affected by focal length? write it in post that you are assuming sensor plane gets larger to preserve FOV.
- * seems reasonable!
+* get someone to pre-review it, when you are done, to look for any significant errors.
 
 * lens videos and images == ??
-
-? maybe each animation should set frame count and samples per frame.
-
-* pinhole cameras have constant blur amount
- * lenses don't!  it varies over distance
 
 * videos done at 400x300?
 
 * talk about falcor
-
-* run your DOF implementation by someone to make sure it seems ok?
-
-* note that this is a diffuse path tracer only so no shiny specular highlights or reflections, but those would do bokeh too if they were there.
-
-* basic camera ray generation using inverse view transform matrix?
-* jitter: show with on vs off
-* DOF
- * both length and radius are in world units
- * talk about shaped bokeh! (random point in shape!)
- ? should we show cosine weighted hemisphere too? not sure how to show it off so maybe not. maybe too off topic
-
-* general uniform point in 2d shape: http://citeseerx.ist.psu.edu/viewdoc/download;jsessionid=03E49E24217598863AE5A66FDEB68832?doi=10.1.1.6.6683&rep=rep1&type=pdf
-* point in triangle: https://math.stackexchange.com/q/18686/138443
-* also this: http://blog.wolfram.com/2011/07/28/how-i-made-wine-glasses-from-sunflowers/
-
-* DOF: http://cg.skeelogy.com/depth-of-field-using-raytracing/
-
-* In path tracing DOF you "scatter" which means you need "random point in 2d shape" for bokeh
- * In rasterization, a common thing is to "scatter while gathering", in which case you need "2d point in shape" test for bokeh.
 
 * better bokeh results recipe:
  * https://twitter.com/romainguy/status/1009528535436939266
@@ -89,14 +57,6 @@ But also:
 * more on pinhole: https://www.scratchapixel.com/lessons/3d-basic-rendering/3d-viewing-pinhole-camera/virtual-pinhole-camera-model
 * circle of confusion: https://en.m.wikipedia.org/wiki/Circle_of_confusion
 
-Rendering with perspective projection matrix is a pinhole camera.
-
-Smaller hole = sharper image, but also dimmer.  There's also a limit to how small it can get (diffraction limit. Could link!)
-
-To get more light (faster exposure) and also sharper images, can replace the pin hole with a lens.
-
-Unfortunately now only one point (plane?) is in focus though, unlike pin hole cameras which have focus not based on distance, but on pin hole (aperture) size! (Could do a pinhole camera with varying hole size!)
-
 The longer the focal length (the less curved the lens) the longer it takes (over distance) to make the image less focused. This means, the acceptable range of focus is bigger. A deeper depth of field.
 
 The more curved (the shorter the focal length) the shallower/shorter the depth of field is.
@@ -107,8 +67,6 @@ Good bokeh shots: (from Romain guy)
 * Wider aperture
 * Longer depth of field
 * Big distances between foreground and background
-
-Show diagrams and show where screen is (near and far plane) in each model.
 
 * note that the code is a WIP for another path tracer, so there are todos and such that will get resolved as time goes on.
 
