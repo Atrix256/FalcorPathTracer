@@ -20,6 +20,10 @@
     #define BOKEH_SHAPE 0
 #endif
 
+#ifndef LENS_AUTO_FOV
+    #define LENS_AUTO_FOV 1
+#endif
+
 // keep in sync with main.cpp enum BokehShape
 #define BOKEH_SHAPE_CIRCLE   0
 #define BOKEH_SHAPE_CIRCLEG  1
@@ -52,6 +56,7 @@ cbuffer ShaderConstants
     float3 cameraPos;
     float3 cameraLeft;
     float3 cameraUp;
+    float3 cameraFwd;
     float4 sensorPlane;
 };
 
@@ -115,7 +120,7 @@ Ray GetRayForPixel(float2 uv, inout uint state, out float lightMultiplier)
     // transform the clip space pixel at z 0 to be able to calculate the ray origin in world space
     float4 destination = mul(float4(pixelClipSpace, 0.0f, 1.0f), invViewProjMtx);
     destination /= destination.w;
-    ret.direction = -normalize(destination.xyz - ret.origin);
+    ret.direction = -normalize(destination.xyz - cameraPos);
 
     // if DOF is on, need to adjust the origin and direction based on aperture size and shape
     #ifdef ENABLE_DOF
@@ -228,7 +233,11 @@ Ray GetRayForPixel(float2 uv, inout uint state, out float lightMultiplier)
 
         // if we are using a lens, shoot a ray from the aperture position to the focus point
         #ifndef PINHOLE_CAMERA
-            float3 focusPoint = cameraPos + normalize(cameraPos - sensorPos) * DOFFocalLength;
+            #if LENS_AUTO_FOV
+                float3 focusPoint = cameraPos - normalize(destination.xyz - cameraPos) * DOFFocalLength;
+            #else
+                float3 focusPoint = cameraPos + normalize(cameraPos - sensorPos) * DOFFocalLength;
+            #endif
             ret.origin = aperturePos;
             ret.direction = normalize(focusPoint - aperturePos);
         #endif

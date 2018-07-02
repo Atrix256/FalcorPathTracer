@@ -10,7 +10,8 @@
     1 = Face and Bokeh Scene: Adjust Focal Length (pinhole)
     2 = Face and Bokeh Scene: Adjust Aperature Size (pinhole)
     3 = Face and Bokeh Scene: Adjust Focal Length (lens)
-    4 = Face and Bokeh Scene: Adjust Aperature Size (lens)
+    4 = Face and Bokeh Scene: Adjust Focal Length (lens "auto fov")
+    5 = Face and Bokeh Scene: Adjust Aperature Size (lens)
 */
 
 static const size_t c_animationSamplesPerFrame = 10;
@@ -334,6 +335,7 @@ private:
     int m_maxRayBounces = 4;
     int m_StopAtSampleCount = 0;
     bool m_sampleLights = true;
+    bool m_autoFOV = true;
     int m_workGroupSize = 8;
 
     bool m_pinholeCamera = false;
@@ -419,6 +421,9 @@ public:
                 ResetIntegration(pSample);
 
             pGui->addFloatVar("Exposure", m_Exposure);
+
+            if (pGui->addCheckBox("Lens auto FOV", m_autoFOV))
+                ResetIntegration(pSample);
 
             {
                 Falcor::Gui::DropdownList bokehShapes;
@@ -642,17 +647,21 @@ public:
         if (percent == 0.0f)
         {
             m_scene = PTScenes::FaceAndBokeh;
-            m_pinholeCamera = false;
             OnChangeScene(pSample);
+            m_pinholeCamera = false;
+            m_DOFApertureRadius = 0.1f;
+            m_Exposure = 30.0f;
+            m_DOFBokehShape = BokehShape::Circle;
+            m_autoFOV = false;
         }
 
         // do per frame logic
         float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
-        m_DOFFocalLength = Lerp(5.0f, 48.0f, animationTime);
+        m_DOFFocalLength = Lerp(5.0f, 30.0f, animationTime);
 
         // set the text
         std::ostringstream stringStream;
-        stringStream << "Focal Length: " << m_DOFFocalLength;
+        stringStream << "Lens Camera\nFocal Length: " << m_DOFFocalLength << "\nAperture Radius: " << m_DOFApertureRadius << "\nExposure:" << m_Exposure;
         m_animationMessage = stringStream.str();
     }
 
@@ -663,17 +672,50 @@ public:
         if (percent == 0.0f)
         {
             m_scene = PTScenes::FaceAndBokeh;
-            m_pinholeCamera = false;
             OnChangeScene(pSample);
+            m_pinholeCamera = false;
+            m_DOFApertureRadius = 1.0f;
+            m_Exposure = 0.3f;
+            m_DOFBokehShape = BokehShape::Circle;
+            m_autoFOV = true;
         }
 
         // do per frame logic
         float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
-        m_DOFApertureRadius = Lerp(0.1f, 3.0f, animationTime);
+        m_DOFFocalLength = Lerp(5.0f, 50.0f, animationTime);
 
         // set the text
         std::ostringstream stringStream;
-        stringStream << "Aperture Radius: " << m_DOFApertureRadius;
+        stringStream << "Lens Camera\nFocal Length: " << m_DOFFocalLength << "\nAperture Radius: " << m_DOFApertureRadius << "\nExposure:" << m_Exposure;
+        m_animationMessage = stringStream.str();
+    }
+
+    template <>
+    void AnimationLogic<5>(SampleCallbacks* pSample, float percent)
+    {
+        // do initial setup
+        if (percent == 0.0f)
+        {
+            m_scene = PTScenes::FaceAndBokeh;
+            OnChangeScene(pSample);
+            m_pinholeCamera = false;
+            m_DOFFocalLength = 1.0f;
+            m_DOFApertureRadius = 0.001f;
+            m_Exposure = 300000.0f;
+            m_DOFBokehShape = BokehShape::Circle;
+            m_autoFOV = true;
+        }
+
+        // do per frame logic
+        float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
+        m_DOFApertureRadius = Lerp(0.001f, 0.2f, animationTime);
+
+        float invRadius = 1.0f / m_DOFApertureRadius;
+        m_Exposure = (invRadius*invRadius) * 1.0f / c_pi;
+
+        // set the text
+        std::ostringstream stringStream;
+        stringStream << "Lens Camera\nFocal Length: " << m_DOFFocalLength << "\nAperture Radius: " << m_DOFApertureRadius << "\nExposure:" << m_Exposure;
         m_animationMessage = stringStream.str();
     }
 
@@ -750,6 +792,9 @@ public:
         sprintf(buffer, "%i", m_sampleLights ? 1 : 0);
         m_computeProgram->addDefine("SAMPLE_LIGHTS", buffer);
 
+        sprintf(buffer, "%i", m_autoFOV ? 1 : 0);
+        m_computeProgram->addDefine("LENS_AUTO_FOV", buffer);
+
         sprintf(buffer, "%i", m_maxRayBounces);
         m_computeProgram->addDefine("MAX_RAY_BOUNCES", buffer);
 
@@ -790,6 +835,7 @@ public:
         pShaderConstants["cameraPos"] = m_cameraPos;
         pShaderConstants["cameraLeft"] = glm::vec3(glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f) * m_viewMtx);
         pShaderConstants["cameraUp"] = glm::vec3(glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) * m_viewMtx);
+        pShaderConstants["cameraFwd"] = glm::vec3(glm::vec4(0.0f, 0.0f, 1.0f, 0.0f) * m_viewMtx);
 
         {
             glm::vec4 cameraForward = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f) * m_viewMtx;

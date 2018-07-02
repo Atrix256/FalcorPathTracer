@@ -38,6 +38,10 @@ But also:
 
 ## DOF blog post notes
 
+* get someone to pre-review it!
+
+* maybe make it cameraright instead of camerafwd?
+
 ! TODO: re-tune lens scene settings. re-render pictures at the top of the post.
  * maybe have to compensate FOV / focal length. For both pinhole and lens?
  * maybe have neither camera type FOV affected by focal length? write it in post that you are assuming sensor plane gets larger to preserve FOV.
@@ -156,6 +160,7 @@ Show diagrams and show where screen is (near and far plane) in each model.
 ## TODOs
 
 * after post, maybe get rid of the multiply by lens area, and comment in the code that there's an implicit auto-exposure so that adjusting aperture size doesn't affect brightness.
+ * also make auto fov on always. it's easier to work with and is simpler code.
 
 * rework the tracing loop, it's confusing to follow and I'm pretty sure if it hits max loop count it doesn't shade the final point, which is wasteful!
 
