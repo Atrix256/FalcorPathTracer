@@ -3,7 +3,7 @@
 #include <random>
 #include <sstream>
 
-#define ANIMATION_TRACK 0
+#define ANIMATION_TRACK 4
 /*
     Animation Tracks:
     0 = off
@@ -16,8 +16,8 @@
 static const size_t c_animationSamplesPerFrame = 10;
 static const size_t c_animationNumFrames = 60;
 
-static const size_t c_width = 800;
-static const size_t c_height = 600;
+static const size_t c_width = 400;
+static const size_t c_height = 300;
 
 using namespace Falcor;
 
@@ -668,15 +668,12 @@ public:
             m_scene = PTScenes::FaceAndBokeh;
             OnChangeScene(pSample);
             m_pinholeCamera = false;
-            m_DOFFocalLength = 1.0f;
-            m_DOFApertureRadius = 0.001f;
-            m_Exposure = 300000.0f;
             m_DOFBokehShape = BokehShape::Circle;
         }
 
         // do per frame logic
         float animationTime = sin(percent * c_pi * 2.0f) * 0.5f + 0.5f;
-        m_DOFApertureRadius = Lerp(0.001f, 0.2f, animationTime);
+        m_DOFApertureRadius = Lerp(0.01f, 10.0f, animationTime);
 
         float invRadius = 1.0f / m_DOFApertureRadius;
         m_Exposure = (invRadius*invRadius) * 1.0f / c_pi;

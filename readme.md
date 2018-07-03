@@ -38,6 +38,16 @@ But also:
 
 ## DOF blog post notes
 
+? should lens focal length affect fov like pinhole does?
+ * need to learn some more i think...
+
+* in pinhole could show a diagram of small vs large pinhole and the rays going through it for a pixel
+
+* how real lenses work: http://www.physicsclassroom.com/class/refrn/Lesson-5/Converging-Lenses-Ray-Diagrams
+* good info here too: https://computergraphics.stackexchange.com/questions/4344/depth-of-field-in-path-tracing-what-do-i-do-with-the-secondary-ray
+* thin lens: https://en.wikipedia.org/wiki/Thin_lens
+* more decent info here: http://www.passmyexams.co.uk/GCSE/physics/concave-lenses-convex-lenses.html
+
 * get someone to pre-review it, when you are done, to look for any significant errors.
 
 * lens videos and images == ??
