@@ -52,7 +52,6 @@ cbuffer ShaderConstants
     float3 cameraPos;
     float3 cameraRight;
     float3 cameraUp;
-    float3 cameraFwd;
     float4 sensorPlane;
     float4 focalPlane;
 };

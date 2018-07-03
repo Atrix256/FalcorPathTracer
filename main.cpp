@@ -802,7 +802,6 @@ public:
         pShaderConstants["cameraPos"] = m_cameraPos;
         pShaderConstants["cameraRight"] = glm::vec3(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f) * m_viewMtx);
         pShaderConstants["cameraUp"] = glm::vec3(glm::vec4(0.0f, 1.0f, 0.0f, 0.0f) * m_viewMtx);
-        pShaderConstants["cameraFwd"] = cameraForward;
 
         {
             float3 cameraSensorPlanePoint = m_cameraPos - glm::vec3(cameraForward);
