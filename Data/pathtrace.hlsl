@@ -20,10 +20,6 @@
     #define BOKEH_SHAPE 0
 #endif
 
-#ifndef LENS_AUTO_FOV
-    #define LENS_AUTO_FOV 1
-#endif
-
 // keep in sync with main.cpp enum BokehShape
 #define BOKEH_SHAPE_CIRCLE   0
 #define BOKEH_SHAPE_CIRCLEG  1
@@ -58,6 +54,7 @@ cbuffer ShaderConstants
     float3 cameraUp;
     float3 cameraFwd;
     float4 sensorPlane;
+    float4 focalPlane;
 };
 
 StructuredBuffer<Sphere> g_spheres;
@@ -227,19 +224,18 @@ Ray GetRayForPixel(float2 uv, inout uint state, out float lightMultiplier)
         // calculate the world space point chosen on the aperture
         float3 aperturePos = cameraPos + rightVector * offset.x + upVector.xyz * offset.y;
 
-        // shoot the ray from the sensor position to the aperture position
-        ret.origin = sensorPos;
-        ret.direction = normalize(aperturePos - sensorPos);
-
-        // if we are using a lens, shoot a ray from the aperture position to the focus point
-        #ifndef PINHOLE_CAMERA
-            #if LENS_AUTO_FOV
-                float3 focusPoint = cameraPos - normalize(destination.xyz - cameraPos) * DOFFocalLength;
-            #else
-                float3 focusPoint = cameraPos + normalize(cameraPos - sensorPos) * DOFFocalLength;
-            #endif
+        #ifdef PINHOLE_CAMERA
+            // pinhole camera shoots the ray from the sensor position to the aperture position
+            ret.origin = sensorPos;
+            ret.direction = normalize(aperturePos - sensorPos);
+        #else
+            // lense camera shoots a ray from the aperture position to the focus position on the focus plane
+            float3 rstart = cameraPos;
+            float3 rdir = -normalize(destination.xyz - cameraPos);
+            float t = -(dot(rstart, focalPlane.xyz) + focalPlane.w) / dot(rdir, focalPlane.xyz);
+            float3 focusPos = rstart + rdir * t;
             ret.origin = aperturePos;
-            ret.direction = normalize(focusPoint - aperturePos);
+            ret.direction = normalize(focusPos - aperturePos);
         #endif
     #endif
 
