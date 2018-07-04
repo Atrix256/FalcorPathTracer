@@ -38,68 +38,12 @@ But also:
 
 ## DOF blog post notes
 
-? should lens focal length affect fov like pinhole does?
- * need to learn some more i think...
-
-* in pinhole could show a diagram of small vs large pinhole and the rays going through it for a pixel
-
-* how real lenses work: http://www.physicsclassroom.com/class/refrn/Lesson-5/Converging-Lenses-Ray-Diagrams
-* good info here too: https://computergraphics.stackexchange.com/questions/4344/depth-of-field-in-path-tracing-what-do-i-do-with-the-secondary-ray
-* thin lens: https://en.wikipedia.org/wiki/Thin_lens
-* more decent info here: http://www.passmyexams.co.uk/GCSE/physics/concave-lenses-convex-lenses.html
-
-* get someone to pre-review it, when you are done, to look for any significant errors.
-
-* lens videos and images == ??
-
-* videos done at 400x300?
-
 * talk about falcor
-
-* better bokeh results recipe:
- * https://twitter.com/romainguy/status/1009528535436939266
-
-* 3 minute dof / bokeh explanation video on youtube
- * https://www.youtube.com/watch?v=bXpTDtU8wgU
-
-* pinhole camera on wikipedia: https://en.wikipedia.org/wiki/Pinhole_camera_model#The_geometry_and_mathematics_of_the_pinhole_camera
-* lens based camera: https://en.wikipedia.org/wiki/Camera_lens#Theory_of_operation
-* more on pinhole: https://www.scratchapixel.com/lessons/3d-basic-rendering/3d-viewing-pinhole-camera/virtual-pinhole-camera-model
-* circle of confusion: https://en.m.wikipedia.org/wiki/Circle_of_confusion
-
-The longer the focal length (the less curved the lens) the longer it takes (over distance) to make the image less focused. This means, the acceptable range of focus is bigger. A deeper depth of field.
-
-The more curved (the shorter the focal length) the shallower/shorter the depth of field is.
-
-Todo: how does aperture size fit in here?
-
-Good bokeh shots: (from Romain guy)
-* Wider aperture
-* Longer depth of field
-* Big distances between foreground and background
-
 * note that the code is a WIP for another path tracer, so there are todos and such that will get resolved as time goes on.
-
-* images to show
- * scene without jitter or dof / bokeh
- * add jitter
- * add dof
- * add shaped bokeh
- * different aperture sizes affecting brightness, and why. counteracting it with exposure.
-
-* images for when explaining how to get good bokeh shots
- * link to romain guy's tweet?
- * show when it's in foreground.
- * show when everythings in background
- * show a nice final result
-
-* animations to show:
- * circle around the scene? toggle bokeh on and off periodically
- * adjust focal length
- * adjust aperature size
-
 * make a tag (?) in github for the code that goes with this blog post. understand how those work, but that's what you can put on your blog post i guess!
 * make sure it explains how to compile etc. Maybe have someone try it before you publish
+
+
 
 ## Notes
 
