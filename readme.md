@@ -1,7 +1,7 @@
 ## Getting Started
 
 I pulled down this falcor, built it and ran one of the samples to make sure it worked ok: "SimpleDeferred"
-https://github.com/NVIDIAGameWorks/Falcor/commit/0b561caae19e8325853166cc4c93d4763570774a
+https://github.com/NVIDIAGameWorks/Falcor/commit/afdd9125283c90374694ed35875144fde81e9312
 * git clone https://github.com/Atrix256/FalcorPathTracer.git
 * git checkout 0b561caae19e8325853166cc4c93d4763570774a
 * somehow it was able to find the location of falcor... weird.
@@ -69,7 +69,13 @@ But also:
 
 * mitsuba xml file format: https://mynameismjp.wordpress.com/2015/04/04/mitsuba-quick-start-guide/
 
+## TODOs new 9/12/18 - for PBR path tracer
+
+* clean out old stuff.
+* start making pbr path tracing stuff!
+
 ## TODOs
+
 
 * after post, maybe get rid of the multiply by lens area, and comment in the code that there's an implicit auto-exposure so that adjusting aperture size doesn't affect brightness.
  * also make auto fov on always. it's easier to work with and is simpler code.
